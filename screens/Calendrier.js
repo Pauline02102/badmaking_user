@@ -16,7 +16,6 @@ import { useNavigation } from "@react-navigation/native";
 function Calendrier({ route }) {
   const [customDatesStyles, setCustomDatesStyles] = useState({});
   const moment = require("moment");
-  //const [prenom, setprenom] = useState("");
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateColor, setSelectedDateColor] = useState(null); // Nouvel état pour stocker la couleur de la date sélectionnée
@@ -46,7 +45,7 @@ function Calendrier({ route }) {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://192.168.1.94:3030/calendar");
+      const response = await axios.get("http://172.20.10.4:3030/calendar");
       const eventsByDate = {};
       response.data.forEach((event) => {
         const eventDate = event.date.split("T")[0];
@@ -65,7 +64,7 @@ function Calendrier({ route }) {
   const handleParticipation = async (eventId, participation) => {
     try {
       await axios.post(
-        `http://192.168.1.94:3030/updateParticipation/${eventId}`,
+        `http://172.20.10.4:3030/updateParticipation/${eventId}`,
         {
           participation,
           id: id, // Envoyer l'ID de l'utilisateur
@@ -99,18 +98,18 @@ function Calendrier({ route }) {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
       await axios.post(
-        `http://192.168.1.94:3030/participationJeuLibre/${id}`,
+        `http://172.20.10.4:3030/participationJeuLibre/${id}`,
         {
           participation : participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
         }
       );
 
-      if (participation === "Oui") {
+      /*if (participation === "Oui") {
         console.log("ID de l'utilisateur :", id);
         console.log("Prénom de l'utilisateur :", prenom);
         navigation.navigate("Match", { id: id, prenom: prenom });
-      }
+      }*/
       await fetchEvents();
       console.log("Participation mise à jour avec succès");
     } catch (error) {
@@ -126,7 +125,7 @@ function Calendrier({ route }) {
   const fetchDateColors = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.1.94:3030/getAllDateColors"
+        "http://172.20.10.4:3030/getAllDateColors"
       );
       const dateColors = response.data || {};
 
@@ -175,31 +174,62 @@ function Calendrier({ route }) {
       return {};
     }
   };
+// fetch participation jeu libre
+  const fetchParticipantsJeuLibre= async (selectedDate) => {
+    try {
+      const response = await axios.get(
+        `http://172.20.10.4:3030/ouiparticipationjeulibre/${selectedDate}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des participants", error);
+      return [];
+    }
+  };
 
-  const handleDayPress = (day) => {
+  
+
+  const handleDayPress = async (day) => {
     console.log("Date sélectionnée :", day.dateString);
     if (day && day.dateString) {
       const selectedDateString = day.dateString;
       setSelectedDate(selectedDateString);
       fetchDateColors(); // Récupérer la couleur associée à la date sélectionnée
-      // Vérifier si la couleur de la date est verte ou bleue
+  
+      // Récupérer la liste des participants avant d'afficher la boîte de dialogue
+      const participants = await fetchParticipantsJeuLibre(selectedDateString);
+  
       // Vérifier si la couleur de la date est verte ou bleue
       const color =
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       if (color === "green" || color === "blue") {
+        // Afficher la liste des participants
+        console.log("Participants présents :", participants);
+  
         // Afficher la boîte de dialogue
-        Alert.alert("Viens-tu au jeu libre ?", "", [
-          {
-            text: "Non",
-            onPress: () => sendParticipation("Non"),
-            style: "cancel",
-          },
-          {
-            text: "Oui",
-            onPress: () => sendParticipation("Oui"),
-          },
-        ]);
+        Alert.alert(
+          
+          "Viens- tu au jeu libre ? \n Voici les joueurs présents",
+          participants.map((participant) => participant.prenom).join(", \n"),
+          [
+            {
+              text: "Non",
+              onPress: () => sendParticipation("Non"),
+              style: "cancel",
+            },
+            {
+              text: "Oui",
+              onPress: () => sendParticipation("Oui"),
+            },
+            {
+              text: "Fermer",
+              onPress: () => console.log("Boîte de dialogue fermée"),
+              style: "cancel",
+              cancelable: true, // Permet à l'utilisateur de fermer la boîte de dialogue sans y répondre
+            },
+          ]
+        );
       }
     } else {
       // Gérer le cas où la date sélectionnée n'est pas correctement définie

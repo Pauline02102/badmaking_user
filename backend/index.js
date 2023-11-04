@@ -228,6 +228,27 @@ app.get("/ouiparticipation", async (req, res) => {
   }
 });
 
+//oui participation au jeu libre
+app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
+  try {
+    const selectedDate = req.params.selectedDate;
+    const query = `
+      SELECT p.user_id, p.participation, u.prenom, u.nom
+      FROM participation_jeu AS p
+      JOIN users AS u ON p.user_id = u.id
+      WHERE p.participation = 'True' AND DATE(p.date) = DATE('${selectedDate}');
+    `;
+    const participations = await pool.query(query);
+    res.json(participations.rows);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des participations" });
+  }
+});
+
+
 // Middleware d'authentification
 
 //login verification
@@ -409,3 +430,23 @@ app.post("/participationJeuLibre/:userId", async (req, res) => {
       .json({ message: "Erreur lors de la mise à jour de la participation" });
   }
 });
+
+app.get("/matches", async (req, res) => {
+  try {
+    const query = `
+      SELECT m.*, u.nom, u.prenom
+      FROM matchs AS m
+      JOIN user_match AS um ON m.id = um.id_match
+      JOIN users AS u ON um.id_user = u.id;
+      
+    `;
+    const matches = await pool.query(query);
+    res.json(matches.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des matchs avec les noms des joueurs" });
+  }
+});
+
+
+

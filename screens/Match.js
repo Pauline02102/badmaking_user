@@ -41,28 +41,94 @@ class MatchScreen extends Component {
   }
   fetchMatches = async () => {
     try {
-      // Récupérez les données des participants qui ont cliqué sur "Oui" depuis le backend
-      const response = await axios.get(
-        "http://192.168.1.94:3030/ouiparticipation"
-      );
-      // Mélangez les matchs avant de les stocker dans l'état
-      const shuffledMatches = _.shuffle(response.data);
-      this.setState({ matches: shuffledMatches });
+      // Récupérez les matchs depuis le backend
+      const response = await axios.get("http://172.20.10.4:3030/matches");
+      const matches = response.data;
+  
+      // Regrouper les joueurs par ID de match
+      const groupedMatches = {};
+      matches.forEach((match) => {
+        if (!groupedMatches[match.id]) {
+          groupedMatches[match.id] = [];
+        }
+        groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom });
+      });
+  
+      // Convertir les groupes de matchs en tableau
+      const matchGroups = Object.values(groupedMatches);
+  
+      this.setState({ matches: matchGroups });
     } catch (error) {
       console.error("Erreur lors de la récupération des matchs", error);
     }
   };
+  
 
-  renderMatchItem = ({ item }) => {
-    // Affichez les données du match pour chaque participant
+fetchMatches = async () => {
+  try {
+    // Récupérez les matchs depuis le backend
+    const response = await axios.get("http://172.20.10.4:3030/matches");
+    const matches = response.data;
+
+    // Regrouper les joueurs par ID de match
+    const groupedMatches = {};
+    matches.forEach((match) => {
+      if (!groupedMatches[match.id]) {
+        groupedMatches[match.id] = [];
+      }
+      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom });
+    });
+
+    // Convertir les groupes de matchs en tableau
+    const matchGroups = Object.values(groupedMatches);
+
+    this.setState({ matches: matchGroups });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des matchs", error);
+  }
+};
+renderMatchItem = ({ item }) => {
+  // Assurez-vous que les valeurs sont définies avant d'y accéder
+  if (item[0] && item[1] && item[2] && item[3]) {
+    // Affichez les données du match en mode 2 vs 2
     return (
       <View style={styles.matchItem}>
-        <Text>Date :{item.date}</Text>
-        <Text>Nom: {item.nom}</Text>
-        <Text>Prenom: {item.prenom}</Text>
+        <Text style={styles.dateText}>Date : {item.date}</Text>
+        <View style={styles.badmintonMatchContainer}>
+          <View style={styles.badmintonPlayerColumn}>
+            
+            <View style={styles.badmintonPlayer}>
+              <Text style={styles.playerText}>
+                {item[0].prenom} {item[0].nom}</Text>
+            </View>
+
+            <View style={styles.badmintonPlayer}>
+              <Text style={styles.playerText}>
+                {item[1].prenom} {item[1].nom}</Text>
+            </View>
+          </View>
+
+          <Text style={styles.vsText}>VS</Text>
+
+          <View style={styles.badmintonPlayerColumn}>
+            <View style={styles.badmintonPlayer}>
+              <Text style={styles.playerText}>
+                {item[2].prenom} {item[2].nom}</Text>
+            </View>
+
+            <View style={styles.badmintonPlayer}>
+              <Text style={styles.playerText}>
+                {item[3].prenom} {item[3].nom}</Text>
+
+            </View>
+          </View>
+        </View>
       </View>
     );
-  };
+  } else {
+    return null; // Ou renvoyer un composant de chargement ou un message d'erreur
+  }
+};
   goBackToList = () => {
     this.setState({ groupsCreated: false });
   };
@@ -125,44 +191,69 @@ class MatchScreen extends Component {
     );
   }
 }
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#f5f5f5', // Couleur de fond blanc
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    color: 'black', // Couleur bleue pour le titre
   },
   matchItem: {
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 8,
+    marginBottom: 16,
+    backgroundColor: '#cee3ed', // Couleur de fond blanc pour chaque match
+    borderRadius:10
+  },
+  dateText: {
+    fontSize: 16,
     marginBottom: 8,
+    color: '#123539', // Couleur bleue pour la date
+    fontWeight: "bold",
   },
   badmintonMatchContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 8,
-    alignItems: "center", // Centre le texte "vs"
+    alignItems: "center", // Centre le texte "VS"
+   borderRadius:15
   },
   badmintonPlayerColumn: {
     flex: 1,
     alignItems: "center",
+    borderRadius:10
   },
   badmintonPlayer: {
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 8,
     marginBottom: 8,
+    backgroundColor: '#00887e', // Couleur de fond bleu pour chaque joueur
+    borderRadius:10
+  },
+  playerText: {
+    fontSize: 16,
+    color: 'white', // Couleur bleue pour le nom du joueur
+  },
+  idText: {
+    fontSize: 14,
+    color: '#000000', // Couleur noire pour l'ID du joueur
   },
   vsText: {
     fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
     marginRight: 10,
+    color: '#123539', // Couleur bleue pour le texte "VS"
   },
 });
-
 export default MatchScreen;
