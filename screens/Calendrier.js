@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
@@ -13,7 +14,10 @@ import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import 'moment/locale/fr'; // Importez le locale français
+import DateTimePicker from '@react-native-community/datetimepicker';
 
+
+moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -25,13 +29,18 @@ function Calendrier({ route }) {
   const [userData, setUserData] = useState(null);
   const { prenom, setprenom } = route.params || {};
   const { id, setId } = route.params || {};
-
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [legendVisible, setLegendVisible] = useState(false); 
+  
   useEffect(() => {
     fetchEvents();
     fetchDateColors();
     /*fetchDateColors().then((colors) => {
       setCustomDatesStyles(colors);
     });*/
+    moment.locale('fr');
+
     const refreshInterval = setInterval(() => {
       fetchEvents();
       fetchDateColors();
@@ -44,6 +53,28 @@ function Calendrier({ route }) {
       clearInterval(refreshInterval);
     };
   }, []);
+
+  // Fonction pour afficher ou cacher la légende
+  const toggleLegend = () => {
+    setLegendVisible(!legendVisible);
+  };
+
+  const onTimeSelected = (event, selectedTime) => {
+    setShowTimePicker(false); // Fermer le TimePicker
+    if (selectedTime) {
+      setSelectedTime(selectedTime); // Sauvegarder l'heure sélectionnée
+      sendParticipation("Oui", selectedTime); // Envoyez la participation avec l'heure choisie.
+      console.log("Heure sélectionnée:", selectedTime);
+    }
+  };
+  
+
+
+      // Appelée quand l'utilisateur confirme la participation
+  const confirmParticipationWithTime = () => {
+        setShowTimePicker(true); // Afficher le TimePicker
+  };
+    
 
   const fetchEvents = async () => {
     try {
@@ -94,16 +125,22 @@ function Calendrier({ route }) {
 
   //participation au jeu libre
 
-  const sendParticipation = async (participation) => {
+  const sendParticipation = async (participation, time = selectedTime) => {
     try {
       if (participation !== "Oui" && participation !== "Non") {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
+      const newTime = new Date(selectedTime);
+      newTime.setHours(newTime.getHours() + 2);
+      
+      const formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
+      console.log("heure " + formattedTime);
       await axios.post(
         `http://192.168.1.6:3030/participationJeuLibre/${id}`,
         {
           participation : participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
+          heure : formattedTime , // Ajoutez l'heure formatée ici
         }
       );
 
@@ -183,6 +220,7 @@ function Calendrier({ route }) {
         `http://192.168.1.6:3030/ouiparticipationjeulibre/${selectedDate}`
       );
       return response.data;
+      
     } catch (error) {
       console.error("Erreur lors de la récupération des participants", error);
       return [];
@@ -213,7 +251,7 @@ function Calendrier({ route }) {
         Alert.alert(
           
           "Viens- tu au jeu libre ? \n Voici les joueurs présents",
-          participants.map((participant) => participant.prenom).join(", \n"),
+          participants .map((participant) => `${participant.prenom} à ${participant.heure}`).join(", \n"),
           [
             {
               text: "Non",
@@ -222,7 +260,8 @@ function Calendrier({ route }) {
             },
             {
               text: "Oui",
-              onPress: () => sendParticipation("Oui"),
+              //onPress: () => sendParticipation("Oui"),
+              onPress: () => confirmParticipationWithTime()
             },
             {
               text: "Fermer",
@@ -238,6 +277,31 @@ function Calendrier({ route }) {
       console.error("La date sélectionnée n'est pas correctement définie.");
     }
   };
+  const Legend = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={legendVisible}
+      onRequestClose={() => {
+        Alert.alert("La légende a été fermée.");
+        setLegendVisible(!legendVisible);
+      }}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.legendTitle}>Légende des couleurs:</Text>
+          <Text style={styles.legendText}><Text style={{ color: 'green' }}>●</Text> Vert: jeu libre au Verseau</Text>
+          <Text style={styles.legendText}><Text style={{ color: 'blue' }}>●</Text> Bleu: jeu libre à Rixensart</Text>
+          <Text style={styles.legendText}><Text style={{ color: 'orange' }}>●</Text> Orange: soirée à thème</Text>
+          <Text style={styles.legendText}><Text style={{ color: 'red' }}>●</Text> Rouge: fermeture de la salle</Text>
+
+          <TouchableOpacity style={styles.buttonClose} onPress={toggleLegend}>
+            <Text style={styles.textStyle}>Fermer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const renderEventsForDate = () => {
     if (
@@ -284,6 +348,10 @@ function Calendrier({ route }) {
   return (
     <ScrollView>
       <View style={styles.container}>
+      <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
+          <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
+        </TouchableOpacity>
+        {legendVisible && <Legend />}
         <Calendar
           onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
           markedDates={customDatesStyles}
@@ -293,6 +361,15 @@ function Calendrier({ route }) {
         <Text>Bonjour, {prenom}! </Text>
         <Text>Bonjour, {id}! </Text>
         {renderEventsForDate()}
+        {showTimePicker && (
+        <DateTimePicker
+          value={selectedTime}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onTimeSelected}
+        />
+      )}
       </View>
     </ScrollView>
   );
@@ -334,6 +411,61 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: '#00887e', // Couleur de fond bleu pour chaque joueur
     borderRadius:10
+  },
+  legendButton: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  legendButtonText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "#214353",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  buttonClose: {
+    backgroundColor: "#559ea2",
+    borderRadius: 20,
+    padding: 7,
+    elevation: 2,
+    marginTop:15
+
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  legendTitle: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: 'bold',
+    color:"#e4ebef"
+  },
+  legendText: {
+    textAlign: "center",
+    marginVertical: 5,
+    color:"#e4ebef"
   },
 });
 

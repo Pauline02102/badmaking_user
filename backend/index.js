@@ -233,11 +233,12 @@ app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
   try {
     const selectedDate = req.params.selectedDate;
     const query = `
-      SELECT p.user_id, p.participation, u.prenom, u.nom
+      SELECT p.user_id, p.participation, p.heure, u.prenom, u.nom
       FROM participation_jeu AS p
       JOIN users AS u ON p.user_id = u.id
       WHERE p.participation = 'True' AND DATE(p.date) = DATE('${selectedDate}');
     `;
+    
     const participations = await pool.query(query);
     res.json(participations.rows);
   } catch (error) {
@@ -391,33 +392,41 @@ app.get("/getAllDateColors", async (req, res) => {
 // participation jeu libre
 app.post("/participationJeuLibre/:userId", async (req, res) => {
   try {
-    const { participation, date } = req.body; // Assurez-vous que "date" est correctement envoyé depuis le frontend
+    const { participation, date, heure } = req.body; // Assurez-vous que "date" est correctement envoyé depuis le frontend
     const { userId } = req.params;
 
-    // Assurez-vous de valider que la valeur de participation est soit "Oui" soit "Non"
+    // Verifier que "heure" est au format correct (HH:MM)
+    if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(heure)) {
+      return res
+        .status(400)
+        .json({ message: "Heure non valide. Le format doit être HH:MM." });
+    }
+
+
+    //  valider que la valeur de participation est soit "Oui" soit "Non"
     if (participation !== "Oui" && participation !== "Non") {
       return res
         .status(400)
         .json({ message: 'La participation doit être soit "Oui" soit "Non"' });
     }
 
-    // Vérifiez si l'enregistrement de participation existe déjà pour cet utilisateur et cette date
+    // Vérifier si l'enregistrement de participation existe déjà pour cet utilisateur et cette date
     const existingParticipation = await db.oneOrNone(
-      "SELECT * FROM participation_jeu WHERE user_id = $1 AND date = $2",
-      [userId, date]
+      "SELECT * FROM participation_jeu WHERE user_id = $1 AND date = $2 AND heure = $3" ,
+      [userId, date, heure]
     );
 
     if (existingParticipation) {
       // Si l'enregistrement de participation existe, mettez à jour la participation existante
       await db.none(
-        "UPDATE participation_jeu SET participation = $1 WHERE user_id = $2 AND date = $3",
-        [participation === "Oui", userId, date]
+        "UPDATE participation_jeu SET participation = $1 WHERE user_id = $2 AND date = $3 AND heure = $4",
+        [participation === "Oui", userId, date,heure]
       );
     } else {
       // Si l'enregistrement de participation n'existe pas, insérez un nouvel enregistrement
       await db.none(
-        "INSERT INTO participation_jeu (user_id, participation, date) VALUES ($1, $2, $3)",
-        [userId, participation === "Oui", date]
+        "INSERT INTO participation_jeu (user_id, participation, date,heure) VALUES ($1, $2, $3,$4)",
+        [userId, participation === "Oui", date,heure]
       );
     }
 
