@@ -12,6 +12,8 @@ import moment from "moment";
 import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
+import 'moment/locale/fr'; // Importez le locale français
+
 
 function Calendrier({ route }) {
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -45,7 +47,7 @@ function Calendrier({ route }) {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://172.20.10.4:3030/calendar");
+      const response = await axios.get("http://192.168.1.6:3030/calendar");
       const eventsByDate = {};
       response.data.forEach((event) => {
         const eventDate = event.date.split("T")[0];
@@ -64,7 +66,7 @@ function Calendrier({ route }) {
   const handleParticipation = async (eventId, participation) => {
     try {
       await axios.post(
-        `http://172.20.10.4:3030/updateParticipation/${eventId}`,
+        `http://192.168.1.6:3030/updateParticipation/${eventId}`,
         {
           participation,
           id: id, // Envoyer l'ID de l'utilisateur
@@ -98,7 +100,7 @@ function Calendrier({ route }) {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
       await axios.post(
-        `http://172.20.10.4:3030/participationJeuLibre/${id}`,
+        `http://192.168.1.6:3030/participationJeuLibre/${id}`,
         {
           participation : participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
@@ -125,7 +127,7 @@ function Calendrier({ route }) {
   const fetchDateColors = async () => {
     try {
       const response = await axios.get(
-        "http://172.20.10.4:3030/getAllDateColors"
+        "http://192.168.1.6:3030/getAllDateColors"
       );
       const dateColors = response.data || {};
 
@@ -178,7 +180,7 @@ function Calendrier({ route }) {
   const fetchParticipantsJeuLibre= async (selectedDate) => {
     try {
       const response = await axios.get(
-        `http://172.20.10.4:3030/ouiparticipationjeulibre/${selectedDate}`
+        `http://192.168.1.6:3030/ouiparticipationjeulibre/${selectedDate}`
       );
       return response.data;
     } catch (error) {
@@ -252,11 +254,15 @@ function Calendrier({ route }) {
         </Text>
 
         {events[selectedDate].map((event) => (
-          <View key={event.id} style={styles.eventContainer}>
-            <Text>{event.title}</Text>
-            <Text>{event.type}</Text>
-            <Text>{event.status}</Text>
-            <Text>{event.date}</Text>
+          <View key={event.id} style={styles.matchItem}>
+            
+            <Text style={styles.badmintonPlayer}>Titre : {event.title}</Text>
+            <Text>Type : {event.type}</Text>
+            <Text>Status : {event.status}</Text>
+            
+            <Text>Date : {moment(event.date).format('LL')}</Text>
+
+
             <View style={styles.participationButtons}>
               <TouchableOpacity
                 onPress={() => handleParticipation(event.id, "Oui")}
@@ -312,6 +318,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
+  },
+  matchItem: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    marginBottom: 16,
+    backgroundColor: '#cee3ed', // Couleur de fond blanc pour chaque match
+    borderRadius:10
+  },
+  badmintonPlayer: {
+    //borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    marginBottom: 8,
+    backgroundColor: '#00887e', // Couleur de fond bleu pour chaque joueur
+    borderRadius:10
   },
 });
 

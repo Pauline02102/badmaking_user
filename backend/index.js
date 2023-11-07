@@ -431,14 +431,25 @@ app.post("/participationJeuLibre/:userId", async (req, res) => {
   }
 });
 
+//get les match avec nom et prenom et date
 app.get("/matches", async (req, res) => {
   try {
     const query = `
-      SELECT m.*, u.nom, u.prenom
-      FROM matchs AS m
-      JOIN user_match AS um ON m.id = um.id_match
-      JOIN users AS u ON um.id_user = u.id;
-      
+    SELECT m.*, u.nom, u.prenom, event.date   
+      FROM matchs AS m   
+               
+
+      JOIN user_match AS um       
+      ON m.id = um.id_match       
+
+      JOIN users AS u            
+      ON um.id_user = u.id     
+
+      JOIN terrain AS t
+      ON m.terrain_id = t.id
+
+      JOIN event as event
+      ON t.id = event.terrain_id
     `;
     const matches = await pool.query(query);
     res.json(matches.rows);

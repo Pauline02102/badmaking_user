@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import _ from "lodash";
+import { Picker } from "@react-native-picker/picker";
 
 class MatchScreen extends Component {
   constructor(props) {
@@ -17,6 +18,8 @@ class MatchScreen extends Component {
       matches: [], // Stocke les données des matchs
       groups: [], // Stocke les groupes de matchs
       groupsCreated: false, // État pour savoir si les groupes ont été créés
+      selectedDate: null, // Ajout d'un état pour la date sélectionnée
+      dates: [] // Ce tableau stockera les dates disponibles
     };
   }
 
@@ -39,45 +42,26 @@ class MatchScreen extends Component {
     // Assurez-vous de nettoyer l'intervalle lorsque le composant est démonté
     clearInterval(this.refreshInterval);
   }
-  fetchMatches = async () => {
-    try {
-      // Récupérez les matchs depuis le backend
-      const response = await axios.get("http://172.20.10.4:3030/matches");
-      const matches = response.data;
-  
-      // Regrouper les joueurs par ID de match
-      const groupedMatches = {};
-      matches.forEach((match) => {
-        if (!groupedMatches[match.id]) {
-          groupedMatches[match.id] = [];
-        }
-        groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom });
-      });
-  
-      // Convertir les groupes de matchs en tableau
-      const matchGroups = Object.values(groupedMatches);
-  
-      this.setState({ matches: matchGroups });
-    } catch (error) {
-      console.error("Erreur lors de la récupération des matchs", error);
-    }
-  };
-  
 
 fetchMatches = async () => {
   try {
     // Récupérez les matchs depuis le backend
-    const response = await axios.get("http://172.20.10.4:3030/matches");
+    const response = await axios.get("http://192.168.1.6:3030/matches");
     const matches = response.data;
 
     // Regrouper les joueurs par ID de match
     const groupedMatches = {};
+    
     matches.forEach((match) => {
+      
       if (!groupedMatches[match.id]) {
         groupedMatches[match.id] = [];
       }
-      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom });
+      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom});
     });
+    // Créer un ensemble unique de dates
+    const dates = [...new Set(matches.map(match => match.date.split('T')[0]))];
+    this.setState({ matches, dates, selectedDate: dates[0] }); // Mettre à jour l'état avec les dates et sélectionner par défaut la première date
 
     // Convertir les groupes de matchs en tableau
     const matchGroups = Object.values(groupedMatches);
@@ -87,9 +71,11 @@ fetchMatches = async () => {
     console.error("Erreur lors de la récupération des matchs", error);
   }
 };
+
 renderMatchItem = ({ item }) => {
   // Assurez-vous que les valeurs sont définies avant d'y accéder
-  if (item[0] && item[1] && item[2] && item[3]) {
+  console.log(item);
+  if (item && item.length > 0){
     // Affichez les données du match en mode 2 vs 2
     return (
       <View style={styles.matchItem}>
@@ -145,6 +131,7 @@ renderMatchItem = ({ item }) => {
               </Text>
             </View>
           ))}
+
         </View>
         <Text style={styles.vsText}>vs</Text>
         <View style={styles.badmintonPlayerColumn}>
@@ -155,13 +142,27 @@ renderMatchItem = ({ item }) => {
               </Text>
             </View>
           ))}
+          
         </View>
       </View>
     );
   };
   render() {
+      const { matches, selectedDate, dates } = this.state;
+    const filteredMatches = matches.filter(match => match.date === selectedDate);
+
     return (
       <View style={styles.container}>
+         <Text style={styles.title}>Sélectionnez une date:</Text>
+        <Picker
+          selectedValue={selectedDate}
+          onValueChange={(itemValue, itemIndex) =>
+            this.setState({ selectedDate: itemValue })
+          }>
+          {dates.map((date) => (
+            <Picker.Item key={date} label={date} value={date} />
+          ))}
+        </Picker>
         {this.state.groupsCreated ? (
           // Afficher la liste des groupes une fois qu'ils sont créés
           <>
@@ -169,7 +170,7 @@ renderMatchItem = ({ item }) => {
             <FlatList
               data={this.state.groups}
               renderItem={this.renderGroupItem}
-              keyExtractor={(item, index) => index.toString()}
+             keyExtractor={(item, index) => index.toString()}
             />
             <Button
               title="Revenir à la liste des matchs"
@@ -184,6 +185,7 @@ renderMatchItem = ({ item }) => {
               data={this.state.matches}
               renderItem={this.renderMatchItem}
               keyExtractor={(item) => `${item.event_id}-${item.user_id}`}
+
             />
           </>
         )}
