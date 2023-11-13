@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Modal
+  Modal,
+  Button
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
@@ -15,11 +16,13 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import 'moment/locale/fr'; // Importez le locale français
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { UserContext } from './UserContext';
 
 
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
+  const { onProfilePress } = route.params || {};
   const [customDatesStyles, setCustomDatesStyles] = useState({});
   const moment = require("moment");
   const [events, setEvents] = useState({});
@@ -32,11 +35,13 @@ function Calendrier({ route }) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [legendVisible, setLegendVisible] = useState(false); 
+
   
   useEffect(() => {
     fetchEvents();
     fetchDateColors();
-    /*fetchDateColors().then((colors) => {
+    
+    /*fetchDateColors().th §en((colors) => {
       setCustomDatesStyles(colors);
     });*/
     moment.locale('fr');
@@ -54,6 +59,7 @@ function Calendrier({ route }) {
     };
   }, []);
 
+
   // Fonction pour afficher ou cacher la légende
   const toggleLegend = () => {
     setLegendVisible(!legendVisible);
@@ -68,8 +74,6 @@ function Calendrier({ route }) {
     }
   };
   
-
-
       // Appelée quand l'utilisateur confirme la participation
   const confirmParticipationWithTime = () => {
         setShowTimePicker(true); // Afficher le TimePicker
@@ -81,11 +85,13 @@ function Calendrier({ route }) {
       const response = await axios.get("http://192.168.1.6:3030/calendar");
       const eventsByDate = {};
       response.data.forEach((event) => {
-        const eventDate = event.date.split("T")[0];
+        //const eventDate = event.date.split("T")[0];
+        const eventDate = moment.utc(event.date).local().format('YYYY-MM-DD');
         if (!eventsByDate[eventDate]) {
           eventsByDate[eventDate] = [];
         }
-        eventsByDate[eventDate].push(event);
+        //eventsByDate[eventDate].push(event);
+        eventsByDate[eventDate].push({ ...event, date: eventDate});
       });
       setEvents(eventsByDate);
     } catch (error) {
@@ -96,23 +102,37 @@ function Calendrier({ route }) {
   //participation event
   const handleParticipation = async (eventId, participation) => {
     try {
+      // Vérifier si selectedDate est une instance de Date
+      let dateUTC;
+      if (selectedDate instanceof Date) {
+        dateUTC = selectedDate.toISOString();
+      } else if (typeof selectedDate === 'string') {
+        // Convertir depuis une chaîne, si nécessaire
+        dateUTC = new Date(selectedDate).toISOString();
+      } else {
+        console.error("selectedDate n'est pas une date valide");
+        return;
+      }
+  
       await axios.post(
         `http://192.168.1.6:3030/updateParticipation/${eventId}`,
         {
           participation,
           id: id, // Envoyer l'ID de l'utilisateur
           prenom: prenom, // Envoyer le prénom de l'utilisateur
-          date: selectedDate,
+          date: dateUTC, // Envoyer la date en format UTC
         }
       );
-
+  
       if (participation === "Oui") {
         console.log("ID de l'utilisateur:", id); // Vérifiez si l'ID est correctement défini
         console.log("Prénom de l'utilisateur:", prenom); // Vérifiez si le prénom est correctement défini
         navigation.navigate("Match", { id: id, prenom: prenom });
       }
+  
       await fetchEvents();
-      console.log("participation validée");
+      console.log("Participation validée");
+      console.log(dateUTC);
     } catch (error) {
       console.error("Erreur lors de la mise à jour de la participation", error);
       if (error.response) {
@@ -122,7 +142,7 @@ function Calendrier({ route }) {
       }
     }
   };
-
+  
   //participation au jeu libre
 
   const sendParticipation = async (participation, time = selectedTime) => {
@@ -163,27 +183,22 @@ function Calendrier({ route }) {
   //nouvelle fonction pour fetch toutes les couleurs
   const fetchDateColors = async () => {
     try {
-      const response = await axios.get(
-        "http://192.168.1.6:3030/getAllDateColors"
-      );
+      const response = await axios.get("http://192.168.1.6:3030/getAllDateColors");
       const dateColors = response.data || {};
-
+  
       // Vérifiez si les données sont correctement renvoyées depuis le backend
       console.log("Toutes les couleurs de date :", dateColors);
       const backendDates = response.data;
-
+  
       // Convertir les dates dans le format 'YYYY-MM-DD'
       const convertedDates = {};
       for (const date in backendDates) {
-        const formattedDate = moment(date, "ddd MMM DD YYYY HH:mm:ss").format(
-          "YYYY-MM-DD"
-        );
+        const formattedDate = moment(date).format("YYYY-MM-DD");
         convertedDates[formattedDate] = backendDates[date];
       }
-
+  
       // Utilisez 'convertedDates' dans votre application pour afficher les dates dans le format 'YYYY-MM-DD'.
       console.log("Dates converties :", convertedDates);
-
       if (dateColors) {
         const updatedCustomDatesStyles = {};
         for (const date in convertedDates) {
@@ -199,20 +214,18 @@ function Calendrier({ route }) {
             },
           };
         }
-
+  
         setCustomDatesStyles(updatedCustomDatesStyles);
       } else {
         // Gérer le cas où aucune couleur de date n'est trouvée
         console.error("Aucune couleur de date trouvée.");
       }
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération de toutes les couleurs de date",
-        error
-      );
+      console.error("Erreur lors de la récupération de toutes les couleurs de date", error);
       return {};
     }
   };
+  
 // fetch participation jeu libre
   const fetchParticipantsJeuLibre= async (selectedDate) => {
     try {
@@ -304,6 +317,7 @@ function Calendrier({ route }) {
   );
 
   const renderEventsForDate = () => {
+    
     if (
       !selectedDate ||
       !customDatesStyles[selectedDate] ||
@@ -346,6 +360,7 @@ function Calendrier({ route }) {
   };
 
   return (
+    
     <ScrollView>
       <View style={styles.container}>
       <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
@@ -357,6 +372,7 @@ function Calendrier({ route }) {
           markedDates={customDatesStyles}
           markingType="custom"
         />
+         <Button title="Voir Profil" onPress={onProfilePress} />
         <Text>Événements pour la date sélectionnée :</Text>
         <Text>Bonjour, {prenom}! </Text>
         <Text>Bonjour, {id}! </Text>

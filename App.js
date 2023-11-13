@@ -6,16 +6,20 @@ import Calendrier from "./screens/Calendrier";
 import Match from "./screens/Match";
 import inscription from "./screens/inscription";
 import Login from "./screens/Login";
+import Profil from "./screens/Profil";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { UserProvider } from './screens/UserContext';
 
 const Tab = createBottomTabNavigator();
 //const Tab = createStackNavigator();
 
 const App = () => {
   return (
+    <UserProvider>
     <NavigationContainer>
       <Tab.Navigator>
+      
         <Tab.Screen
           name="Calendrier"
           component={Calendrier}
@@ -57,8 +61,21 @@ const App = () => {
             ),
           }}
         />
+        <Tab.Screen
+          name="Profil"
+          component={Profil}
+          options={{
+            tabBarLabel: "Profil",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="body-outline" color={color} size={size} />
+              
+            ),
+          }}
+        />
+      
       </Tab.Navigator>
     </NavigationContainer>
+    </UserProvider>
   );
 };
 

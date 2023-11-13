@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import _ from "lodash";
 import { Picker } from "@react-native-picker/picker";
+import moment from 'moment';
 
 class MatchScreen extends Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class MatchScreen extends Component {
     const groupedMatches = _.chunk(matches, 4);
     this.setState({ groups: groupedMatches, groupsCreated: true });
     groupedMatches.forEach((group, index) => {
-      console.log(`Groupe ${index + 1}:`, group);
+      //(`Groupe ${index + 1}:`, group);
     });
   };
   componentDidMount() {
@@ -48,7 +49,8 @@ fetchMatches = async () => {
     // Récupérez les matchs depuis le backend
     const response = await axios.get("http://192.168.1.6:3030/matches");
     const matches = response.data;
-
+    console.log("matches",matches)
+    
     // Regrouper les joueurs par ID de match
     const groupedMatches = {};
     
@@ -57,10 +59,12 @@ fetchMatches = async () => {
       if (!groupedMatches[match.id]) {
         groupedMatches[match.id] = [];
       }
-      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom});
+      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom,date : match.date  , type : match.type});
+      //console.log("matche dates,", match.date)
     });
     // Créer un ensemble unique de dates
     const dates = [...new Set(matches.map(match => match.date.split('T')[0]))];
+    console.log("dates" ,dates)
     this.setState({ matches, dates, selectedDate: dates[0] }); // Mettre à jour l'état avec les dates et sélectionner par défaut la première date
 
     // Convertir les groupes de matchs en tableau
@@ -73,24 +77,35 @@ fetchMatches = async () => {
 };
 
 renderMatchItem = ({ item }) => {
-  // Assurez-vous que les valeurs sont définies avant d'y accéder
-  console.log(item);
+  let formattedDate = 'Date non disponible';
+
+  if (item.date) {
+    formattedDate = moment(item.date).format('LL');
+  } else {
+    //console.log('Date is undefined for item', item);
+  }
   if (item && item.length > 0){
     // Affichez les données du match en mode 2 vs 2
     return (
       <View style={styles.matchItem}>
-        <Text style={styles.dateText}>Date : {item.date}</Text>
+        {item.map((match, index) => (
+          <Text key={index} style={styles.dateText}>Date : {match.date}</Text>
+          
+        ))}
+       
+        <Text style={styles.dateText}>Type : {item[0]?.type}</Text>
+        
         <View style={styles.badmintonMatchContainer}>
           <View style={styles.badmintonPlayerColumn}>
-            
+          <Text style={styles.dateText}>date 1  : {item[5]?.date}</Text>
             <View style={styles.badmintonPlayer}>
               <Text style={styles.playerText}>
-                {item[0].prenom} {item[0].nom}</Text>
+              {item[0]?.prenom} {item[0]?.nom}</Text>
             </View>
 
             <View style={styles.badmintonPlayer}>
               <Text style={styles.playerText}>
-                {item[1].prenom} {item[1].nom}</Text>
+                {item[1]?.prenom} {item[1]?.nom}</Text>
             </View>
           </View>
 
@@ -99,12 +114,12 @@ renderMatchItem = ({ item }) => {
           <View style={styles.badmintonPlayerColumn}>
             <View style={styles.badmintonPlayer}>
               <Text style={styles.playerText}>
-                {item[2].prenom} {item[2].nom}</Text>
+                {item[2]?.prenom} {item[2]?.nom}</Text>
             </View>
 
             <View style={styles.badmintonPlayer}>
               <Text style={styles.playerText}>
-                {item[3].prenom} {item[3].nom}</Text>
+                {item[3]?.prenom} {item[3]?.nom}</Text>
 
             </View>
           </View>
@@ -139,6 +154,7 @@ renderMatchItem = ({ item }) => {
             <View key={index} style={styles.badmintonPlayer}>
               <Text>
                 {match.prenom} {match.nom}
+                
               </Text>
             </View>
           ))}
@@ -184,9 +200,9 @@ renderMatchItem = ({ item }) => {
             <FlatList
               data={this.state.matches}
               renderItem={this.renderMatchItem}
-              keyExtractor={(item) => `${item.event_id}-${item.user_id}`}
-
+              keyExtractor={(item, index) => item.event_id && item.user_id ? `${item.event_id}-${item.user_id}` : index.toString()}
             />
+
           </>
         )}
       </View>

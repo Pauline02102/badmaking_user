@@ -87,6 +87,33 @@ app.post("/postusers", async (req, response) => {
   }
 });
 
+//modifier un user
+app.patch("/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { nom, prenom, email, classement_simple, classement_double, classement_mixte } = req.body;
+
+  try {
+    // Mise à jour de l'utilisateur avec les nouvelles valeurs
+    const data = await pool.query(
+      "UPDATE users SET nom = $1, prenom = $2, email = $3, classement_simple = $4, classement_double = $5, classement_mixte = $6 WHERE id = $7 RETURNING *",
+      [nom, prenom, email, classement_simple, classement_double, classement_mixte, id]
+    );
+
+    if (data.rows.length === 0) {
+      // Aucun utilisateur trouvé avec cet ID, renvoyer une erreur
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    // Renvoyer l'utilisateur mis à jour
+    res.json(data.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la mise à jour des données" });
+  }
+});
+
+
+
 // Créer un nouvel événement
 app.post("/postcalendar", async (req, res) => {
   try {
@@ -162,51 +189,46 @@ function requireAuth(req, res, next) {
 
 app.post("/updateParticipation/:eventId", async (req, res) => {
   try {
-    const { participation, id } = req.body; // Assurez-vous que "id" est correctement envoyé depuis le frontend
+    const { participation, id, date: receivedDate } = req.body; // Inclure la date reçue du frontend
     const { eventId } = req.params;
 
-    // Assurez-vous de valider que la valeur de participation est soit "Oui" soit "Non"
+    // Validation de la participation
     if (participation !== "Oui" && participation !== "Non") {
-      return res
-        .status(400)
-        .json({ message: 'La participation doit être soit "Oui" soit "Non"' });
+      return res.status(400).json({ message: 'La participation doit être "Oui" ou "Non"' });
     }
 
-    // Vérifiez si l'enregistrement de participation existe déjà pour cet utilisateur et cet événement
+    // Conversion de la date reçue en UTC si nécessaire
+    // Assurez-vous que receivedDate est déjà en format UTC (comme une chaîne ISO)
+    const dateUTC = new Date(receivedDate).toISOString();
+    console.log(dateUTC);
+
+    // Vérification de l'existence de la participation
     const existingParticipation = await db.oneOrNone(
       "SELECT * FROM participation_events WHERE event_id = $1 AND user_id = $2",
       [eventId, id]
     );
-    const eventDetails = await db.oneOrNone(
-      "SELECT * FROM event WHERE id = $1",
-      [eventId]
-    );
 
-    const eventDate = eventDetails.date.toISOString();
-
+    // Mise à jour ou insertion de la participation
     if (existingParticipation) {
-      // Si l'enregistrement de participation existe, mettez à jour la participation existante
       await db.none(
-        "UPDATE participation_events SET participation = $1, date = $2 WHERE event_id = $2 AND user_id = $3",
-        [participation === "Oui", eventDate,eventId, id]
+        "UPDATE participation_events SET participation = $1, date = $2 WHERE event_id = $3 AND user_id = $4",
+        [participation === "Oui", dateUTC, eventId, id]
       );
     } else {
-      // Si l'enregistrement de participation n'existe pas, insérez un nouvel enregistrement
       await db.none(
-        "INSERT INTO participation_events (event_id, user_id,date,participation) VALUES ($1, $2, $3,$4)",
-        [eventId, id, eventDate,participation === "Oui"]
+        "INSERT INTO participation_events (event_id, user_id, date, participation) VALUES ($1, $2, $3, $4)",
+        [eventId, id, dateUTC, participation === "Oui"]
       );
     }
 
-    res.json({ message: "Participation mise à jour avec succès",eventDetails });
+    res.json({ message: "Participation mise à jour avec succès" });
     console.log("Participation mise à jour avec succès");
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la participation", error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la mise à jour de la participation" });
+    res.status(500).json({ message: "Erreur lors de la mise à jour de la participation" });
   }
 });
+
 
 // match avec "oui" comme participation - recuperation nom prenom et date avec un JOIN
 app.get("/ouiparticipation", async (req, res) => {

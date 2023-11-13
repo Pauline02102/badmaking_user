@@ -19,6 +19,7 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [role, setRole] = React.useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  
 
   const data = [
     { key: "1", value: "Admin" },
@@ -50,8 +51,18 @@ export default function SignupScreen() {
         console.log("Inscription réussie");
         //console.log({ prenom, id });
         navigation.navigate("Calendrier", {
+          nom: nom,
           prenom: prenom,
-          id: data.id, // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
+          email: email,
+          role: role,
+          id: data.id,
+          onProfilePress: () => navigation.navigate("Profil", {
+            nom: nom,
+            prenom: prenom,
+            email: email,
+            role: role,
+            id: data.id,
+          }) // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
         });
       } else {
         // Gérer les autres cas d'erreur ou de réponse inattendue
