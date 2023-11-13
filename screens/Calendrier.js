@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import 'moment/locale/fr'; // Importez le locale français
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
+import styles from './CalendrierStyles';
+import DatePicker from 'react-native-date-picker'
 
 
 moment.locale('fr'); // Définir la locale de moment en français
@@ -35,7 +37,7 @@ function Calendrier({ route }) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [legendVisible, setLegendVisible] = useState(false); 
-
+  const [showConfirmButton, setShowConfirmButton] = useState(false);
   
   useEffect(() => {
     fetchEvents();
@@ -66,15 +68,22 @@ function Calendrier({ route }) {
   };
 
   const onTimeSelected = (event, selectedTime) => {
-    setShowTimePicker(false); // Fermer le TimePicker
     if (selectedTime) {
       setSelectedTime(selectedTime); // Sauvegarder l'heure sélectionnée
-      sendParticipation("Oui", selectedTime); // Envoyez la participation avec l'heure choisie.
+      /*sendParticipation("Oui", selectedTime); // Envoyez la participation avec l'heure choisie.*/
       console.log("Heure sélectionnée:", selectedTime);
     }
   };
   
-      // Appelée quand l'utilisateur confirme la participation
+  // fonction de confirmation
+  const confirmTime = () => {
+    setShowTimePicker(false); // Fermer le sélecteur de temps
+    setShowConfirmButton(false); // Cacher le bouton de confirmation
+    sendParticipation("Oui", selectedTime); // Envoyer la participation avec l'heure confirmée
+    console.log("Heure confirmée:", selectedTime);
+  };
+
+  // Appelée quand l'utilisateur confirme la participation
   const confirmParticipationWithTime = () => {
         setShowTimePicker(true); // Afficher le TimePicker
   };
@@ -151,7 +160,7 @@ function Calendrier({ route }) {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
       const newTime = new Date(selectedTime);
-      newTime.setHours(newTime.getHours() + 2);
+      newTime.setHours(newTime.getHours());
       
       const formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
       console.log("heure " + formattedTime);
@@ -163,12 +172,6 @@ function Calendrier({ route }) {
           heure : formattedTime , // Ajoutez l'heure formatée ici
         }
       );
-
-      /*if (participation === "Oui") {
-        console.log("ID de l'utilisateur :", id);
-        console.log("Prénom de l'utilisateur :", prenom);
-        navigation.navigate("Match", { id: id, prenom: prenom });
-      }*/
       await fetchEvents();
       console.log("Participation mise à jour avec succès");
     } catch (error) {
@@ -240,10 +243,9 @@ function Calendrier({ route }) {
     }
   };
 
-  
-
   const handleDayPress = async (day) => {
     console.log("Date sélectionnée :", day.dateString);
+    //const color = customDatesStyles[day.dateString]?.customStyles?.container?.backgroundColor;
     if (day && day.dateString) {
       const selectedDateString = day.dateString;
       setSelectedDate(selectedDateString);
@@ -257,6 +259,8 @@ function Calendrier({ route }) {
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       if (color === "green" || color === "blue") {
+        setShowTimePicker(true); // Afficher le sélecteur de temps
+        setShowConfirmButton(true); // Afficher le bouton de confirmation
         // Afficher la liste des participants
         console.log("Participants présents :", participants);
   
@@ -285,11 +289,24 @@ function Calendrier({ route }) {
           ]
         );
       }
+      if (color === 'red') {
+        setShowTimePicker(false);
+        setShowConfirmButton(false);
+        // Affiche une alerte si la date sélectionnée est marquée en rouge
+        Alert.alert("Information", "Salle fermée", [
+          { text: "OK", onPress: () => console.log("Alerte fermée") }
+        ]);
+      }
+      if (color ==="orange"){
+        setShowTimePicker(false);
+        setShowConfirmButton(false);
+      }
     } else {
       // Gérer le cas où la date sélectionnée n'est pas correctement définie
       console.error("La date sélectionnée n'est pas correctement définie.");
     }
   };
+
   const Legend = () => (
     <Modal
       animationType="slide"
@@ -372,6 +389,7 @@ function Calendrier({ route }) {
           markedDates={customDatesStyles}
           markingType="custom"
         />
+
          <Button title="Voir Profil" onPress={onProfilePress} />
         <Text>Événements pour la date sélectionnée :</Text>
         <Text>Bonjour, {prenom}! </Text>
@@ -384,105 +402,16 @@ function Calendrier({ route }) {
           is24Hour={true}
           display="default"
           onChange={onTimeSelected}
+  
         />
+        
       )}
+         {showConfirmButton && (
+          <Button title="Confirmer l'heure" onPress={confirmTime} />
+        )}
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  eventContainer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 8,
-  },
-  participationButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  attendanceContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  matchItem: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 16,
-    backgroundColor: '#cee3ed', // Couleur de fond blanc pour chaque match
-    borderRadius:10
-  },
-  badmintonPlayer: {
-    //borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 8,
-    backgroundColor: '#00887e', // Couleur de fond bleu pour chaque joueur
-    borderRadius:10
-  },
-  legendButton: {
-    padding: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  legendButtonText: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "#214353",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
-  },
-  buttonClose: {
-    backgroundColor: "#559ea2",
-    borderRadius: 20,
-    padding: 7,
-    elevation: 2,
-    marginTop:15
-
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  legendTitle: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontWeight: 'bold',
-    color:"#e4ebef"
-  },
-  legendText: {
-    textAlign: "center",
-    marginVertical: 5,
-    color:"#e4ebef"
-  },
-});
 
 export default Calendrier;
