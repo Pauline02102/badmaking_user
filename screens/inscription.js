@@ -50,7 +50,7 @@ export default function SignupScreen() {
       if (response.status === 200) {
         console.log("Inscription réussie");
         //console.log({ prenom, id });
-        navigation.navigate("Calendrier", {
+        navigation.navigate("Login", {
           nom: nom,
           prenom: prenom,
           email: email,
@@ -60,8 +60,7 @@ export default function SignupScreen() {
             nom: nom,
             prenom: prenom,
             email: email,
-            role: role,
-            id: data.id,
+            //id: data.id,
           }) // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
         });
       } else {

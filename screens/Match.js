@@ -1,236 +1,101 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
-  Button,
-} from "react-native";
-import axios from "axios";
-import _ from "lodash";
-import { Picker } from "@react-native-picker/picker";
+} from 'react-native';
+import axios from 'axios';
+import _ from 'lodash';
 import moment from 'moment';
 
 class MatchScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      matches: [], // Stocke les données des matchs
-      groups: [], // Stocke les groupes de matchs
-      groupsCreated: false, // État pour savoir si les groupes ont été créés
-      selectedDate: null, // Ajout d'un état pour la date sélectionnée
-      dates: [] // Ce tableau stockera les dates disponibles
-    };
-  }
-
-  createGroups = () => {
-    const { matches } = this.state;
-    const groupedMatches = _.chunk(matches, 4);
-    this.setState({ groups: groupedMatches, groupsCreated: true });
-    groupedMatches.forEach((group, index) => {
-      //(`Groupe ${index + 1}:`, group);
-    });
+  state = {
+    groupedParticipants: {}, // Stocke les participants groupés par date et event_id
   };
+
   componentDidMount() {
     this.fetchMatches();
-    // Ajoutez le rafraîchissement périodique des matchs ici
-    this.refreshInterval = setInterval(() => {
-      this.fetchMatches();
-    }, 3030); // Rafraîchir
-  }
-  componentWillUnmount() {
-    // Assurez-vous de nettoyer l'intervalle lorsque le composant est démonté
-    clearInterval(this.refreshInterval);
   }
 
-fetchMatches = async () => {
-  try {
-    // Récupérez les matchs depuis le backend
-    const response = await axios.get("http://192.168.1.6:3030/matches");
-    const matches = response.data;
-    console.log("matches",matches)
-    
-    // Regrouper les joueurs par ID de match
-    const groupedMatches = {};
-    
-    matches.forEach((match) => {
+  fetchMatches = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.6:3030/ouiparticipation');
+      const data = response.data;
       
-      if (!groupedMatches[match.id]) {
-        groupedMatches[match.id] = [];
-      }
-      groupedMatches[match.id].push({ nom: match.nom, prenom: match.prenom,date : match.date  , type : match.type});
-      //console.log("matche dates,", match.date)
-    });
-    // Créer un ensemble unique de dates
-    const dates = [...new Set(matches.map(match => match.date.split('T')[0]))];
-    console.log("dates" ,dates)
-    this.setState({ matches, dates, selectedDate: dates[0] }); // Mettre à jour l'état avec les dates et sélectionner par défaut la première date
+      // Grouper les participants par date
+      const groupedByDate = _.groupBy(data, participant =>
+        moment(participant.date).format('YYYY-MM-DD')
+      );
+      
+      // Pour chaque date, grouper les participants par event_id, puis créer des sous-groupes de 4
+      const groupedParticipants = _.mapValues(groupedByDate, participantsByDate => {
+        const participantsGroupedByEvent = _.groupBy(participantsByDate, 'event_id');
+        return _.flatMap(participantsGroupedByEvent, participants => _.chunk(participants, 4));
+      });
 
-    // Convertir les groupes de matchs en tableau
-    const matchGroups = Object.values(groupedMatches);
-
-    this.setState({ matches: matchGroups });
-  } catch (error) {
-    console.error("Erreur lors de la récupération des matchs", error);
-  }
-};
-
-renderMatchItem = ({ item }) => {
-  let formattedDate = 'Date non disponible';
-
-  if (item.date) {
-    formattedDate = moment(item.date).format('LL');
-  } else {
-    //console.log('Date is undefined for item', item);
-  }
-  if (item && item.length > 0){
-    // Affichez les données du match en mode 2 vs 2
-    return (
-      <View style={styles.matchItem}>
-        {item.map((match, index) => (
-          <Text key={index} style={styles.dateText}>Date : {match.date}</Text>
-          
-        ))}
-       
-        <Text style={styles.dateText}>Type : {item[0]?.type}</Text>
-        
-        <View style={styles.badmintonMatchContainer}>
-          <View style={styles.badmintonPlayerColumn}>
-          <Text style={styles.dateText}>date 1  : {item[5]?.date}</Text>
-            <View style={styles.badmintonPlayer}>
-              <Text style={styles.playerText}>
-              {item[0]?.prenom} {item[0]?.nom}</Text>
-            </View>
-
-            <View style={styles.badmintonPlayer}>
-              <Text style={styles.playerText}>
-                {item[1]?.prenom} {item[1]?.nom}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.vsText}>VS</Text>
-
-          <View style={styles.badmintonPlayerColumn}>
-            <View style={styles.badmintonPlayer}>
-              <Text style={styles.playerText}>
-                {item[2]?.prenom} {item[2]?.nom}</Text>
-            </View>
-
-            <View style={styles.badmintonPlayer}>
-              <Text style={styles.playerText}>
-                {item[3]?.prenom} {item[3]?.nom}</Text>
-
-            </View>
-          </View>
-        </View>
-      </View>
-    );
-  } else {
-    return null; // Ou renvoyer un composant de chargement ou un message d'erreur
-  }
-};
-  goBackToList = () => {
-    this.setState({ groupsCreated: false });
+      this.setState({ groupedParticipants });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des matchs', error);
+    }
   };
 
-  renderGroupItem = ({ item }) => {
-    // Affichez les matchs pour chaque groupe sous forme de matchs de tennis
+  renderMatchGroup = ({ item }) => {
+    // Chaque item ici est un sous-groupe de 4 participants ou moins
     return (
-      <View style={styles.badmintonMatchContainer}>
-        <View style={styles.badmintonPlayerColumn}>
-          {item.slice(0, 2).map((match, index) => (
-            <View key={index} style={styles.badmintonPlayer}>
-              <Text>
-                {match.prenom} {match.nom}
-              </Text>
-            </View>
+      <View style={styles.groupContainer}>
+        <View style={styles.teamContainer}>
+          <Text style={styles.playerText}>Équipe 1</Text>
+          {item.slice(0, 2).map((player, index) => (
+            <Text key={index} style={styles.playerText}>
+              {player.prenom} {player.nom}
+            </Text>
+            
           ))}
-
         </View>
-        <Text style={styles.vsText}>vs</Text>
-        <View style={styles.badmintonPlayerColumn}>
-          {item.slice(2, 4).map((match, index) => (
-            <View key={index} style={styles.badmintonPlayer}>
-              <Text>
-                {match.prenom} {match.nom}
-                
-              </Text>
-            </View>
+        <Text style={styles.vsText}>VS</Text>
+        <View style={styles.teamContainer}>
+          <Text style={styles.playerText}>Équipe 2</Text>
+          {item.slice(2, 4).map((player, index) => (
+            <Text key={index} style={styles.playerText}>
+              {player.prenom} {player.nom}
+            </Text>
           ))}
-          
         </View>
       </View>
     );
   };
+
   render() {
-      const { matches, selectedDate, dates } = this.state;
-    const filteredMatches = matches.filter(match => match.date === selectedDate);
+    const { groupedParticipants } = this.state;
+    const dates = Object.keys(groupedParticipants).sort(); // Trier les dates
 
     return (
       <View style={styles.container}>
-         <Text style={styles.title}>Sélectionnez une date:</Text>
-        <Picker
-          selectedValue={selectedDate}
-          onValueChange={(itemValue, itemIndex) =>
-            this.setState({ selectedDate: itemValue })
-          }>
-          {dates.map((date) => (
-            <Picker.Item key={date} label={date} value={date} />
-          ))}
-        </Picker>
-        {this.state.groupsCreated ? (
-          // Afficher la liste des groupes une fois qu'ils sont créés
-          <>
-            <Text style={styles.title}>Groupes créés :</Text>
+        {dates.map(date => (
+          <View key={date} style={styles.dateContainer}>
+            <Text style={styles.dateText}>{date}</Text>
             <FlatList
-              data={this.state.groups}
-              renderItem={this.renderGroupItem}
-             keyExtractor={(item, index) => index.toString()}
+              data={groupedParticipants[date]}
+              renderItem={this.renderMatchGroup}
+              keyExtractor={(item, index) => `${date}-${index}`}
             />
-            <Button
-              title="Revenir à la liste des matchs"
-              onPress={this.goBackToList}
-            />
-          </>
-        ) : (
-          // Masquer le bouton de création de groupes dans l'application utilisateur
-          <>
-            <Text style={styles.title}>Liste des matchs :</Text>
-            <FlatList
-              data={this.state.matches}
-              renderItem={this.renderMatchItem}
-              keyExtractor={(item, index) => item.event_id && item.user_id ? `${item.event_id}-${item.user_id}` : index.toString()}
-            />
-
-          </>
-        )}
+          </View>
+        ))}
       </View>
     );
   }
 }
 
-
-
+// Styles à définir selon vos besoins
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#f5f5f5', // Couleur de fond blanc
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: 'black', // Couleur bleue pour le titre
-  },
-  matchItem: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 16,
-    backgroundColor: '#cee3ed', // Couleur de fond blanc pour chaque match
-    borderRadius:10
+  dateContainer: {
+    marginBottom: 20,
   },
   dateText: {
     fontSize: 16,
@@ -238,33 +103,23 @@ const styles = StyleSheet.create({
     color: '#123539', // Couleur bleue pour la date
     fontWeight: "bold",
   },
-  badmintonMatchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-    alignItems: "center", // Centre le texte "VS"
-   borderRadius:15
+  groupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 10,
   },
-  badmintonPlayerColumn: {
-    flex: 1,
-    alignItems: "center",
-    borderRadius:10
-  },
-  badmintonPlayer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 8,
-    backgroundColor: '#00887e', // Couleur de fond bleu pour chaque joueur
-    borderRadius:10
+  teamContainer: {
+  backgroundColor :"#00887e",
+  borderRadius: 5,
+  padding : 15,
+  margin :15
   },
   playerText: {
     fontSize: 16,
-    color: 'white', // Couleur bleue pour le nom du joueur
-  },
-  idText: {
-    fontSize: 14,
-    color: '#000000', // Couleur noire pour l'ID du joueur
+    color: 'black', // Couleur bleue pour le nom du joueur
   },
   vsText: {
     fontSize: 20,
@@ -274,4 +129,7 @@ const styles = StyleSheet.create({
     color: '#123539', // Couleur bleue pour le texte "VS"
   },
 });
+
 export default MatchScreen;
+
+

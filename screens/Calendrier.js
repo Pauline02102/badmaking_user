@@ -33,6 +33,7 @@ function Calendrier({ route }) {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const { prenom, setprenom } = route.params || {};
+  const { nom, setnom } = route.params || {};
   const { id, setId } = route.params || {};
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
@@ -393,6 +394,7 @@ function Calendrier({ route }) {
          <Button title="Voir Profil" onPress={onProfilePress} />
         <Text>Événements pour la date sélectionnée :</Text>
         <Text>Bonjour, {prenom}! </Text>
+        <Text>nom de famille, {nom}</Text>
         <Text>Bonjour, {id}! </Text>
         {renderEventsForDate()}
         {showTimePicker && (

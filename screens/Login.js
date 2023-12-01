@@ -8,12 +8,16 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [prenom, setPrenom] = useState("");
   const [password, setPassword] = useState("");
+  const [nom, setnom] = useState("");
+  const [role, setRole] = React.useState("");
 
   const handleLogin = async () => {
     try {
       const loginData = {
+        prenom,
         email,
         password,
+        nom
       };
 
       const response = await fetch("http://192.168.1.6:3030/login", {
@@ -29,10 +33,20 @@ const LoginScreen = () => {
   
       if (response.status === 200) {
         navigation.navigate("Calendrier", {
-          prenom: prenom,
+          nom: nom,
+          prenom: data.prenom,
+          email: email,
           id: data.id, // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
+          role: role,
+          onProfilePress: () => navigation.navigate("Profil", {
+            nom: nom,
+            prenom: prenom,
+            email: email,
+            id: data.id,
+          }) // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
         });
-
+        
+        
         console.log("Connexion réussie");
       } else {
         // La connexion a échoué, affichez un message d'erreur à l'utilisateur
@@ -48,9 +62,15 @@ const LoginScreen = () => {
       <Text style={styles.heading}>Connexion</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Username"
+          placeholder="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
+          style={styles.inputField}
+        />
+        <TextInput
+          placeholder="Prenom"
+          value={prenom}
+          onChangeText={(text) => setPrenom(text)}
           style={styles.inputField}
         />
       </View>

@@ -6,6 +6,7 @@ import Calendrier from "./screens/Calendrier";
 import Match from "./screens/Match";
 import inscription from "./screens/inscription";
 import Login from "./screens/Login";
+import Tournoi from "./screens/Tournoi";
 import Profil from "./screens/Profil";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -66,6 +67,17 @@ const App = () => {
           component={Profil}
           options={{
             tabBarLabel: "Profil",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="body-outline" color={color} size={size} />
+              
+            ),
+          }}
+        />
+          <Tab.Screen
+          name="Tournoi"
+          component={Tournoi}
+          options={{
+            tabBarLabel: "Tournoi",
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="body-outline" color={color} size={size} />
               

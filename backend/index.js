@@ -1,9 +1,14 @@
 //const Calendar =require('../backend1/request/Calendar');
+
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+require('dotenv').config();
+
 
 const crypto = require("crypto");
 
@@ -21,6 +26,7 @@ const db = pgp({
   database: "badmaking",
   password: "Gribe123!",
   port: 5432,
+
 });
 
 const app = express();
@@ -36,6 +42,19 @@ app.get("/", async (request, response) => {
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.use(cookieParser(process.env.SESSION_SECRET));
+const sessionSecret = process.env.SESSION_SECRET || 'un_secret_par_defaut';
+app.use(session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, // passer à true si vous êtes en https
+        maxAge: 1209600000 // deux semaines en millisecondes
+    },
+}));
+
 app.get("/users", async (req, res) => {
   try {
     const data = await pool.query("SELECT * FROM users");
@@ -230,25 +249,31 @@ app.post("/updateParticipation/:eventId", async (req, res) => {
 });
 
 
-// match avec "oui" comme participation - recuperation nom prenom et date avec un JOIN
+// match avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN
 app.get("/ouiparticipation", async (req, res) => {
   try {
-    const query = `
-      SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, e.date
+    let query = `
+      SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, u.classement_simple, u.classement_double, u.classement_mixte, (e.date + INTERVAL '1 hour') AS date 
       FROM participation_events AS p
       JOIN users AS u ON p.user_id = u.id
       JOIN event AS e ON p.event_id = e.id
-      WHERE p.participation = 'True';
+      WHERE p.participation = 'True'
     `;
-    const events = await pool.query(query);
+
+    const params = [];
+    if (req.query.date && !isNaN(Date.parse(req.query.date))) {
+      query += ` AND DATE(e.date) = $1`;
+      params.push(req.query.date);
+    }
+
+    const events = await pool.query(query, params);
     res.json(events.rows);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la récupération des événements" });
+    res.status(500).json({ message: "Erreur lors de la récupération des événements" });
   }
 });
+
 
 //oui participation au jeu libre
 app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
@@ -273,7 +298,7 @@ app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
 
 
 // Middleware d'authentification
-
+/*
 //login verification
 app.post("/login", async (req, res) => {
   try {
@@ -298,29 +323,73 @@ app.post("/login", async (req, res) => {
       console.log("Mot de passe incorrect :", password);
       return res.status(401).json({ message: "Mot de passe incorrect" });
     }
-
-    // Si l'adresse e-mail et le mot de passe sont corrects, vous pouvez générer un jeton d'authentification ici
-    // et le renvoyer comme réponse pour gérer l'authentification ultérieurement
-    // Exemple : const token = generateAuthToken(user.id);
-    // Si l'adresse e-mail et le mot de passe sont corrects, générez un jeton d'authentification
-    /*const token = jwt.sign(
-      { id: user.id, email: user.email }, // Les données que vous souhaitez inclure dans le token
-      "f630f38a7a67e3044f05c3dc1cdc3208e1b48a8a924370c00117ba630c14c7fd", // Remplacez par une clé secrète sécurisée
-      { expiresIn: "1h" } // Optionnel : la durée de validité du token (par exemple, 1 heure)
-    );*/
-
-    // Réponse réussie
-    //res.status(200).json({ message: "Connexion réussie", id: user.id });
+    // Génère un token
+    const id = result.rows[0].id;
+    const prenom = result.rows[0].prenom;
+    const token = jwt.sign({ id, prenom }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+    console.log("token",token);
+    // Stocke le token dans un cookie
+    res.cookie('jwt', token, { httpOnly: true, secure: false });    
+    res
+    .status(200)
+    .json({ id: id, prenom: prenom, message: "Connexion réussie" });
+    /*
     const id = result.rows[0].id;
     const prenom = result.rows[0].prenom;
     res
       .status(200)
       .json({ id: id, prenom: prenom, message: "Connexion réussie" });
+      
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la connexion" });
+  }
+});*/
+
+//nouvelle login securisé token opaque
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password} = req.body;
+    const userQuery = "SELECT * FROM users WHERE email = $1";
+    const userResult = await pool.query(userQuery, [email]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ message: "Adresse e-mail incorrecte" });
+    }
+
+    const user = userResult.rows[0];
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Mot de passe incorrect" });
+    }
+
+    // Générer un token opaque
+    const token = crypto.randomBytes(48).toString('hex');
+    const userId = user.id;
+    const prenom = user.prenom;
+    const mail = user.email;
+    const nom = user.nom;
+
+    // Définir une date d'expiration pour le token, par exemple 24 heures
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 1);
+
+    // Stocker le token dans la base de données
+    const tokenQuery = "INSERT INTO user_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)";
+    await pool.query(tokenQuery, [token, userId, expiresAt]);
+
+    // Envoyer le token au client
+    res.cookie('session_token', token, { httpOnly: true, secure: false }); // Utilisez secure: true en production
+    res.status(200).json({ id: userId, prenom: prenom, mail : mail,nom : nom, message: "Connexion réussie" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur lors de la connexion" });
   }
 });
+
 
 // associate Color To Date
 app.post("/associateColorToDate", async (req, res) => {
