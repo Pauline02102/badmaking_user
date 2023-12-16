@@ -67,6 +67,62 @@ app.get("/users", async (req, res) => {
   }
 });
 
+//verifier que c'est le bon user conecté 
+const userAuthMiddleware = async (req, res, next) => {
+  try {
+
+    const token = req.headers.authorization.split(" ")[1]; // Bearer TOKEN_VALUE
+
+    // Interroge la base de données pour le jeton
+    const tokenQuery = "SELECT * FROM user_tokens WHERE token = $1";
+    const tokenResult = await pool.query(tokenQuery, [token]);
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(401).json({ message: "Token invalide" });
+    }
+
+    const tokenData = tokenResult.rows[0];
+
+    // Regarde si c'est expiré ou non
+    if (new Date() > new Date(tokenData.expires_at)) {
+      return res.status(401).json({ message: "Token expiré " });
+    }
+
+    // Récupére les détails de l'utilisateur
+    const userQuery = "SELECT * FROM users WHERE id = $1";
+    const userResult = await pool.query(userQuery, [tokenData.user_id]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ message: "Utilisateur pas trouvé" });
+    }
+
+    const user = userResult.rows[0];
+
+    // Ajouter les détails de l'utilisateur à la demande d'objet
+    req.user = {
+      id: user.id,
+      prenom: user.prenom,
+      nom: user.nom,
+      email: user.email
+    };
+    next(); //Passer au prochain middleware ou gestionnaire de route
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur durant l'authentification" });
+  }
+};
+
+app.get("/get-user-info", userAuthMiddleware, async (req, res) => {
+  // Si le middleware réussit,  un utilisateur valide
+  // req.user est ajouté par userAuthMiddleware
+  const userInfo = {
+    id: req.user.id,
+    prenom: req.user.prenom,
+    nom: req.user.nom
+  };
+  res.json({ success: true, user: userInfo });
+});
+
 //creer nouvel user
 app.post("/postusers", async (req, response) => {
   try {
@@ -252,25 +308,24 @@ app.post("/updateParticipation/:eventId", async (req, res) => {
 // match avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN
 app.get("/ouiparticipation", async (req, res) => {
   try {
-    let query = `
-      SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, u.classement_simple, u.classement_double, u.classement_mixte, (e.date + INTERVAL '1 hour') AS date 
+    const query = `
+      SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, u.classement_double, u.classement_mixte, 
+      TO_CHAR(  e.date,'YYYY-MM-DD') AS "date",
+      e.status as status
       FROM participation_events AS p
       JOIN users AS u ON p.user_id = u.id
       JOIN event AS e ON p.event_id = e.id
       WHERE p.participation = 'True'
+      
+      ;
     `;
-
-    const params = [];
-    if (req.query.date && !isNaN(Date.parse(req.query.date))) {
-      query += ` AND DATE(e.date) = $1`;
-      params.push(req.query.date);
-    }
-
-    const events = await pool.query(query, params);
+    const events = await pool.query(query);
     res.json(events.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur lors de la récupération des événements" });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des événements" });
   }
 });
 
@@ -654,7 +709,7 @@ app.post("/creerPaires", async (req, res) => {
   }
 });
 
- //forme les paires en melangeant les joueurs et en faisant attention a l'event_id
+//forme les paires en melangeant les joueurs et en faisant attention a l'event_id
 app.post("/formerPaires", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -683,6 +738,7 @@ app.post("/formerPaires", async (req, res) => {
         } else {
           // Gérer le cas où un utilisateur reste sans paire
           response.push({ message: `L'utilisateur ${users[i].user_id} (événement ${eventId}) est resté sans paire` });
+          console.log({ message: `L'utilisateur ${users[i].user_id} (événement ${eventId}) est resté sans paire` });
         }
       }
     }
@@ -697,6 +753,124 @@ app.post("/formerPaires", async (req, res) => {
     client.release();
   }
 });
+
+
+
+app.post("/formerPaireParClassementDouble", async (req, res) => {
+  const client = await pool.connect();
+  let responseSent = false;
+  try {
+    await client.query('BEGIN');
+
+    const participants = req.body; // Les données des participants
+    // Extrait le tableau de participants
+    const waitingList = []; // Liste d'attente pour les joueurs du groupe moyen
+    const formedPairs = []; // Paires formées
+    console.log(participants)
+    if (!Array.isArray(participants)) {
+      return res.status(400).json({ message: 'Les données des participants ne sont pas au format attendu' });
+    }
+
+    const groupedByEvent = participants.reduce((acc, participant) => {
+
+      // Regrouper les participants par event_id et par niveau
+      acc[participant.event_id] = acc[participant.event_id] || { haut: [], bas: [], moyen: [] };
+      if (participant.classement_double >= 1 && participant.classement_double <= 4) {
+        acc[participant.event_id].bas.push(participant);
+      } else if (participant.classement_double >= 8 && participant.classement_double <= 12) {
+        acc[participant.event_id].haut.push(participant);
+      } else if (participant.classement_double >= 5 && participant.classement_double <= 7) {
+        acc[participant.event_id].moyen.push(participant);
+      }
+      return acc;
+    }, {});
+
+    for (const [eventId, levels] of Object.entries(groupedByEvent)) {
+      const hautParticipants = levels.haut;
+      const basParticipants = levels.bas;
+      const moyenParticipants = levels.moyen;
+
+      // Formez des paires entre bas et haut
+      while (basParticipants.length > 0 && hautParticipants.length > 0) {
+        const userBas = basParticipants.pop();
+        const userHaut = hautParticipants.pop();
+
+        // Insérez la paire dans la table "paires"
+        await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, userBas.user_id, userHaut.user_id]);
+        formedPairs.push({ user1: userBas, user2: userHaut });
+      }
+      // Ajouter les joueurs bas et haut restants dans la liste d'attente
+      waitingList.push(...basParticipants, ...hautParticipants);
+      // console.log seulement s'il y a des joueurs du groupe bas
+      if (basParticipants.length > 0) {
+        basParticipants.forEach(user => {
+          console.log(`Joueur du groupe bas ajouté à la liste d'attente: ${user.prenom} ${user.nom} (ID: ${user.user_id})`);
+        });
+      } else {
+        console.log("Aucun joueur du groupe bas à ajouter à la liste d'attente");
+      }
+      //  console.log seulement s'il y a des joueurs du groupe haut
+      if (hautParticipants.length > 0) {
+        hautParticipants.forEach(user => {
+          console.log(`Joueur du groupe haut ajouté à la liste d'attente: ${user.prenom} ${user.nom} (ID: ${user.user_id})`);
+        });
+      } else {
+        console.log("Aucun joueur du groupe haut à ajouter à la liste d'attente.");
+      }
+
+      // Formez des paires entre joueurs moyens
+      while (moyenParticipants.length >= 2) {
+        const joueur1 = moyenParticipants.pop();
+        const joueur2 = moyenParticipants.pop();
+
+        // Insérez la paire dans la table "paires"
+        await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, joueur1.user_id, joueur2.user_id]);
+        formedPairs.push({ user1: joueur1, user2: joueur2 });
+      }
+
+      // Si le nombre de joueurs moyens est impair
+      if (moyenParticipants.length === 1) {
+        const joueurMoyenRestant = moyenParticipants.pop();
+
+        // Vérifiez s'il y a un joueur en attente
+        if (waitingList.length > 0) {
+          const joueurEnAttente = waitingList.pop();
+
+          // Formez la paire entre joueurMoyenRestant et joueurEnAttente
+          formedPairs.push({ joueurMoyenRestant, joueurEnAttente });
+
+          // Retirez le joueur en attente de la liste d'attente
+          const index = waitingList.indexOf(joueurEnAttente);
+          if (index !== -1) {
+            waitingList.splice(index, 1);
+          }
+
+          // Insérez la paire dans la table "paires"
+          await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, joueurMoyenRestant.user_id, joueurEnAttente.user_id]);
+        } else {
+          // Aucun joueur en attente disponible
+          // Ajoutez le joueur moyen restant à la liste d'attente
+          waitingList.push(joueurMoyenRestant);
+          console.log(`Le joueur du groupe moyen ${joueurMoyenRestant.user_id} est ajouté à la liste d'attente car la liste d'attente est vide`);
+        }
+      }
+    }
+    // Ajoutez les joueurs restants de la liste d'attente à un message
+    const joueursRestants = waitingList.map(joueur => `${joueur.prenom} ${joueur.nom}`).join(', ');
+
+    await client.query('COMMIT');
+    if (!responseSent) {
+      res.status(200).json({ message: "Paire formée", formedPairs, joueursRestants });
+    }
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Erreur lors de la formation des paires :', error);
+    res.status(500).json({ message: "Erreur lors de la formation des paires" });
+  } finally {
+    client.release();
+  }
+});
+
 
 //recupère les paires aves les nom 
 app.get("/recupererPaires", async (req, res) => {
@@ -732,7 +906,6 @@ function shuffleArray(array) {
   }
 }
 
-//post creation de poules
 
 //post creation de poules
 app.post("/creerPoules", async (req, res) => {
@@ -817,7 +990,6 @@ app.post("/creerPoules", async (req, res) => {
   }
 });
 
-
 //recuperer poule 
 app.get("/recupererPoules", async (req, res) => {
   try {
@@ -843,7 +1015,6 @@ app.get("/recupererPoules", async (req, res) => {
 });
 
 // post pour créer toutes les combinaisons de matchs 
-
 app.post("/creerMatchs", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -901,24 +1072,230 @@ app.post("/creerMatchs", async (req, res) => {
   }
 });
 
+
+//enregistrer les resultats d'un match
+app.post('/report-match-result', async (req, res) => {
+  try {
+    const { match_id, user_id, victoire, defaite } = req.body;
+
+    // Recherche d'un résultat existant pour l'utilisateur et le match
+    const existingResultQuery = `SELECT * FROM resultat WHERE match_id = $1 AND user_id = $2`;
+    const existingResult = await pool.query(existingResultQuery, [match_id, user_id]);
+    if (existingResult.rows.length > 0) {
+      // Avant de mettre à jour, vérifier s'il y a un conflit avec les résultats des adversaires
+
+      // Récupérer les identifiants des paires du match
+      const pairsQuery = `
+        SELECT paire1, paire2 FROM match
+        WHERE id = $1
+      `;
+      const pairsResult = await pool.query(pairsQuery, [match_id]);
+      const { paire1, paire2 } = pairsResult.rows[0];
+
+      // Récupérer les identifiants des joueurs pour chaque paire
+      const playersQuery = `
+        SELECT user1, user2 FROM paires WHERE id = $1
+        UNION
+        SELECT user1, user2 FROM paires WHERE id = $2
+      `;
+      const playersResult = await pool.query(playersQuery, [paire1, paire2]);
+      const players = playersResult.rows;
+
+      // Identifier l'équipe du joueur actuel et l'équipe adverse
+      let myTeam = [];
+      let opponentTeam = [];
+      players.forEach(pair => {
+        if (pair.user1 === user_id || pair.user2 === user_id) {
+          myTeam.push(pair.user1, pair.user2);
+        } else {
+          opponentTeam.push(pair.user1, pair.user2);
+        }
+      });
+
+      // Vérifier les résultats de l'équipe adverse
+      const opponentResultsQuery = `
+        SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+        FROM resultat
+        WHERE match_id = $1 AND (user_id = ANY($2))
+      `;
+      const opponentResults = await pool.query(opponentResultsQuery, [match_id, opponentTeam]);
+      const opponentData = opponentResults.rows[0];
+
+      // Vérifier les conflits de résultat
+      if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
+        return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
+      }
+
+      // Mettre à jour le résultat existant si aucune incohérence n'est détectée
+      const updateQuery = `
+        UPDATE resultat
+        SET victoire = $3, defaite = $4
+        WHERE match_id = $1 AND user_id = $2
+      `;
+      await pool.query(updateQuery, [match_id, user_id, victoire, defaite]);
+      return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
+    }
+
+    // Vérifiez l'état actuel des résultats du match
+    const checkQuery = `
+      SELECT SUM(victoire) as total_victories, SUM(defaite) as total_defeats
+      FROM resultat
+      WHERE match_id = $1
+      GROUP BY match_id
+    `;
+    const checkResult = await pool.query(checkQuery, [match_id]);
+    const matchResult = checkResult.rows[0];
+
+    // Logique pour éviter plus de 2 victoires ou défaites
+    if (matchResult) {
+      if ((victoire == 1 && matchResult.total_victories >= 2) || (defaite == 1 && matchResult.total_defeats >= 2)) {
+        return res.status(400).json({ message: "Le résultat de ce match est déjà complet." });
+      }
+    }
+
+    // Récupérer les identifiants des paires du match
+    const pairsQuery = `
+      SELECT paire1, paire2 FROM match
+      WHERE id = $1
+    `;
+    const pairsResult = await pool.query(pairsQuery, [match_id]);
+    const { paire1, paire2 } = pairsResult.rows[0];
+
+    // Récupérer les identifiants des joueurs pour chaque paire
+    const playersQuery = `
+      SELECT user1, user2 FROM paires WHERE id = $1
+      UNION
+      SELECT user1, user2 FROM paires WHERE id = $2
+    `;
+    const playersResult = await pool.query(playersQuery, [paire1, paire2]);
+    const players = playersResult.rows;
+
+    // Identifier l'équipe du joueur actuel et l'équipe adverse
+    let myTeam = [];
+    let opponentTeam = [];
+    players.forEach(pair => {
+      if (pair.user1 === user_id || pair.user2 === user_id) {
+        myTeam.push(pair.user1, pair.user2);
+      } else {
+        opponentTeam.push(pair.user1, pair.user2);
+      }
+    });
+
+    // Vérifier les résultats de l'équipe adverse
+    const opponentResultsQuery = `
+      SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+      FROM resultat
+      WHERE match_id = $1 AND (user_id = ANY($2))
+    `;
+    const opponentResults = await pool.query(opponentResultsQuery, [match_id, opponentTeam]);
+    const opponentData = opponentResults.rows[0];
+
+    // Vérifier les conflits de résultat
+    if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
+      return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
+
+    }
+
+    // Insérer le résultat
+    const insertQuery = `
+      INSERT INTO resultat (match_id, user_id, victoire, defaite)
+      VALUES ($1, $2, $3, $4)
+    `;
+    await pool.query(insertQuery, [match_id, user_id, victoire, defaite]);
+
+    res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
+    console.log({ message: "Le résultat du match a été signalé avec succès." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur dans les résultats du match" });
+    console.log({ message: "Erreur dans les résultats du match" });
+  }
+});
+
+
+// recuperer les resultats d'un match
+app.get('/check-match-result', async (req, res) => {
+  try {
+    const { match_id, user_id } = req.query;
+
+    // Vérification de l'existence du match_id et du user_id
+    if (!match_id || !user_id) {
+      return res.status(400).json({ message: "Le match_id et le user_id sont requis." });
+    }
+
+    // Vérifier si l'utilisateur a déjà enregistré un résultat pour ce match
+    const existingResultQuery = `
+      SELECT victoire, defaite
+      FROM resultat
+      WHERE match_id = $1 AND user_id = $2
+    `;
+    const existingResult = await pool.query(existingResultQuery, [match_id, user_id]);
+
+    if (existingResult.rows.length > 0) {
+      // L'utilisateur a déjà enregistré un résultat
+      return res.status(200).json({ resultExists: true, victory: existingResult.rows[0].victoire, defeat: existingResult.rows[0].defaite });
+    }
+
+    // Aucun résultat trouvé
+    res.status(200).json({ resultExists: false });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la vérification du résultat du match" });
+  }
+});
+
+//récupérer tous les joueurs et leurs résultats de matchs
+app.get('/joueurs_resultats', async (req, res) => {
+  try {
+    const playersQuery = `
+      SELECT  
+        user_id, 
+        prenom, 
+        nom, 
+        COUNT(CASE WHEN victoire = 1 THEN 1 END) as total_victoires, 
+        COUNT(CASE WHEN defaite = 1 THEN 1 END) as total_defaites,
+        ARRAY_AGG(DISTINCT match_id) as match_ids
+      FROM resultat 
+      JOIN users ON resultat.user_id = users.id
+      GROUP BY user_id, prenom, nom
+      ORDER BY total_victoires DESC
+    `;
+    const players = await pool.query(playersQuery);
+    res.status(200).json(players.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des joueurs" });
+  }
+});
 //get recuperer les matchs crée
 
 app.get("/recupererMatchs", async (req, res) => {
   try {
     const query = `
-      SELECT m.id as match_id,
-             m.poule_id,
-             p1.id as paire1_id,
-             p2.id as paire2_id,
-             u1.nom as user1_nom_paire1,
-             u1.prenom as user1_prenom_paire1,
-             u2.nom as user2_nom_paire1,
-             u2.prenom as user2_prenom_paire1,
-             u3.nom as user1_nom_paire2,
-             u3.prenom as user1_prenom_paire2,
-             u4.nom as user2_nom_paire2,
-             u4.prenom as user2_prenom_paire2
-             
+          SELECT m.id as match_id,
+          m.poule_id,
+          p1.id as paire1_id,
+          p2.id as paire2_id,
+          u1.nom as user1_nom_paire1,
+          u1.prenom as user1_prenom_paire1,
+          u2.nom as user2_nom_paire1,
+          u2.prenom as user2_prenom_paire1,
+          u3.nom as user1_nom_paire2,
+          u3.prenom as user1_prenom_paire2,
+          u4.nom as user2_nom_paire2,
+          u4.prenom as user2_prenom_paire2,
+          u1.classement_mixte as user1_mixte,
+          u1.classement_double as user1_double,
+          u2.classement_mixte as user2_mixte,
+          u2.classement_double as user2_double,
+          u3.classement_mixte as user3_mixte,
+          u3.classement_double as user3_double,
+          u4.classement_mixte as user4_mixte,
+          u4.classement_double as user4_double,
+          p1.event_id as event_id ,
+          TO_CHAR(  e.date,'YYYY-MM-DD') AS "event_date",
+          e.status as status
+          
       FROM match m
       JOIN paires p1 ON m.paire1 = p1.id
       JOIN paires p2 ON m.paire2 = p2.id
@@ -926,7 +1303,7 @@ app.get("/recupererMatchs", async (req, res) => {
       JOIN users u2 ON p1.user2 = u2.id
       JOIN users u3 ON p2.user1 = u3.id
       JOIN users u4 ON p2.user2 = u4.id
-
+      JOIN event e ON p1.event_id = e.id;
     `;
     const result = await pool.query(query);
     res.json(result.rows);
@@ -936,6 +1313,125 @@ app.get("/recupererMatchs", async (req, res) => {
   }
 });
 
+
+
+const cron = require('node-cron');
+
+cron.schedule('* * * * *', async () => {
+  const client = await pool.connect();
+  console.log("Travail Cron démarré - vérification des événements pour créer des paires");
+
+  try {
+    // Get events starting within the next 24 hours
+
+
+    const eventQuery = `
+    SELECT id, status, TO_CHAR(date, 'YYYY-MM-DD HH24:MI:SS') AS start_time
+    FROM event 
+    WHERE date BETWEEN NOW() AND NOW() + INTERVAL '2 MINUTES'
+    AND paire_creer = false`;
+    const { rows: upcomingEvents } = await client.query(eventQuery);
+
+    for (const event of upcomingEvents) {
+      // Fetch participants for the event
+      const participantsQuery = `
+        SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
+               u.classement_double, u.classement_mixte, 
+               TO_CHAR(e.date,'YYYY-MM-DD') AS "date",
+               e.status as status
+        FROM participation_events AS p
+        JOIN users AS u ON p.user_id = u.id
+        JOIN event AS e ON p.event_id = e.id
+        WHERE p.participation = 'True' AND p.event_id = $1`;
+      const { rows: participants } = await client.query(participantsQuery, [event.id]);
+
+      if (event.status === 'Random') {
+        console.log(`Paire random crée pour l'event : ${event.id}`);
+        await handleCreerPaires(participants);
+      } else if (event.status === 'par niveau') {
+        console.log(`Paire par classement crée pour l'event : ${event.id}`);
+        await handleCreerPairesParClassement(participants);
+      }
+      await createPools(event.id);
+      await createMatches(event.id);
+      // Update the event as pairs created
+      const updateEventQuery = `UPDATE event SET paire_creer = true WHERE id = $1`;
+      await client.query(updateEventQuery, [event.id]);
+    }
+  } catch (error) {
+    console.error('Error in scheduled task: ', error);
+  } finally {
+    client.release();
+  }
+});
+
+async function handleCreerPaires(participants) {
+  try {
+    const url = 'http://192.168.1.6:3000/formerPaires';
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(participants),
+    };
+
+    const response = await fetch(url, requestOptions);
+    const data = await response.json();
+    console.log("Données reçues du serveur:", data);
+  } catch (error) {
+    console.error('Erreur lors de la création des paires:', error);
+  }
+
+}
+
+async function handleCreerPairesParClassement(participants) {
+  try {
+    const url = 'http://192.168.1.6:3000/formerPaireParClassementDouble';
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(participants),
+    };
+
+    const response = await fetch(url, requestOptions);
+    const data = await response.json();
+    console.log("Données reçues du serveur:", JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Erreur lors de la création des paires:', error);
+  }
+
+}
+
+async function createPools(eventId) {
+  try {
+    const url = 'http://192.168.1.6:3000/creerPoules';
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    const response = await fetch(url, requestOptions);
+    const data = await response.json();
+    console.log("Données reçues du serveur:", JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Erreur lors de la création des poules:', error);
+  }
+}
+
+async function createMatches(eventId) {
+  try {
+    const url = 'http://192.168.1.6:3000/creerMatchs';
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    const response = await fetch(url, requestOptions);
+    const data = await response.json();
+    console.log("Matchs créés: ", data);
+  } catch (error) {
+    console.error('Erreur lors de la création des matchs:', error);
+  }
+}
 
 
 

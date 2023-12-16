@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const LoginScreen = () => {
@@ -14,13 +15,14 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       const loginData = {
+        
         prenom,
         email,
         password,
         nom
       };
 
-      const response = await fetch("http://192.168.1.6:3030/login", {
+      const response = await fetch("http://192.168.1.6:3000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,7 +33,11 @@ const LoginScreen = () => {
   
       console.log("Réponse du serveur:", data); // Afficher la réponse du serveur
   
-      if (response.status === 200) {
+      if (response.status === 200 && data.token) {
+        console.log("Storing token:", data.token);
+        await AsyncStorage.setItem('userToken', data.token);
+        console.log("Token stored successfully"); //stocker le token
+
         navigation.navigate("Calendrier", {
           nom: nom,
           prenom: data.prenom,
@@ -49,8 +55,7 @@ const LoginScreen = () => {
         
         console.log("Connexion réussie");
       } else {
-        // La connexion a échoué, affichez un message d'erreur à l'utilisateur
-        console.error("Échec de la connexion");
+        console.error("Token manquant ou erreur de connexion");
       }
     } catch (error) {
       console.error("Erreur lors de la connexion :", error);

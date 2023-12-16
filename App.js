@@ -1,33 +1,35 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-
+import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Calendrier from "./screens/Calendrier";
-import Match from "./screens/Match";
 import inscription from "./screens/inscription";
 import Login from "./screens/Login";
-import Tournoi from "./screens/Tournoi";
 import Profil from "./screens/Profil";
+import Match from "./screens/Match";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { UserProvider } from './screens/UserContext';
+
+import Joueurs from "./screens/Joueurs";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
+import { SimpleLineIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 //const Tab = createStackNavigator();
 
 const App = () => {
   return (
-    <UserProvider>
     <NavigationContainer>
       <Tab.Navigator>
-      
         <Tab.Screen
           name="Calendrier"
           component={Calendrier}
           options={{
             tabBarLabel: "Calendrier",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="calendar" color={color} size={size} />
+              <Ionicons name="calendar" size={24} color="black" />
             ),
           }}
         />
@@ -37,20 +39,22 @@ const App = () => {
           options={{
             tabBarLabel: "Match",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="aperture-sharp" color={color} size={size} />
+              <MaterialCommunityIcons name="badminton" size={24} color="black" />
             ),
           }}
         />
+
         <Tab.Screen
           name="Inscription"
           component={inscription}
           options={{
             tabBarLabel: "Inscription",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="log-in-outline" color={color} size={size} />
+              <Ionicons name="person-add" size={24} color="black" />
             ),
           }}
         />
+
 
         <Tab.Screen
           name="Login"
@@ -58,7 +62,17 @@ const App = () => {
           options={{
             tabBarLabel: "Login",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="log-in-outline" color={color} size={size} />
+              <AntDesign name="login" size={24} color="black" />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Joueurs"
+          component={Joueurs}
+          options={{
+            tabBarLabel: "Joueurs",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="format-list-bulleted" size={24} color="black" />
             ),
           }}
         />
@@ -69,25 +83,13 @@ const App = () => {
             tabBarLabel: "Profil",
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="body-outline" color={color} size={size} />
-              
+
             ),
           }}
         />
-          <Tab.Screen
-          name="Tournoi"
-          component={Tournoi}
-          options={{
-            tabBarLabel: "Tournoi",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="body-outline" color={color} size={size} />
-              
-            ),
-          }}
-        />
-      
+
       </Tab.Navigator>
     </NavigationContainer>
-    </UserProvider>
   );
 };
 
