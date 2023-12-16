@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity,Alert} from "react-native";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert } from "react-native";
 import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import { CommonActions } from '@react-navigation/native';
+import { useUser } from "./UserContext";
 
 const Profil = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const [nom, setNom] = useState(route.params?.nom || '');
   const [prenom, setPrenom] = useState(route.params?.prenom || '');
@@ -12,6 +18,7 @@ const Profil = () => {
   const [classementMixte, setClassementMixte] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState(route.params?.id || '');
+  const { setIsSignedIn } = useUser();
 
   const handleSave = async () => {
     try {
@@ -29,9 +36,9 @@ const Profil = () => {
           classement_mixte: classementMixte || null
         }),
       });
-  
+
       const data = await response.json();
-      
+
       if (response.status === 200) {
         console.log('Mise à jour réussie:', data);
       } else {
@@ -41,79 +48,112 @@ const Profil = () => {
       console.error("Erreur lors de l'envoi de la requête:", error);
     }
   };
+  const handleLogout = async () => {
+    // Fonction pour gérer la logique de déconnexion
+    const logout = async () => {
+      try {
+        await fetch("http://192.168.1.6:3000/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,
+          },
+        });
+        await AsyncStorage.removeItem('userToken');
+        setIsSignedIn(false);
+      } catch (error) {
+        console.error("Erreur lors de la déconnexion :", error);
+      }
+    };
+  
+    // Affichage du pop-up de confirmation
+    Alert.alert(
+      "Déconnexion",
+      "Êtes-vous sûr de vouloir vous déconnecter ?",
+      [
+        {
+          text: "Non",
+          style: "cancel"
+        },
+        { 
+          text: "Oui", 
+          onPress: () => logout() 
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mon profil</Text>
       <View style={styles.inputContainer}>
-        
-      <View style={styles.row}>
-        <Text style={styles.label}>Nom</Text>
-        <TextInput
-          editable={isEditing}
-          style={styles.input}
-          value={nom}
-          onChangeText={setNom}
-          placeholder="Nom"
-        />
-      </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Prénom</Text>
-        <TextInput
-          editable={isEditing}
-          style={styles.input}
-          value={prenom}
-          onChangeText={setPrenom}
-          placeholder="Prénom"
-        />
-      </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Nom</Text>
+          <TextInput
+            editable={isEditing}
+            style={styles.input}
+            value={nom}
+            onChangeText={setNom}
+            placeholder="Nom"
+          />
+        </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          editable={isEditing}
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email"
-        />
-      </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Prénom</Text>
+          <TextInput
+            editable={isEditing}
+            style={styles.input}
+            value={prenom}
+            onChangeText={setPrenom}
+            placeholder="Prénom"
+          />
+        </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Classement Simple</Text>
-        <TextInput
-          keyboardType="numeric"
-          editable={isEditing}
-          style={styles.input}
-          value={classementSimple}
-          onChangeText={setClassementSimple}
-          placeholder="Classement Simple"
-        />
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Classement Double</Text>
-        <TextInput
-          keyboardType="numeric"
-          editable={isEditing}
-          style={styles.input}
-          value={classementDouble}
-          onChangeText={setClassementDouble}
-          placeholder="Classement Double"
-        />
-      </View>
-      
-      <View style={styles.row}>
-        <Text style={styles.label}>Classement Mixte</Text>
-        <TextInput
-          keyboardType="numeric"
-          editable={isEditing}
-          style={styles.input}
-          value={classementMixte}
-          onChangeText={setClassementMixte}
-          placeholder="Classement Mixte"
-        />
-      </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            editable={isEditing}
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Email"
+          />
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Classement Simple</Text>
+          <TextInput
+            keyboardType="numeric"
+            editable={isEditing}
+            style={styles.input}
+            value={classementSimple}
+            onChangeText={setClassementSimple}
+            placeholder="Classement Simple"
+          />
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Classement Double</Text>
+          <TextInput
+            keyboardType="numeric"
+            editable={isEditing}
+            style={styles.input}
+            value={classementDouble}
+            onChangeText={setClassementDouble}
+            placeholder="Classement Double"
+          />
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Classement Mixte</Text>
+          <TextInput
+            keyboardType="numeric"
+            editable={isEditing}
+            style={styles.input}
+            value={classementMixte}
+            onChangeText={setClassementMixte}
+            placeholder="Classement Mixte"
+          />
+        </View>
       </View>
 
       <TouchableOpacity
@@ -128,60 +168,65 @@ const Profil = () => {
           {isEditing ? 'Sauvegarder les modifications' : 'Modifier mes informations'}
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogout}>
+        <Text style={styles.buttonText}>Déconnexion</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#f3f3f3", // Bleu pâle
-      padding: 30,
-      borderRadius: 10,
-      shadowColor: "rgba(0, 0, 0, 0.05)",
-      shadowOffset: { width: 0, height: 0 },
-      shadowRadius: 40,
-      marginBottom : 30
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 20,
-      color: "#467c86", // Gris foncé
-    },
-    inputContainer: {
-      width: '100%',
-      marginBottom: 15,
-    },
-    input: {
-      width: '65%',
-      borderWidth: 1,
-      borderColor: '#D3D3D3', // Gris clair
-      backgroundColor: "#efefe4", // Blanc cassé
-      padding: 10,
-      borderRadius: 5,
-    },
-    button: {
-      backgroundColor: '#467c86', // Bleu poudre
-      padding: 10,
-      borderRadius: 5,
-    },
-    buttonText: {
-      color: '#FFFFFF', // Blanc
-      textAlign: 'center',
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 10,
-    },
-    label: {
-      width: '35%',
-      marginRight: 10,
-      color: "#467c86", // Gris foncé
-      fontWeight :"bold"
-    },
-  });
-  
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f3f3f3", // Bleu pâle
+    padding: 30,
+    borderRadius: 10,
+    shadowColor: "rgba(0, 0, 0, 0.05)",
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 40,
+    marginBottom: 30
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: "#467c86", // Gris foncé
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 15,
+  },
+  input: {
+    width: '65%',
+    borderWidth: 1,
+    borderColor: '#D3D3D3', // Gris clair
+    backgroundColor: "#efefe4", // Blanc cassé
+    padding: 10,
+    borderRadius: 5,
+  },
+  button: {
+    backgroundColor: '#467c86', // Bleu poudre
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#FFFFFF', // Blanc
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  label: {
+    width: '35%',
+    marginRight: 10,
+    color: "#467c86", // Gris foncé
+    fontWeight: "bold"
+  },
+});
+
 export default Profil;

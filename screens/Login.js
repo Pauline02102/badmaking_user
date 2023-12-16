@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
+import UserContext from "./UserContext";
+import { useUser } from "./UserContext";
 
 
 const LoginScreen = () => {
@@ -11,6 +14,8 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [nom, setnom] = useState("");
   const [role, setRole] = React.useState("");
+  const { setIsSignedIn } = useUser();
+  
 
   const handleLogin = async () => {
     try {
@@ -38,20 +43,7 @@ const LoginScreen = () => {
         await AsyncStorage.setItem('userToken', data.token);
         console.log("Token stored successfully"); //stocker le token
 
-        navigation.navigate("Calendrier", {
-          nom: nom,
-          prenom: data.prenom,
-          email: email,
-          id: data.id, // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
-          role: role,
-          onProfilePress: () => navigation.navigate("Profil", {
-            nom: nom,
-            prenom: prenom,
-            email: email,
-            id: data.id,
-          }) // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
-        });
-        
+        setIsSignedIn(true); // Mettre à jour l'état global de connexion
         
         console.log("Connexion réussie");
       } else {
@@ -93,7 +85,9 @@ const LoginScreen = () => {
       </TouchableOpacity>
       <View style={styles.signupContainer}>
         <Text style={styles.already}>Tu n'as pas de compte ?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Inscription")}>
+        <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
+          name:'Inscription',
+        }))}>
           <Text style={styles.signupLink}>Inscription</Text>
         </TouchableOpacity>
       </View>

@@ -46,13 +46,13 @@ app.use(bodyParser.json());
 app.use(cookieParser(process.env.SESSION_SECRET));
 const sessionSecret = process.env.SESSION_SECRET || 'un_secret_par_defaut';
 app.use(session({
-    secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: false, // passer à true si vous êtes en https
-        maxAge: 1209600000 // deux semaines en millisecondes
-    },
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // passer à true si vous êtes en https
+    maxAge: 1209600000 // deux semaines en millisecondes
+  },
 }));
 
 app.get("/users", async (req, res) => {
@@ -122,6 +122,24 @@ app.get("/get-user-info", userAuthMiddleware, async (req, res) => {
   };
   res.json({ success: true, user: userInfo });
 });
+
+//deconnecter un user
+app.post("/logout", userAuthMiddleware, async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1]; // Récupère le token
+
+    // Supprime le token de la base de données 
+    const deleteTokenQuery = "DELETE FROM user_tokens WHERE token = $1";
+    await pool.query(deleteTokenQuery, [token]);
+
+    res.json({ message: "Déconnexion réussie" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la déconnexion" });
+  }
+});
+
+
 
 //creer nouvel user
 app.post("/postusers", async (req, response) => {
@@ -340,7 +358,7 @@ app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
       JOIN users AS u ON p.user_id = u.id
       WHERE p.participation = 'True' AND DATE(p.date) = DATE('${selectedDate}');
     `;
-    
+
     const participations = await pool.query(query);
     res.json(participations.rows);
   } catch (error) {
@@ -406,7 +424,7 @@ app.post("/login", async (req, res) => {
 //nouvelle login securisé token opaque
 app.post("/login", async (req, res) => {
   try {
-    const { email, password} = req.body;
+    const { email, password } = req.body;
     const userQuery = "SELECT * FROM users WHERE email = $1";
     const userResult = await pool.query(userQuery, [email]);
 
@@ -438,7 +456,7 @@ app.post("/login", async (req, res) => {
 
     // Envoyer le token au client
     res.cookie('session_token', token, { httpOnly: true, secure: false }); // Utilisez secure: true en production
-    res.status(200).json({ id: userId, prenom: prenom, mail : mail,nom : nom, message: "Connexion réussie" });
+    res.status(200).json({ id: userId, prenom: prenom, mail: mail, nom: nom, message: "Connexion réussie" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur lors de la connexion" });
@@ -558,7 +576,7 @@ app.post("/participationJeuLibre/:userId", async (req, res) => {
 
     // Vérifier si l'enregistrement de participation existe déjà pour cet utilisateur et cette date
     const existingParticipation = await db.oneOrNone(
-      "SELECT * FROM participation_jeu WHERE user_id = $1 AND date = $2 AND heure = $3" ,
+      "SELECT * FROM participation_jeu WHERE user_id = $1 AND date = $2 AND heure = $3",
       [userId, date, heure]
     );
 
@@ -566,13 +584,13 @@ app.post("/participationJeuLibre/:userId", async (req, res) => {
       // Si l'enregistrement de participation existe, mettez à jour la participation existante
       await db.none(
         "UPDATE participation_jeu SET participation = $1 WHERE user_id = $2 AND date = $3 AND heure = $4",
-        [participation === "Oui", userId, date,heure]
+        [participation === "Oui", userId, date, heure]
       );
     } else {
       // Si l'enregistrement de participation n'existe pas, insérez un nouvel enregistrement
       await db.none(
         "INSERT INTO participation_jeu (user_id, participation, date,heure) VALUES ($1, $2, $3,$4)",
-        [userId, participation === "Oui", date,heure]
+        [userId, participation === "Oui", date, heure]
       );
     }
 

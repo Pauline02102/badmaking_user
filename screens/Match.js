@@ -170,7 +170,7 @@ const Match = () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        console.error('Token non trouvé');
+        console.error('page match : Token non trouvé');
         return;
       }
       const response = await fetch('http://192.168.1.6:3000/get-user-info', {

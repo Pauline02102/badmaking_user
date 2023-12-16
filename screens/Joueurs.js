@@ -28,7 +28,7 @@ const Joueurs = () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        console.error('Token non trouvé');
+        console.error('Page joueur : Token non trouvé');
         return;
       }
       const response = await fetch('http://192.168.1.6:3000/get-user-info', {

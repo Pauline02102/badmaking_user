@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { CommonActions } from '@react-navigation/native';
 
 export default function SignupScreen() {
   const navigation = useNavigation();

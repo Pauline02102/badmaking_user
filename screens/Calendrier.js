@@ -19,6 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
 import styles from './CalendrierStyles';
 import DatePicker from 'react-native-date-picker'
+import { CommonActions } from '@react-navigation/native';
 
 
 moment.locale('fr'); // Définir la locale de moment en français
@@ -39,6 +40,7 @@ function Calendrier({ route }) {
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [legendVisible, setLegendVisible] = useState(false); 
   const [showConfirmButton, setShowConfirmButton] = useState(false);
+  
   
   useEffect(() => {
     fetchEvents();
