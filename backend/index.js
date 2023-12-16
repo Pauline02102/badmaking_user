@@ -560,4 +560,386 @@ app.get("/matches", async (req, res) => {
 });
 
 
+//creation match
+app.post("/match", async (req, res) => {
+  try {
+    const { type, terrain_id } = req.body;
+    const newMatch = await pool.query(
+      "INSERT INTO matchs (type, terrain_id) VALUES ($1, $2) RETURNING *",
+      [type, terrain_id]
+    );
+    res.json(newMatch.rows[0]);
+    console.log("Match créé");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la création du match en backend" });
+  }
+});
+
+//get les match avec nom et prenom et date
+app.get("/matches", async (req, res) => {
+  try {
+    const query = `
+    SELECT m.*, u.nom, u.prenom, event.date   
+      FROM matchs AS m   
+               
+
+      JOIN user_match AS um       
+      ON m.id = um.id_match       
+
+      JOIN users AS u            
+      ON um.id_user = u.id     
+
+      JOIN terrain AS t
+      ON m.terrain_id = t.id
+
+      JOIN event as event
+      ON t.id = event.terrain_id
+    `;
+    const matches = await pool.query(query);
+    res.json(matches.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des matchs avec les noms des joueurs" });
+  }
+});
+
+// recupere donnée user_match + nom, prenom + date de participation events
+app.get("/matches1", async (req, res) => {
+  try {
+    const query = `
+      SELECT um.id_match,
+              um.id_user,
+             u.nom,
+             u.prenom,
+             (pe.date + INTERVAL '1 hour') 
+
+      FROM user_match um
+      JOIN users u ON um.id_user = u.id
+      JOIN participation_events pe ON u.id = pe.user_id
+
+    `;
+    const matches = await pool.query(query);
+    res.json(matches.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des matchs avec les noms des joueurs et les dates des événements" });
+  }
+});
+
+
+//Requête POST pour créer des paires
+app.post("/creerPaires", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const paires = req.body; // Liste d'objets { event_id, user1, user2 }
+
+    paires.forEach(async (paire) => {
+      const insertQuery = `
+        INSERT INTO paires (event_id, user1, user2)
+        VALUES ($1, $2, $3)
+      `;
+      await client.query(insertQuery, [paire.event_id, paire.user1, paire.user2]);
+    });
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: "Paires créées avec succès" });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la création des paires" });
+  } finally {
+    client.release();
+  }
+});
+
+ //forme les paires en melangeant les joueurs et en faisant attention a l'event_id
+app.post("/formerPaires", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const participants = req.body; // Les données des participants
+    const groupedByEvent = participants.reduce((acc, participant) => {
+      // Regrouper les participants par event_id
+      acc[participant.event_id] = acc[participant.event_id] || [];
+      acc[participant.event_id].push(participant);
+      return acc;
+    }, {});
+
+    let response = [];
+
+    for (const [eventId, users] of Object.entries(groupedByEvent)) {
+      // Mélanger l'array pour former des paires aléatoires
+      shuffleArray(users);
+
+      // Former des paires
+      for (let i = 0; i < users.length; i += 2) {
+        if (users[i + 1]) {
+          // Insérer la paire dans la base de données
+          const insertQuery = 'INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)';
+          await client.query(insertQuery, [eventId, users[i].user_id, users[i + 1].user_id]);
+        } else {
+          // Gérer le cas où un utilisateur reste sans paire
+          response.push({ message: `L'utilisateur ${users[i].user_id} (événement ${eventId}) est resté sans paire` });
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json(response.length > 0 ? response : { message: "Toutes les paires ont été formées avec succès" });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la formation des paires" });
+  } finally {
+    client.release();
+  }
+});
+
+//recupère les paires aves les nom 
+app.get("/recupererPaires", async (req, res) => {
+  try {
+    const query = `
+      SELECT p.id as pair_id, 
+             p.event_id,
+             e.title as nom_event,    -- Nom de l'événement
+            (  e.date + INTERVAL '1 hour') as date_event,    -- Ajout de la date de l'événement
+             u1.nom as user1_nom, 
+             u1.prenom as user1_prenom,
+             u2.nom as user2_nom,
+             u2.prenom as user2_prenom
+      FROM paires p
+      JOIN users u1 ON p.user1 = u1.id
+      JOIN users u2 ON p.user2 = u2.id
+      JOIN event e ON p.event_id = e.id;  -- Jointure avec la table event
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des paires" });
+  }
+});
+
+
+// Fonction pour mélanger un tableau (Fisher-Yates shuffle)
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+//post creation de poules
+
+//post creation de poules
+app.post("/creerPoules", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const result = await client.query(`
+      SELECT event_id, COUNT(*) as nombre_paires
+      FROM paires
+      GROUP BY event_id;
+    `);
+
+    let messages = [];
+
+    for (const row of result.rows) {
+      const nombrePaires = parseInt(row.nombre_paires);
+      const eventId = row.event_id;
+
+      if (nombrePaires < 3) {
+        messages.push(`Pas assez de paires pour former une poule pour l'événement ${eventId}`);
+        console.log(`Pas assez de paires pour former une poule pour l'événement ${eventId}`);
+        continue;
+      }
+
+      let taillesPoules = [];
+      let totalPaires = nombrePaires; // Utilisation d'une variable temporaire pour ne pas modifier nombrePaires directement
+      if (nombrePaires % 5 === 0) {
+        taillesPoules = new Array(nombrePaires / 5).fill(5);
+      } else if (nombrePaires % 4 === 0) {
+        taillesPoules = new Array(nombrePaires / 4).fill(4);
+      } else if (nombrePaires % 3 === 0) {
+        taillesPoules = new Array(nombrePaires / 3).fill(3);
+      } else {
+        // Logique pour les cas non multiples de 3, 4 ou 5
+        while (totalPaires > 0) {
+          if (totalPaires % 4 === 0 || totalPaires - 4 >= 3) {
+            taillesPoules.push(4);
+            totalPaires -= 4;
+          } else if (totalPaires % 5 === 0 || totalPaires - 5 >= 3) {
+            taillesPoules.push(5);
+            totalPaires -= 5;
+          } else {
+            taillesPoules.push(3);
+            totalPaires -= 3;
+          }
+        }
+      }
+
+      const paires = await client.query(`
+        SELECT id
+        FROM paires
+        WHERE event_id = $1
+        ORDER BY id;
+      `, [eventId]);
+
+      let pouleNum = 1;
+      let indexPaire = 0;
+      for (const taille of taillesPoules) {
+        for (let i = 0; i < taille; i++) {
+          const paireId = paires.rows[indexPaire++].id;
+          await client.query(`
+            INSERT INTO poule (poule, paire_id)
+            VALUES ($1, $2)
+          `, [pouleNum, paireId]);
+        }
+        pouleNum++;
+      }
+
+      messages.push(`Poules créées pour l'événement ${eventId} avec des tailles de ${taillesPoules.join(', ')}`);
+      console.log(`Poules créées pour l'événement ${eventId} avec des tailles de ${taillesPoules.join(', ')}`);
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json({ messages });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la création des poules" });
+  } finally {
+    client.release();
+  }
+});
+
+
+//recuperer poule 
+app.get("/recupererPoules", async (req, res) => {
+  try {
+    const query = `
+      SELECT po.id as poule_id, 
+             po.poule, 
+             pa.id as paire_id,
+             u1.nom as user1_nom, 
+             u1.prenom as user1_prenom,
+             u2.nom as user2_nom, 
+             u2.prenom as user2_prenom
+      FROM poule po
+      JOIN paires pa ON po.paire_id = pa.id
+      JOIN users u1 ON pa.user1 = u1.id
+      JOIN users u2 ON pa.user2 = u2.id;
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des poules et des informations des joueurs" });
+  }
+});
+
+// post pour créer toutes les combinaisons de matchs 
+
+app.post("/creerMatchs", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Récupérer les numéros de poule existants
+    const poulesExistantesResult = await client.query(`
+      SELECT DISTINCT poule 
+      FROM poule;
+    `);
+    const poulesExistantes = poulesExistantesResult.rows.map(row => row.poule);
+
+    // Récupérer les paires pour chaque poule
+    const poulesResult = await client.query(`
+      SELECT poule, paire_id 
+      FROM poule 
+      ORDER BY poule, id;
+    `);
+
+    // Regrouper les paires par poule
+    const pairesParPoule = {};
+    poulesResult.rows.forEach(row => {
+      if (!pairesParPoule[row.poule]) {
+        pairesParPoule[row.poule] = [];
+      }
+      pairesParPoule[row.poule].push(row.paire_id);
+    });
+
+    // Générer et insérer les matchs
+    for (const [pouleNum, paires] of Object.entries(pairesParPoule)) {
+      if (poulesExistantes.includes(parseInt(pouleNum))) {
+        for (let i = 0; i < paires.length; i++) {
+          for (let j = i + 1; j < paires.length; j++) {
+            const paire1 = paires[i];
+            const paire2 = paires[j];
+
+            // Insérer le match
+            await client.query(`
+              INSERT INTO match (poule_id, paire1, paire2)
+              VALUES ($1, $2, $3)
+            `, [pouleNum, paire1, paire2]);
+          }
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: "Matchs créés avec succès" });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la création des matchs" });
+  } finally {
+    client.release();
+  }
+});
+
+//get recuperer les matchs crée
+
+app.get("/recupererMatchs", async (req, res) => {
+  try {
+    const query = `
+      SELECT m.id as match_id,
+             m.poule_id,
+             p1.id as paire1_id,
+             p2.id as paire2_id,
+             u1.nom as user1_nom_paire1,
+             u1.prenom as user1_prenom_paire1,
+             u2.nom as user2_nom_paire1,
+             u2.prenom as user2_prenom_paire1,
+             u3.nom as user1_nom_paire2,
+             u3.prenom as user1_prenom_paire2,
+             u4.nom as user2_nom_paire2,
+             u4.prenom as user2_prenom_paire2
+             
+      FROM match m
+      JOIN paires p1 ON m.paire1 = p1.id
+      JOIN paires p2 ON m.paire2 = p2.id
+      JOIN users u1 ON p1.user1 = u1.id
+      JOIN users u2 ON p1.user2 = u2.id
+      JOIN users u3 ON p2.user1 = u3.id
+      JOIN users u4 ON p2.user2 = u4.id
+
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des matchs" });
+  }
+});
+
+
+
+
+
+
+
 
