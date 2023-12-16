@@ -509,7 +509,7 @@ app.post("/login", async (req, res) => {
 
     // Envoyer le token au client
     res.cookie('session_token', token, { httpOnly: true, secure: false }); // Utilisez secure: true en production
-    res.status(200).json({ id: userId, prenom: prenom, mail: mail, nom: nom, message: "Connexion réussie" });
+    res.status(200).json({token, id: userId, prenom: prenom, mail: mail, nom: nom, message: "Connexion réussie" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur lors de la connexion" });
@@ -594,7 +594,7 @@ app.get("/getAllDateColors", async (req, res) => {
         dateColors[row.date] = row.color;
       });
       res.status(200).json(dateColors);
-      console.log("ok");
+     
     } else {
       res.status(404).json({ message: "Aucune couleur de date trouvée" });
     }

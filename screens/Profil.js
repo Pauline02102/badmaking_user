@@ -17,9 +17,7 @@ const Profil = () => {
   const [showClassements, setShowClassements] = useState(false);
   const [showInfo, setshowInfo] = useState(false);
 
-  const handleProfileUpdated = (updatedUser) => {
-    setLoggedInUser(updatedUser);
-  };
+
   const toggleClassements = () => {
     setShowClassements(!showClassements);
   };

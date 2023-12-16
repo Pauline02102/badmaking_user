@@ -20,29 +20,28 @@ import { UserContext } from './UserContext';
 import styles from './CalendrierStyles';
 import DatePicker from 'react-native-date-picker'
 import { CommonActions } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
-  const { onProfilePress } = route.params || {};
   const [customDatesStyles, setCustomDatesStyles] = useState({});
   const moment = require("moment");
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedDateColor, setSelectedDateColor] = useState(null); // Nouvel état pour stocker la couleur de la date sélectionnée
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
   const { prenom, setprenom } = route.params || {};
-  const { nom, setnom } = route.params || {};
   const { id, setId } = route.params || {};
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [legendVisible, setLegendVisible] = useState(false); 
   const [showConfirmButton, setShowConfirmButton] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   
   
   useEffect(() => {
+    fetchLoggedInUserInfo();
     fetchEvents();
     fetchDateColors();
     
@@ -52,17 +51,44 @@ function Calendrier({ route }) {
     moment.locale('fr');
 
     const refreshInterval = setInterval(() => {
+      fetchLoggedInUserInfo();
       fetchEvents();
       fetchDateColors();
       /*fetchDateColors().then((colors) => {
         setCustomDatesStyles(colors);
       });*/
-    }, 30300);
+    }, 3000);
 
     return () => {
       clearInterval(refreshInterval);
     };
   }, []);
+  
+  const fetchLoggedInUserInfo = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        console.error('page match : Token non trouvé');
+        return;
+      }
+      const response = await fetch('http://192.168.1.6:3030/get-user-info', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setLoggedInUser(data.user);
+     
+      } else {
+        console.error('Raté pour fetch user info:', data.message);
+      }
+    } catch (error) {
+      console.error('Erreur pour fetch les info des users:', error);
+    }
+  };
 
 
   // Fonction pour afficher ou cacher la légende
@@ -125,21 +151,26 @@ function Calendrier({ route }) {
         console.error("selectedDate n'est pas une date valide");
         return;
       }
+
+      if (!loggedInUser || !loggedInUser.id) {
+        console.error("Les informations de l'utilisateur ne sont pas disponibles");
+        return;
+      }
   
       await axios.post(
         `http://192.168.1.6:3030/updateParticipation/${eventId}`,
         {
           participation,
-          id: id, // Envoyer l'ID de l'utilisateur
-          prenom: prenom, // Envoyer le prénom de l'utilisateur
-          date: dateUTC, // Envoyer la date en format UTC
+          id: loggedInUser.id, // Utiliser l'ID de loggedInUser
+          prenom: loggedInUser.prenom, // Utiliser le prénom de loggedInUser
+          date: dateUTC,
         }
       );
   
       if (participation === "Oui") {
         console.log("ID de l'utilisateur:", id); // Vérifiez si l'ID est correctement défini
         console.log("Prénom de l'utilisateur:", prenom); // Vérifiez si le prénom est correctement défini
-        navigation.navigate("Match", { id: id, prenom: prenom });
+       
       }
   
       await fetchEvents();
@@ -167,8 +198,12 @@ function Calendrier({ route }) {
       
       const formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
       console.log("heure " + formattedTime);
+      if (!loggedInUser || !loggedInUser.id) {
+        console.error("Les informations de l'utilisateur ne sont pas disponibles");
+        return;
+      }
       await axios.post(
-        `http://192.168.1.6:3030/participationJeuLibre/${id}`,
+        `http://192.168.1.6:3030/participationJeuLibre/${loggedInUser.id}`,
         {
           participation : participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
@@ -193,7 +228,7 @@ function Calendrier({ route }) {
       const dateColors = response.data || {};
   
       // Vérifiez si les données sont correctement renvoyées depuis le backend
-      console.log("Toutes les couleurs de date :", dateColors);
+     
       const backendDates = response.data;
   
       // Convertir les dates dans le format 'YYYY-MM-DD'
@@ -204,7 +239,7 @@ function Calendrier({ route }) {
       }
   
       // Utilisez 'convertedDates' dans votre application pour afficher les dates dans le format 'YYYY-MM-DD'.
-      console.log("Dates converties :", convertedDates);
+      
       if (dateColors) {
         const updatedCustomDatesStyles = {};
         for (const date in convertedDates) {
@@ -348,24 +383,15 @@ function Calendrier({ route }) {
     return (
       <View>
         {events[selectedDate].map((event) => (
-          <View key={event.id} style={styles.matchItem}>
-            
-            <Text style={styles.badmintonPlayer}>Titre : {event.title}</Text>
-            <Text>Type : {event.type}</Text>
-            <Text>Status : {event.status}</Text>
-            
-            <Text>Date : {moment(event.date).format('LL')}</Text>
-
-
+          <View key={event.id} style={styles.eventItem}>
+            <Text style={styles.eventTitle}>{event.title}</Text>
+            <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
+  
             <View style={styles.participationButtons}>
-              <TouchableOpacity
-                onPress={() => handleParticipation(event.id, "Oui")}
-              >
+              <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                 <Icon name="check-circle" size={30} color="green" />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleParticipation(event.id, "Non")}
-              >
+              <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
                 <Icon name="cancel" size={30} color="red" />
               </TouchableOpacity>
             </View>
@@ -390,7 +416,7 @@ function Calendrier({ route }) {
         />
 
          
-        <Text>Événements pour la date sélectionnée :</Text>
+        <Text style={styles.eventTitle2}>Événements  :</Text>
 
         {renderEventsForDate()}
         {showTimePicker && (

@@ -94,6 +94,41 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         color:"#e4ebef"
       },
+      eventItem: {
+        backgroundColor: '#f9f9f9',
+        padding: 20,
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 3,
+        marginBottom: 20,
+      },
+      eventTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: "#467c86",
+        marginBottom: 5,
+      },
+      eventTitle2:{
+        fontSize: 20, // Augmenter la taille de la police
+        fontWeight: 'bold', // Rendre le texte en gras
+        color: "#123e53", // Choisir une couleur qui correspond au thème
+        marginBottom: 10, // Ajouter une marge en bas
+        marginTop: 10, // Ajouter une marge en haut
+        textAlign: 'center', // Centrer le texte
+      },
+      eventInfo: {
+        fontSize: 16,
+        color: "#333333",
+        marginBottom: 5,
+      },
+      participationButtons: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        marginTop: 10,
+      },
   });
   
   export default styles;
