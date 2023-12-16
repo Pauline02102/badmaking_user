@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   joueurConnecte: {
-    color: 'orange',
+    color: '#467c86',
     fontWeight: 'bold',
   },
 });

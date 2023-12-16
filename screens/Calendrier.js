@@ -347,10 +347,6 @@ function Calendrier({ route }) {
     }
     return (
       <View>
-        <Text>
-          Couleur de la date sélectionnée : {selectedDateColor || "N/A"}
-        </Text>
-
         {events[selectedDate].map((event) => (
           <View key={event.id} style={styles.matchItem}>
             
@@ -393,11 +389,9 @@ function Calendrier({ route }) {
           markingType="custom"
         />
 
-         <Button title="Voir Profil" onPress={onProfilePress} />
+         
         <Text>Événements pour la date sélectionnée :</Text>
-        <Text>Bonjour, {prenom}! </Text>
-        <Text>nom de famille, {nom}</Text>
-        <Text>Bonjour, {id}! </Text>
+
         {renderEventsForDate()}
         {showTimePicker && (
         <DateTimePicker

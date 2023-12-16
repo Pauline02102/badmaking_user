@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { useUser } from "./UserContext";
 import EditProfileForm from "./EditProfil";
-
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 
 const Profil = () => {
@@ -15,11 +15,16 @@ const Profil = () => {
   const { setIsSignedIn } = useUser();
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [showClassements, setShowClassements] = useState(false);
+  const [showInfo, setshowInfo] = useState(false);
+
   const handleProfileUpdated = (updatedUser) => {
     setLoggedInUser(updatedUser);
   };
   const toggleClassements = () => {
     setShowClassements(!showClassements);
+  };
+  const toggleInfo = () => {
+    setshowInfo(!showInfo);
   };
 
   useEffect(() => {
@@ -88,39 +93,52 @@ const Profil = () => {
   };
 
   return (
-    <ScrollView style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Mon profil</Text>
 
-        <Text style={styles.title}>Mon profil</Text>
-        <View style={styles.infoContainer}>
-          
           {loggedInUser ? (
             <>
-              <Text style={styles.infoText}>Prénom: {loggedInUser.prenom}</Text>
-              <Text style={styles.infoText}>Nom: {loggedInUser.nom}</Text>
-              <Text style={styles.infoText}>Email: {loggedInUser.email}</Text>
-              
-              <View style={styles.classementsContainer}>
-              <Text style={styles.classementText}>Simple: {loggedInUser.classement_simple}</Text>
-              <Text style={styles.classementText}>Double: {loggedInUser.classement_double}</Text>
-              <Text style={styles.classementText}>Mixte: {loggedInUser.classement_mixte}</Text>
-              </View>
+
+              <TouchableOpacity style={styles.infoContainer} onPress={toggleInfo}>
+                <Text style={styles.infoTextTitre}>Informations personnelles {showInfo ? '▲' : '▼'} </Text>
+                {showInfo && (
+                  <View style={styles.classementsDetails}>
+                    <Text style={styles.infoText}>Prénom: {loggedInUser.prenom}</Text>
+                    <Text style={styles.infoText}>Nom: {loggedInUser.nom}</Text>
+                    <Text style={styles.infoText}>Email: {loggedInUser.email}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+
+              <TouchableOpacity style={styles.infoContainer} onPress={toggleClassements}>
+                <Text style={styles.infoTextTitre}>Classements {showClassements ? '▲' : '▼'}</Text>
+                {showClassements && (
+                  <View style={styles.classementsDetails}>
+                    <Text style={styles.infoText}>Simple: {loggedInUser.classement_simple}</Text>
+                    <Text style={styles.infoText}>Double: {loggedInUser.classement_double}</Text>
+                    <Text style={styles.infoText}>Mixte: {loggedInUser.classement_mixte}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
             </>
           ) : (
             <Text>Chargement...</Text>
           )}
+
+          <EditProfileForm user={loggedInUser} onProfileUpdated={setLoggedInUser} />
+
+          <TouchableOpacity style={styles.button} onPress={handleLogout}>
+            <Text style={styles.buttonText}>Déconnexion</Text>
+          </TouchableOpacity>
         </View>
-
-
-        <EditProfileForm user={loggedInUser} onProfileUpdated={handleProfileUpdated} />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <Text style={styles.buttonText}>Déconnexion</Text>
-        </TouchableOpacity>
-
-
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 const styles = StyleSheet.create({
@@ -130,7 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#f3f3f3",
     padding: 30,
-    paddingTop: 110,
+    paddingTop: 30,
   },
   title: {
     fontSize: 24,
@@ -150,32 +168,38 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
+  classementsDetails: {
+    marginTop: 10,
+  },
   infoText: {
     fontSize: 18,
     marginBottom: 5,
     color: "#333333",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   button: {
-    backgroundColor: "#467c86", // Couleur de fond du bouton
+    backgroundColor: "#467c86",
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
-    width: '30%', // Vous pouvez ajuster la largeur selon votre besoin
+    width: '80%',
   },
   buttonText: {
-    color: "#defdf5", // Couleur du texte
+    color: "#defdf5",
     textAlign: "center",
   },
-  classementsContainer: {
+  infoTextTitre: {
+    fontSize: 18,
+    marginBottom: 5,
+    color: "#333333",
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  classementText: {
-    fontSize: 16,
-    color: "#333",
-  },
+    fontWeight: 'bold'
+
+  }
 });
 
 export default Profil;

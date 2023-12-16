@@ -33,6 +33,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     };
 
     return (
+        
         <View style={styles.container}>
             <TextInput
                 style={styles.input}
@@ -56,19 +57,19 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
                 style={styles.input}
                 onChangeText={setclassement_simple}
                 value={classement_simple}
-                placeholder="classement simple"
+                placeholder="Classement simple"
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setclassement_double}
                 value={classement_double}
-                placeholder="classement double"
+                placeholder="Classement double"
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setclassement_mixte}
                 value={classement_mixte}
-                placeholder="classement mixte"
+                placeholder="Classement mixte"
             />
             <Button title="Mettre à jour" onPress={handleSubmit} />
         </View>
