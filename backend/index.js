@@ -103,7 +103,10 @@ const userAuthMiddleware = async (req, res, next) => {
       id: user.id,
       prenom: user.prenom,
       nom: user.nom,
-      email: user.email
+      email: user.email,
+      classement_simple : user.classement_simple,
+      classement_double : user.classement_double,
+      classement_mixte : user.classement_mixte
     };
     next(); //Passer au prochain middleware ou gestionnaire de route
   } catch (error) {
@@ -118,7 +121,11 @@ app.get("/get-user-info", userAuthMiddleware, async (req, res) => {
   const userInfo = {
     id: req.user.id,
     prenom: req.user.prenom,
-    nom: req.user.nom
+    nom: req.user.nom,
+    email : req.user.email,
+    classement_simple : req.user.classement_simple,
+    classement_double : req.user.classement_double,
+    classement_mixte : req.user.classement_mixte
   };
   res.json({ success: true, user: userInfo });
 });
@@ -204,6 +211,52 @@ app.patch("/users/:id", async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la mise à jour des données" });
   }
 });
+
+
+// Route pour la mise à jour du profil
+app.put('/update-profile', userAuthMiddleware, async (req, res) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "Utilisateur non authentifié" });
+  }
+
+  const userId = req.user.id;
+  try {
+    // Récupérer les informations actuelles de l'utilisateur
+    const userQuery = "SELECT * FROM users WHERE id = $1";
+    const userResult = await pool.query(userQuery, [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    const currentUser = userResult.rows[0];
+
+    // Utiliser les nouvelles valeurs ou conserver les anciennes si non fournies
+    const {
+      prenom = currentUser.prenom,
+      nom = currentUser.nom,
+      email = currentUser.email,
+      classement_simple = currentUser.classement_simple,
+      classement_double = currentUser.classement_double,
+      classement_mixte = currentUser.classement_mixte
+    } = req.body;
+
+    // Mise à jour du profil de l'utilisateur
+    const updateQuery = `
+      UPDATE users
+      SET prenom = $1, nom = $2, email = $3, classement_simple = $4, classement_double = $5, classement_mixte = $6
+      WHERE id = $7
+    `;
+    
+    const values = [prenom, nom, email, classement_simple, classement_double, classement_mixte, userId];
+    await pool.query(updateQuery, values);
+
+    res.json({ message: 'Profil mis à jour avec succès' });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du profil :", error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du profil' });
+  }
+});
+
 
 
 
@@ -1385,7 +1438,7 @@ cron.schedule('* * * * *', async () => {
 
 async function handleCreerPaires(participants) {
   try {
-    const url = 'http://192.168.1.6:3000/formerPaires';
+    const url = 'http://192.168.1.6:3030/formerPaires';
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1403,7 +1456,7 @@ async function handleCreerPaires(participants) {
 
 async function handleCreerPairesParClassement(participants) {
   try {
-    const url = 'http://192.168.1.6:3000/formerPaireParClassementDouble';
+    const url = 'http://192.168.1.6:3030/formerPaireParClassementDouble';
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1421,7 +1474,7 @@ async function handleCreerPairesParClassement(participants) {
 
 async function createPools(eventId) {
   try {
-    const url = 'http://192.168.1.6:3000/creerPoules';
+    const url = 'http://192.168.1.6:3030/creerPoules';
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1437,7 +1490,7 @@ async function createPools(eventId) {
 
 async function createMatches(eventId) {
   try {
-    const url = 'http://192.168.1.6:3000/creerMatchs';
+    const url = 'http://192.168.1.6:3030/creerMatchs';
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

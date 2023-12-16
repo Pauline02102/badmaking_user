@@ -29,7 +29,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 10000); // 30 000 millisecondes (30 secondes)
+    }, 3030); 
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -58,7 +58,7 @@ const Match = () => {
   };
   const fetchParticipations = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/ouiparticipation';
+      const url = 'http://192.168.1.6:3030/ouiparticipation';
       const response = await fetch(url);
       const data = await response.json();
   
@@ -70,7 +70,7 @@ const Match = () => {
 
   const fetchPaires = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/recupererPaires';
+      const url = 'http://192.168.1.6:3030/recupererPaires';
       const response = await fetch(url);
       const data = await response.json();
       setPaires(data);
@@ -82,7 +82,7 @@ const Match = () => {
   const handleCreerPaires = async () => {
     console.log("participants", participants);
     try {
-      const url = 'http://192.168.1.6:3000/formerPaires';
+      const url = 'http://192.168.1.6:3030/formerPaires';
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,7 +100,7 @@ const Match = () => {
   const handleCreerPairesParClassement = async () => {
     console.log("participants", participants);
     try {
-      const url = 'http://192.168.1.6:3000/formerPaireParClassementDouble';
+      const url = 'http://192.168.1.6:3030/formerPaireParClassementDouble';
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ const Match = () => {
 
   const handleCreerPoules = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/creerPoules';
+      const url = 'http://192.168.1.6:3030/creerPoules';
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,7 +137,7 @@ const Match = () => {
 
   const fetchPoules = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/recupererPoules';
+      const url = 'http://192.168.1.6:3030/recupererPoules';
       const response = await fetch(url);
       const data = await response.json();
       // Créer un ensemble unique d'identifiants de poule
@@ -150,7 +150,7 @@ const Match = () => {
 
   async function fetchEventStatuses(eventIds) {
     try {
-      const url = `http://192.168.1.6:3000/getEventStatus?eventIds=${encodeURIComponent(JSON.stringify(eventIds))}`;
+      const url = `http://192.168.1.6:3030/getEventStatus?eventIds=${encodeURIComponent(JSON.stringify(eventIds))}`;
       const response = await fetch(url);
       const statusesArray = await response.json();
 
@@ -173,7 +173,7 @@ const Match = () => {
         console.error('page match : Token non trouvé');
         return;
       }
-      const response = await fetch('http://192.168.1.6:3000/get-user-info', {
+      const response = await fetch('http://192.168.1.6:3030/get-user-info', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -224,7 +224,7 @@ const Match = () => {
 
   const handleCreerMatchs = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/creerMatchs';
+      const url = 'http://192.168.1.6:3030/creerMatchs';
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +243,7 @@ const Match = () => {
   // Fonction pour récupérer les matchs
   const fetchMatches = async () => {
     try {
-      const url = 'http://192.168.1.6:3000/recupererMatchs';
+      const url = 'http://192.168.1.6:3030/recupererMatchs';
       const response = await fetch(url);
       const data = await response.json();
       //console.log('Match data:', data);
@@ -256,7 +256,7 @@ const Match = () => {
 
   const handleToutCreer = async (eventId) => {
     try {
-      const response = await fetch(`http://192.168.1.6:3000/getEventStatus/${eventId}`);
+      const response = await fetch(`http://192.168.1.6:3030/getEventStatus/${eventId}`);
       const status = await response.json()
       if (status === 'Random') {
         await handleCreerPaires();
@@ -294,7 +294,7 @@ const Match = () => {
         victoire: didWin ? 1 : 0,
         defaite: didWin ? 0 : 1
       };
-      const response = await fetch('http://192.168.1.6:3000/report-match-result', {
+      const response = await fetch('http://192.168.1.6:3030/report-match-result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -369,7 +369,7 @@ const Match = () => {
       return;
     }
 
-    fetch(`http://192.168.1.6:3000/check-match-result?match_id=${matchId}&user_id=${loggedInUser.id}`)
+    fetch(`http://192.168.1.6:3030/check-match-result?match_id=${matchId}&user_id=${loggedInUser.id}`)
       .then(response => response.json())
       .then(data => {
         if (data.resultExists) {

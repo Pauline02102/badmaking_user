@@ -1,51 +1,56 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { useUser } from "./UserContext";
+import EditProfileForm from "./EditProfil";
+
+
 
 const Profil = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const [nom, setNom] = useState(route.params?.nom || '');
-  const [prenom, setPrenom] = useState(route.params?.prenom || '');
-  const [email, setEmail] = useState(route.params?.email || '');
-  const [classementSimple, setClassementSimple] = useState('');
-  const [classementDouble, setClassementDouble] = useState('');
-  const [classementMixte, setClassementMixte] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [userId, setUserId] = useState(route.params?.id || '');
-  const { setIsSignedIn } = useUser();
 
-  const handleSave = async () => {
+  const { setIsSignedIn } = useUser();
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [showClassements, setShowClassements] = useState(false);
+  const handleProfileUpdated = (updatedUser) => {
+    setLoggedInUser(updatedUser);
+  };
+  const toggleClassements = () => {
+    setShowClassements(!showClassements);
+  };
+
+  useEffect(() => {
+    fetchLoggedInUserInfo()
+  }, [], 30); // Utilisation d'un tableau vide de dépendances
+
+
+
+  const fetchLoggedInUserInfo = async () => {
     try {
-      const response = await fetch(`http://192.168.1.6:3030/users/${userId}`, {
-        method: 'PATCH',
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        console.error('page match : Token non trouvé');
+        return;
+      }
+      const response = await fetch('http://192.168.1.6:3030/get-user-info', {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          nom: nom,
-          prenom: prenom,
-          email: email,
-          classement_simple: classementSimple || null,
-          classement_double: classementDouble || null,
-          classement_mixte: classementMixte || null
-        }),
       });
 
       const data = await response.json();
-
-      if (response.status === 200) {
-        console.log('Mise à jour réussie:', data);
+      if (data.success) {
+        setLoggedInUser(data.user);
+        console.log(data.user);
       } else {
-        console.error('Erreur lors de la mise à jour:', data);
+        console.error('Raté pour fetch user info:', data.message);
       }
     } catch (error) {
-      console.error("Erreur lors de l'envoi de la requête:", error);
+      console.error('Erreur pour fetch les info des users:', error);
     }
   };
   const handleLogout = async () => {
@@ -64,7 +69,7 @@ const Profil = () => {
         console.error("Erreur lors de la déconnexion :", error);
       }
     };
-  
+
     // Affichage du pop-up de confirmation
     Alert.alert(
       "Déconnexion",
@@ -74,106 +79,48 @@ const Profil = () => {
           text: "Non",
           style: "cancel"
         },
-        { 
-          text: "Oui", 
-          onPress: () => logout() 
+        {
+          text: "Oui",
+          onPress: () => logout()
         }
       ]
     );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mon profil</Text>
-      <View style={styles.inputContainer}>
+    <ScrollView style={{ flex: 1 }}>
+      <View style={styles.container}>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Nom</Text>
-          <TextInput
-            editable={isEditing}
-            style={styles.input}
-            value={nom}
-            onChangeText={setNom}
-            placeholder="Nom"
-          />
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Prénom</Text>
-          <TextInput
-            editable={isEditing}
-            style={styles.input}
-            value={prenom}
-            onChangeText={setPrenom}
-            placeholder="Prénom"
-          />
+        <Text style={styles.title}>Mon profil</Text>
+        <View style={styles.infoContainer}>
+          
+          {loggedInUser ? (
+            <>
+              <Text style={styles.infoText}>Prénom: {loggedInUser.prenom}</Text>
+              <Text style={styles.infoText}>Nom: {loggedInUser.nom}</Text>
+              <Text style={styles.infoText}>Email: {loggedInUser.email}</Text>
+              
+              <View style={styles.classementsContainer}>
+              <Text style={styles.classementText}>Simple: {loggedInUser.classement_simple}</Text>
+              <Text style={styles.classementText}>Double: {loggedInUser.classement_double}</Text>
+              <Text style={styles.classementText}>Mixte: {loggedInUser.classement_mixte}</Text>
+              </View>
+            </>
+          ) : (
+            <Text>Chargement...</Text>
+          )}
         </View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            editable={isEditing}
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-          />
-        </View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Classement Simple</Text>
-          <TextInput
-            keyboardType="numeric"
-            editable={isEditing}
-            style={styles.input}
-            value={classementSimple}
-            onChangeText={setClassementSimple}
-            placeholder="Classement Simple"
-          />
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Classement Double</Text>
-          <TextInput
-            keyboardType="numeric"
-            editable={isEditing}
-            style={styles.input}
-            value={classementDouble}
-            onChangeText={setClassementDouble}
-            placeholder="Classement Double"
-          />
-        </View>
+        <EditProfileForm user={loggedInUser} onProfileUpdated={handleProfileUpdated} />
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Classement Mixte</Text>
-          <TextInput
-            keyboardType="numeric"
-            editable={isEditing}
-            style={styles.input}
-            value={classementMixte}
-            onChangeText={setClassementMixte}
-            placeholder="Classement Mixte"
-          />
-        </View>
+        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Déconnexion</Text>
+        </TouchableOpacity>
+
+
       </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          if (isEditing) {
-            handleSave();
-          }
-          setIsEditing(!isEditing);
-        }}>
-        <Text style={styles.buttonText}>
-          {isEditing ? 'Sauvegarder les modifications' : 'Modifier mes informations'}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogout}>
-        <Text style={styles.buttonText}>Déconnexion</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({
@@ -181,51 +128,53 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f3f3f3", // Bleu pâle
+    backgroundColor: "#f3f3f3",
     padding: 30,
-    borderRadius: 10,
-    shadowColor: "rgba(0, 0, 0, 0.05)",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 40,
-    marginBottom: 30
+    paddingTop: 110,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: "#467c86", // Gris foncé
+    color: "#467c86",
   },
-  inputContainer: {
+  infoContainer: {
+    backgroundColor: "#f9f9f9",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
     width: '100%',
-    marginBottom: 15,
+    marginBottom: 20,
   },
-  input: {
-    width: '65%',
-    borderWidth: 1,
-    borderColor: '#D3D3D3', // Gris clair
-    backgroundColor: "#efefe4", // Blanc cassé
-    padding: 10,
-    borderRadius: 5,
+  infoText: {
+    fontSize: 18,
+    marginBottom: 5,
+    color: "#333333",
   },
   button: {
-    backgroundColor: '#467c86', // Bleu poudre
+    backgroundColor: "#467c86", // Couleur de fond du bouton
     padding: 10,
     borderRadius: 5,
+    marginTop: 10,
+    width: '30%', // Vous pouvez ajuster la largeur selon votre besoin
   },
   buttonText: {
-    color: '#FFFFFF', // Blanc
-    textAlign: 'center',
+    color: "#defdf5", // Couleur du texte
+    textAlign: "center",
   },
-  row: {
+  classementsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
     marginBottom: 10,
   },
-  label: {
-    width: '35%',
-    marginRight: 10,
-    color: "#467c86", // Gris foncé
-    fontWeight: "bold"
+  classementText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
 
