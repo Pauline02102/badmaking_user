@@ -29,7 +29,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 30000); // 30 000 millisecondes (30 secondes)
+    }, 10000); // 30 000 millisecondes (30 secondes)
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -61,7 +61,7 @@ const Match = () => {
       const url = 'http://192.168.1.6:3000/ouiparticipation';
       const response = await fetch(url);
       const data = await response.json();
-      console.log("oui participation", data)
+  
       setParticipants(data);
     } catch (error) {
       console.error('Erreur lors de la récupération des participations:', error);
@@ -314,7 +314,7 @@ const Match = () => {
 
   // Fonction de rendu pour le tableau de matchs
   const renderMatchTable = () => {
-    console.log("matches", matches)
+   
     const matchesGroupedByPoule = groupMatchesByPoule(matches);
     const poulesToShow = selectedPoule === 'all' ? Object.keys(matchesGroupedByPoule) : [selectedPoule];
 
