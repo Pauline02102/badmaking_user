@@ -82,7 +82,7 @@ const App = () => {
           options={{
             tabBarLabel: "Profil",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="body-outline" color={color} size={size} />
+              <MaterialCommunityIcons name="account-edit" size={24} color="black" />
 
             ),
           }}
