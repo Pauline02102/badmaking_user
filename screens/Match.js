@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Alert } f
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Modal from 'react-native-modal';
+import { BASE_URL } from './config';
 
 const Match = () => {
   const [participants, setParticipants] = useState([]);
@@ -58,7 +59,7 @@ const Match = () => {
   };
   const fetchParticipations = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/participation_event/ouiparticipation';
+      const url =`${BASE_URL}/participation_event/ouiparticipation`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -70,7 +71,7 @@ const Match = () => {
 
   const fetchPaires = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/paires/recupererPaires';
+      const url = `${BASE_URL}/paires/recupererPaires`;
       const response = await fetch(url);
       const data = await response.json();
       setPaires(data);
@@ -82,7 +83,7 @@ const Match = () => {
   const handleCreerPaires = async () => {
     console.log("participants", participants);
     try {
-      const url = 'http://192.168.1.6:3030/paires/formerPaires';
+      const url =`${BASE_URL}/paires/formerPaires`;
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,7 +101,7 @@ const Match = () => {
   const handleCreerPairesParClassement = async () => {
     console.log("participants", participants);
     try {
-      const url = 'http://192.168.1.6:3030/paires/formerPaireParClassementDouble';
+      const url =`${BASE_URL}/paires/formerPaireParClassementDouble`;
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,7 +119,7 @@ const Match = () => {
 
   const handleCreerPoules = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/poule/creerPoules';
+      const url = `${BASE_URL}/poule/creerPoules`;
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,7 +138,7 @@ const Match = () => {
 
   const fetchPoules = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/poule/recupererPoules';
+      const url = `${BASE_URL}/poule/recupererPoules`;
       const response = await fetch(url);
       const data = await response.json();
       // Créer un ensemble unique d'identifiants de poule
@@ -173,7 +174,7 @@ const Match = () => {
         console.error('page match : Token non trouvé');
         return;
       }
-      const response = await fetch('http://192.168.1.6:3030/user_tokens/get-user-info', {
+      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -224,7 +225,7 @@ const Match = () => {
 
   const handleCreerMatchs = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/match/creerMatchs';
+      const url = `${BASE_URL}/match/creerMatchs`;
       const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +244,7 @@ const Match = () => {
   // Fonction pour récupérer les matchs
   const fetchMatches = async () => {
     try {
-      const url = 'http://192.168.1.6:3030/match/recupererMatchs';
+      const url = `${BASE_URL}/match/recupererMatchs`;
       const response = await fetch(url);
       const data = await response.json();
       //console.log('Match data:', data);
@@ -256,7 +257,7 @@ const Match = () => {
 
   const handleToutCreer = async (eventId) => {
     try {
-      const response = await fetch(`http://192.168.1.6:3030/getEventStatus/${eventId}`);
+      const response = await fetch(`${BASE_URL}/getEventStatus/${eventId}`);
       const status = await response.json()
       if (status === 'Random') {
         await handleCreerPaires();
@@ -294,7 +295,7 @@ const Match = () => {
         victoire: didWin ? 1 : 0,
         defaite: didWin ? 0 : 1
       };
-      const response = await fetch('http://192.168.1.6:3030/resultat/report-match-result', {
+      const response = await fetch(`${BASE_URL}/resultat/report-match-result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

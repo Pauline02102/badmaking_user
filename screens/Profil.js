@@ -8,7 +8,7 @@ import { CommonActions } from '@react-navigation/native';
 import { useUser } from "./UserContext";
 import EditProfileForm from "./EditProfil";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
+import { BASE_URL } from './config';
 
 const Profil = () => {
 
@@ -38,7 +38,7 @@ const Profil = () => {
         console.error('page match : Token non trouvé');
         return;
       }
-      const response = await fetch('http://192.168.1.6:3030/user_tokens/get-user-info', {
+      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, { 
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -60,7 +60,7 @@ const Profil = () => {
     // Fonction pour gérer la logique de déconnexion
     const logout = async () => {
       try {
-        await fetch("http://192.168.1.6:3000/user_tokens/logout", {
+        await fetch(`${BASE_URL}/user_tokens/logout`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,

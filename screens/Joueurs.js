@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { BASE_URL } from './config';
 const Joueurs = () => {
   const [joueurs, setJoueurs] = useState([]);
   const [recherche, setRecherche] = useState('');
@@ -16,7 +16,7 @@ const Joueurs = () => {
 
   const fetchJoueurs = async () => {
     try {
-      const response = await fetch('http://192.168.1.6:3030/resultat/joueurs_resultats');
+      const response = await fetch(`${BASE_URL}/resultat/joueurs_resultats`);
       const data = await response.json();
       setJoueurs(data);
     } catch (error) {
@@ -31,7 +31,7 @@ const Joueurs = () => {
         console.error('Page joueur : Token non trouvé');
         return;
       }
-      const response = await fetch('http://192.168.1.6:3030/user_tokens/get-user-info', {
+      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }

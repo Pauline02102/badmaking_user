@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
-
+import { BASE_URL } from './config';
 export default function SignupScreen() {
   const navigation = useNavigation();
   const [nom, setnom] = useState("");
@@ -30,7 +30,7 @@ export default function SignupScreen() {
   
   const handleSignup = async () => {
     try {
-      const response = await fetch("http://192.168.1.6:3030/users/postusers", {
+      const response = await fetch(`${BASE_URL}/users/postusers`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",

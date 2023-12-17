@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { BASE_URL } from './config';
 const EditProfileForm = ({ user, onProfileUpdated }) => {
     const [prenom, setPrenom] = useState(user ? user.prenom : '');
     const [nom, setNom] = useState(user ? user.nom : '');
@@ -13,7 +13,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const handleSubmit = async () => {
         try {
             // Remplacer avec votre URL de backend
-            const response = await fetch("http://192.168.1.6:3030/user_tokens/update-profile", {
+            const response = await fetch(`${BASE_URL}/user_tokens/update-profile`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

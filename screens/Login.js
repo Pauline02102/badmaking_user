@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import UserContext from "./UserContext";
 import { useUser } from "./UserContext";
-
+import { BASE_URL } from './config';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ const LoginScreen = () => {
         nom
       };
 
-      const response = await fetch("http://192.168.1.6:3030/user_tokens/login", {
+      const response = await fetch(`${BASE_URL}/user_tokens/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

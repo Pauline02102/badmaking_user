@@ -21,7 +21,7 @@ import styles from './CalendrierStyles';
 import DatePicker from 'react-native-date-picker'
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { BASE_URL } from './config';
 
 moment.locale('fr'); // Définir la locale de moment en français
 
@@ -71,7 +71,7 @@ function Calendrier({ route }) {
         console.error('page match : Token non trouvé');
         return;
       }
-      const response = await fetch('http://192.168.1.6:3030/user_tokens/get-user-info', {
+      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -120,7 +120,7 @@ function Calendrier({ route }) {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://192.168.1.6:3030/event/calendar");
+      const response = await axios.get(`${BASE_URL}/event/calendar`);
       const eventsByDate = {};
       response.data.forEach((event) => {
         //const eventDate = event.date.split("T")[0];
@@ -158,7 +158,7 @@ function Calendrier({ route }) {
       }
 
       await axios.post(
-        `http://192.168.1.6:3030/participation_event/updateParticipation/${eventId}`,
+        `${BASE_URL}/participation_event/updateParticipation/${eventId}`,
         {
           participation,
           id: loggedInUser.id, // Utiliser l'ID de loggedInUser
@@ -203,7 +203,7 @@ function Calendrier({ route }) {
         return;
       }
       await axios.post(
-        `http://192.168.1.6:3030/participation_jeu/participationJeuLibre/${loggedInUser.id}`,
+        `${BASE_URL}/participation_jeu/participationJeuLibre/${loggedInUser.id}`,
         {
           participation: participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
@@ -224,7 +224,7 @@ function Calendrier({ route }) {
   //nouvelle fonction pour fetch toutes les couleurs
   const fetchDateColors = async () => {
     try {
-      const response = await axios.get("http://192.168.1.6:3030/date_color/getAllDateColors");
+      const response = await axios.get(`${BASE_URL}/date_color/getAllDateColors`);
       const dateColors = response.data || {};
 
       // Vérifiez si les données sont correctement renvoyées depuis le backend
@@ -270,9 +270,7 @@ function Calendrier({ route }) {
   // fetch participation jeu libre
   const fetchParticipantsJeuLibre = async (selectedDate) => {
     try {
-      const response = await axios.get(
-        `http://192.168.1.6:3030/participation_jeu/ouiparticipationjeulibre/${selectedDate}`
-      );
+      const response = await axios.get(`${BASE_URL}/participation_jeu/ouiparticipationjeulibre/${selectedDate}`);
       return response.data;
 
     } catch (error) {
