@@ -1363,7 +1363,7 @@ app.get("/recupererMatchs", async (req, res) => {
           u4.classement_mixte as user4_mixte,
           u4.classement_double as user4_double,
           p1.event_id as event_id ,
-          TO_CHAR(  e.date,'YYYY-MM-DD') AS "event_date",
+          TO_CHAR(e.date,'YYYY-MM-DD') AS "event_date",
           TO_CHAR(e.heure, 'HH24:MI') AS "event_time",
           e.status as status
           
@@ -1374,7 +1374,8 @@ app.get("/recupererMatchs", async (req, res) => {
       JOIN users u2 ON p1.user2 = u2.id
       JOIN users u3 ON p2.user1 = u3.id
       JOIN users u4 ON p2.user2 = u4.id
-      JOIN event e ON p1.event_id = e.id;
+      JOIN event e ON p1.event_id = e.id
+      WHERE e.date >= CURRENT_DATE - INTERVAL '2 day';
     `;
     const result = await pool.query(query);
     res.json(result.rows);
