@@ -29,7 +29,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 2000);
+    }, 200000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -429,14 +429,18 @@ const Match = () => {
       {renderPoulePicker()}
       <View>
         <Text style={styles.subtitle}>Matchs</Text>
-        {matches.map((match, index) => (
-          <View key={match.match_id}>
-            {/* ... (le reste de votre code pour afficher les détails du match) */}
-          </View>
-        ))}
-        <Text style={styles.dateCellbas}>
-          Date: {formatDayAndMonth(matches[0].event_date)} - Heure: {matches[0].event_time}
-        </Text>
+        {matches.length > 0 && (
+          <>
+            {matches.map((match, index) => (
+              <View key={match.match_id} >
+                {/* ... (le reste de votre code pour afficher les détails du match) */}
+              </View>
+            ))}
+            <Text style={styles.dateCellbas}>
+              Date: {formatDayAndMonth(matches[0].event_date)} - Heure: {matches[0].event_time}
+            </Text>
+          </>
+        )}
       </View>
 
 
@@ -495,6 +499,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+    textAlign:'center'
   },
   paireContainer: {
     marginBottom: 15,
