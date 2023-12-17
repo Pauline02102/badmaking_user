@@ -13,7 +13,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const handleSubmit = async () => {
         try {
             // Remplacer avec votre URL de backend
-            const response = await fetch("http://192.168.1.6:3030/update-profile", {
+            const response = await fetch("http://192.168.1.6:3030/user_tokens/update-profile", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

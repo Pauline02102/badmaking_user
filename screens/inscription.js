@@ -30,7 +30,7 @@ export default function SignupScreen() {
   
   const handleSignup = async () => {
     try {
-      const response = await fetch("http://192.168.1.6:3030/postusers", {
+      const response = await fetch("http://192.168.1.6:3030/users/postusers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

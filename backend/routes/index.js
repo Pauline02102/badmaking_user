@@ -1,0 +1,39 @@
+const express = require("express");
+const cors = require("cors");
+// Importez les routes après avoir configuré les middleware et le pool de connexion
+const paires = require("./paires/paires.js");
+const automatisation = require("./automatisation/automatisation.js");
+const date_color = require("./date_color/date_color.js");
+const event = require("./event/event.js");
+const match = require("./match/match.js");
+const participation_event = require("./participation_event/participation_event.js");
+const participation_jeu = require("./participation_jeu/participation_jeu.js");
+const poule = require("./poule/poule.js");
+const resultat = require("./resultat/resultat.js");
+
+const user_tokens = require("./user_tokens/user_tokens.js");
+const users = require("./users/users.js");
+
+const app = express();
+app.use(cors()); // Enable CORS for all origins
+app.use(express.json());
+
+const port = process.env.PORT || 3030;
+app.listen(port, () => {
+  console.log(`Serveur en cours d'exécution sur le port ${port}`);
+});
+
+// Montez les routes sur les chemins appropriés
+app.use("/paires", paires);
+app.use("/automatisation", automatisation);
+app.use("/date_color", date_color);
+app.use("/event", event);
+app.use("/match", match);
+
+app.use("/participation_event", participation_event);
+app.use("/participation_jeu", participation_jeu);
+app.use("/poule", poule);
+app.use("/resultat", resultat);
+
+app.use("/user_tokens", user_tokens);
+app.use("/users", users);
