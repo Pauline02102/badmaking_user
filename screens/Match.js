@@ -29,7 +29,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 2000); 
+    }, 2000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -61,7 +61,7 @@ const Match = () => {
       const url = 'http://192.168.1.6:3030/ouiparticipation';
       const response = await fetch(url);
       const data = await response.json();
-  
+
       setParticipants(data);
     } catch (error) {
       console.error('Erreur lors de la récupération des participations:', error);
@@ -311,12 +311,19 @@ const Match = () => {
       console.error("erreur lors de l'encodage des resultats du match ", error);
     }
   };
-
+  const formatDayAndMonth = (dateString) => {
+    const options = { day: 'numeric', month: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, options);
+  };
   // Fonction de rendu pour le tableau de matchs
   const renderMatchTable = () => {
-   
+
     const matchesGroupedByPoule = groupMatchesByPoule(matches);
     const poulesToShow = selectedPoule === 'all' ? Object.keys(matchesGroupedByPoule) : [selectedPoule];
+    // Fonction pour formater la date au format jour et mois
+
+
 
 
     return poulesToShow.map((pouleId) => (
@@ -352,7 +359,8 @@ const Match = () => {
                 {'\n'}
                 {renderPlayerName(match.user2_prenom_paire2, match.user2_nom_paire2, match.user4_double, match.match_id)}
               </Text>
-              <Text style={styles.dateCellbas}>{match.event_date}</Text>
+              <Text style={styles.dateCellbas}>{formatDayAndMonth(match.event_date)}{match.event_time}</Text>
+
 
             </View>
           );
@@ -414,13 +422,23 @@ const Match = () => {
     );
   };
 
-
   return (
 
     <ScrollView style={styles.container}>
 
       {renderPoulePicker()}
-      <Text style={styles.subtitle}>Matchs </Text>
+      <View>
+        <Text style={styles.subtitle}>Matchs</Text>
+        {matches.map((match, index) => (
+          <View key={match.match_id}>
+            {/* ... (le reste de votre code pour afficher les détails du match) */}
+          </View>
+        ))}
+        <Text style={styles.dateCellbas}>
+          Date: {formatDayAndMonth(matches[0].event_date)} - Heure: {matches[0].event_time}
+        </Text>
+      </View>
+
 
       <View >
 

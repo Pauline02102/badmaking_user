@@ -35,16 +35,16 @@ function Calendrier({ route }) {
   const { id, setId } = route.params || {};
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [legendVisible, setLegendVisible] = useState(false); 
+  const [legendVisible, setLegendVisible] = useState(false);
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  
-  
+
+
   useEffect(() => {
     fetchLoggedInUserInfo();
     fetchEvents();
     fetchDateColors();
-    
+
     /*fetchDateColors().th §en((colors) => {
       setCustomDatesStyles(colors);
     });*/
@@ -63,7 +63,7 @@ function Calendrier({ route }) {
       clearInterval(refreshInterval);
     };
   }, []);
-  
+
   const fetchLoggedInUserInfo = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
@@ -81,7 +81,7 @@ function Calendrier({ route }) {
       const data = await response.json();
       if (data.success) {
         setLoggedInUser(data.user);
-     
+
       } else {
         console.error('Raté pour fetch user info:', data.message);
       }
@@ -103,7 +103,7 @@ function Calendrier({ route }) {
       console.log("Heure sélectionnée:", selectedTime);
     }
   };
-  
+
   // fonction de confirmation
   const confirmTime = () => {
     setShowTimePicker(false); // Fermer le sélecteur de temps
@@ -114,9 +114,9 @@ function Calendrier({ route }) {
 
   // Appelée quand l'utilisateur confirme la participation
   const confirmParticipationWithTime = () => {
-        setShowTimePicker(true); // Afficher le TimePicker
+    setShowTimePicker(true); // Afficher le TimePicker
   };
-    
+
 
   const fetchEvents = async () => {
     try {
@@ -129,7 +129,7 @@ function Calendrier({ route }) {
           eventsByDate[eventDate] = [];
         }
         //eventsByDate[eventDate].push(event);
-        eventsByDate[eventDate].push({ ...event, date: eventDate});
+        eventsByDate[eventDate].push({ ...event, date: eventDate, heure: event.heure, });
       });
       setEvents(eventsByDate);
     } catch (error) {
@@ -156,7 +156,7 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
-  
+
       await axios.post(
         `http://192.168.1.6:3030/updateParticipation/${eventId}`,
         {
@@ -166,13 +166,13 @@ function Calendrier({ route }) {
           date: dateUTC,
         }
       );
-  
+
       if (participation === "Oui") {
         console.log("ID de l'utilisateur:", id); // Vérifiez si l'ID est correctement défini
         console.log("Prénom de l'utilisateur:", prenom); // Vérifiez si le prénom est correctement défini
-       
+
       }
-  
+
       await fetchEvents();
       console.log("Participation validée");
       console.log(dateUTC);
@@ -185,17 +185,17 @@ function Calendrier({ route }) {
       }
     }
   };
-  
+
   //participation au jeu libre
 
-  const sendParticipation = async (participation, time = selectedTime) => {
+  const sendParticipation = async (participation) => {
     try {
       if (participation !== "Oui" && participation !== "Non") {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
       const newTime = new Date(selectedTime);
       newTime.setHours(newTime.getHours());
-      
+
       const formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
       console.log("heure " + formattedTime);
       if (!loggedInUser || !loggedInUser.id) {
@@ -205,9 +205,9 @@ function Calendrier({ route }) {
       await axios.post(
         `http://192.168.1.6:3030/participationJeuLibre/${loggedInUser.id}`,
         {
-          participation : participation === "Oui" ? "Oui" : "Non",
+          participation: participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
-          heure : formattedTime , // Ajoutez l'heure formatée ici
+          heure: formattedTime, // Ajoutez l'heure formatée ici
         }
       );
       await fetchEvents();
@@ -226,20 +226,20 @@ function Calendrier({ route }) {
     try {
       const response = await axios.get("http://192.168.1.6:3030/getAllDateColors");
       const dateColors = response.data || {};
-  
+
       // Vérifiez si les données sont correctement renvoyées depuis le backend
-     
+
       const backendDates = response.data;
-  
+
       // Convertir les dates dans le format 'YYYY-MM-DD'
       const convertedDates = {};
       for (const date in backendDates) {
         const formattedDate = moment(date).format("YYYY-MM-DD");
         convertedDates[formattedDate] = backendDates[date];
       }
-  
+
       // Utilisez 'convertedDates' dans votre application pour afficher les dates dans le format 'YYYY-MM-DD'.
-      
+
       if (dateColors) {
         const updatedCustomDatesStyles = {};
         for (const date in convertedDates) {
@@ -255,7 +255,7 @@ function Calendrier({ route }) {
             },
           };
         }
-  
+
         setCustomDatesStyles(updatedCustomDatesStyles);
       } else {
         // Gérer le cas où aucune couleur de date n'est trouvée
@@ -266,15 +266,15 @@ function Calendrier({ route }) {
       return {};
     }
   };
-  
-// fetch participation jeu libre
-  const fetchParticipantsJeuLibre= async (selectedDate) => {
+
+  // fetch participation jeu libre
+  const fetchParticipantsJeuLibre = async (selectedDate) => {
     try {
       const response = await axios.get(
         `http://192.168.1.6:3030/ouiparticipationjeulibre/${selectedDate}`
       );
       return response.data;
-      
+
     } catch (error) {
       console.error("Erreur lors de la récupération des participants", error);
       return [];
@@ -288,10 +288,10 @@ function Calendrier({ route }) {
       const selectedDateString = day.dateString;
       setSelectedDate(selectedDateString);
       fetchDateColors(); // Récupérer la couleur associée à la date sélectionnée
-  
+
       // Récupérer la liste des participants avant d'afficher la boîte de dialogue
       const participants = await fetchParticipantsJeuLibre(selectedDateString);
-  
+
       // Vérifier si la couleur de la date est verte ou bleue
       const color =
         customDatesStyles[selectedDateString]?.customStyles?.container
@@ -301,12 +301,12 @@ function Calendrier({ route }) {
         setShowConfirmButton(true); // Afficher le bouton de confirmation
         // Afficher la liste des participants
         console.log("Participants présents :", participants);
-  
+
         // Afficher la boîte de dialogue
         Alert.alert(
-          
+
           "Viens- tu au jeu libre ? \n Voici les joueurs présents",
-          participants .map((participant) => `${participant.prenom} à ${participant.heure}`).join(", \n"),
+          participants.map((participant) => `${participant.prenom} à ${moment(selectedTime).format("HH:mm")}`).join(", \n"),
           [
             {
               text: "Non",
@@ -335,7 +335,7 @@ function Calendrier({ route }) {
           { text: "OK", onPress: () => console.log("Alerte fermée") }
         ]);
       }
-      if (color ==="orange"){
+      if (color === "orange") {
         setShowTimePicker(false);
         setShowConfirmButton(false);
       }
@@ -372,7 +372,9 @@ function Calendrier({ route }) {
   );
 
   const renderEventsForDate = () => {
-    
+
+
+
     if (
       !selectedDate ||
       !customDatesStyles[selectedDate] ||
@@ -381,12 +383,18 @@ function Calendrier({ route }) {
       return null;
     }
     return (
+
+
       <View>
         {events[selectedDate].map((event) => (
+
           <View key={event.id} style={styles.eventItem}>
             <Text style={styles.eventTitle}>{event.title}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
-  
+            <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
+            
+
+          
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                 <Icon name="check-circle" size={30} color="green" />
@@ -399,13 +407,14 @@ function Calendrier({ route }) {
         ))}
       </View>
     );
+
   };
 
   return (
-    
+
     <ScrollView>
       <View style={styles.container}>
-      <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
+        <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
           <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
         </TouchableOpacity>
         {legendVisible && <Legend />}
@@ -415,22 +424,22 @@ function Calendrier({ route }) {
           markingType="custom"
         />
 
-         
+
         <Text style={styles.eventTitle2}>Événements  :</Text>
 
         {renderEventsForDate()}
         {showTimePicker && (
-        <DateTimePicker
-          value={selectedTime}
-          mode="time"
-          is24Hour={true}
-          display="default"
-          onChange={onTimeSelected}
-  
-        />
-        
-      )}
-         {showConfirmButton && (
+          <DateTimePicker
+            value={selectedTime}
+            mode="time"
+            is24Hour={true}
+            display="default"
+            onChange={onTimeSelected}
+
+          />
+
+        )}
+        {showConfirmButton && (
           <Button title="Confirmer l'heure" onPress={confirmTime} />
         )}
       </View>

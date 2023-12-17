@@ -407,7 +407,7 @@ app.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
     const selectedDate = req.params.selectedDate;
     const query = `
       SELECT p.user_id, p.participation, p.heure, u.prenom, u.nom
-      FROM participation_jeu AS p
+      FROM participation_jeulibre AS p
       JOIN users AS u ON p.user_id = u.id
       WHERE p.participation = 'True' AND DATE(p.date) = DATE('${selectedDate}');
     `;
@@ -605,57 +605,56 @@ app.get("/getAllDateColors", async (req, res) => {
       .json({ message: "Erreur lors de la récupération des couleurs de date" });
   }
 });
-
 // participation jeu libre
 app.post("/participationJeuLibre/:userId", async (req, res) => {
   try {
-    const { participation, date, heure } = req.body; // Assurez-vous que "date" est correctement envoyé depuis le frontend
+    const { participation, date, heure } = req.body;
     const { userId } = req.params;
 
-    // Verifier que "heure" est au format correct (HH:MM)
+    console.log(`Requête reçue - User ID: ${userId}, Participation: ${participation}, Date: ${date}, Heure: ${heure}`);
+
+    // Validation de l'heure
     if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(heure)) {
-      return res
-        .status(400)
-        .json({ message: "Heure non valide. Le format doit être HH:MM." });
+      console.log("Erreur: Format d'heure invalide");
+      return res.status(400).json({ message: "Heure non valide. Le format doit être HH:MM." });
     }
 
-
-    //  valider que la valeur de participation est soit "Oui" soit "Non"
+    // Validation de la participation
     if (participation !== "Oui" && participation !== "Non") {
-      return res
-        .status(400)
-        .json({ message: 'La participation doit être soit "Oui" soit "Non"' });
+      console.log("Erreur: Valeur de participation invalide");
+      return res.status(400).json({ message: 'La participation doit être soit "Oui" soit "Non"' });
     }
 
-    // Vérifier si l'enregistrement de participation existe déjà pour cet utilisateur et cette date
+    // Vérification d'un enregistrement existant
+    console.log("Vérification de l'enregistrement existant dans la base de données");
     const existingParticipation = await db.oneOrNone(
-      "SELECT * FROM participation_jeu WHERE user_id = $1 AND date = $2 AND heure = $3",
-      [userId, date, heure]
+      "SELECT * FROM participation_jeulibre WHERE user_id = $1 AND date = $2",
+      [userId, date]
     );
 
     if (existingParticipation) {
-      // Si l'enregistrement de participation existe, mettez à jour la participation existante
+      console.log("Mise à jour de l'enregistrement existant");
       await db.none(
-        "UPDATE participation_jeu SET participation = $1 WHERE user_id = $2 AND date = $3 AND heure = $4",
-        [participation === "Oui", userId, date, heure]
+        "UPDATE participation_jeulibre SET heure = $1, participation = $2 WHERE user_id = $3 AND date = $4",
+        [heure, participation === "Oui", userId, date]
       );
+      console.log("Mise à jour de la participation avec succès");
+      res.json({ message: "Mise à jour de la participation avec succès" });
     } else {
-      // Si l'enregistrement de participation n'existe pas, insérez un nouvel enregistrement
+      console.log("Insertion d'un nouvel enregistrement");
       await db.none(
-        "INSERT INTO participation_jeu (user_id, participation, date,heure) VALUES ($1, $2, $3,$4)",
+        "INSERT INTO participation_jeulibre (user_id, participation, date, heure) VALUES ($1, $2, $3, $4)",
         [userId, participation === "Oui", date, heure]
       );
+      console.log("Nouvelle participation insérée avec succès");
+      res.json({ message: "Nouvelle participation insérée avec succès" });
     }
-
-    res.json({ message: "Participation mise à jour avec succès" });
-    console.log("Participation mise à jour avec succès");
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la participation", error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la mise à jour de la participation" });
+    res.status(500).json({ message: "Erreur lors de la mise à jour de la participation" });
   }
 });
+
 
 //get les match avec nom et prenom et date
 app.get("/matches", async (req, res) => {
@@ -1365,6 +1364,7 @@ app.get("/recupererMatchs", async (req, res) => {
           u4.classement_double as user4_double,
           p1.event_id as event_id ,
           TO_CHAR(  e.date,'YYYY-MM-DD') AS "event_date",
+          TO_CHAR(e.heure, 'HH24:MI') AS "event_time",
           e.status as status
           
       FROM match m
