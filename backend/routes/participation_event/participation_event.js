@@ -109,5 +109,21 @@ router.get("/ouiparticipation/:event_id", async (req, res) => {
     }
 });
 
+//compte le nombre de participants a l'evenement 
+router.get("/participantcount/:event_id", async (req, res) => {
+    try {
+        const { event_id } = req.params;
+        const query = `
+            SELECT COUNT(*) as participant_count
+            FROM participation_events
+            WHERE event_id = $1 AND participation = 'True';
+        `;
+        const result = await db.oneOrNone(query, [event_id]);
+        res.json({ event_id: event_id, participant_count: result ? result.participant_count : 0 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erreur lors de la récupération du nombre de participants" });
+    }
+});
 
  module.exports = router;

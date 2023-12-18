@@ -41,6 +41,7 @@ function Calendrier({ route }) {
   const { setIsSignedIn } = useUser();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [participantsList, setParticipantsList] = useState([]);
+  const [participantsCounts, setParticipantsCounts] = useState({});
 
   useEffect(() => {
     fetchLoggedInUserInfo();
@@ -136,6 +137,7 @@ function Calendrier({ route }) {
     }
   };
 
+  //get le nombre de participants par evenement
   const fetchParticipantsParEvent = async (eventId) => {
     try {
       const response = await axios.get(`${BASE_URL}/participation_event/ouiparticipation/${eventId}`);
@@ -190,7 +192,6 @@ function Calendrier({ route }) {
   };
 
   //participation au jeu libre
-
   const sendParticipation = async (participation) => {
     try {
       if (participation !== "Oui" && participation !== "Non") {
@@ -346,6 +347,7 @@ function Calendrier({ route }) {
     }
   };
 
+  //legende des couleurs
   const Legend = () => (
     <Modal
       animationType="slide"
@@ -372,7 +374,7 @@ function Calendrier({ route }) {
     </Modal>
   );
 
-
+  //calculer la taille du modal
   const calculateModalHeight = (numberOfParticipants) => {
     const minHeight = 200; // Hauteur minimale du modal
     const maxHeight = 600; // Hauteur maximale du modal
@@ -383,6 +385,45 @@ function Calendrier({ route }) {
   };
 
 
+  const fetchParticipantCount = async (eventId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/participation_event/participantcount/${eventId}`);
+      return response.data.participant_count; // Renvoie le nombre de participants
+    } catch (error) {
+      console.error("Erreur lors de la récupération du nombre de participants", error);
+      return 0; // Renvoie 0 en cas d'erreur
+    }
+  };
+
+  const calculateUsedCourts = (participantCount) => {
+    const playersPerCourt = 4; // Nombre de joueurs par terrain
+    return Math.ceil(participantCount / playersPerCourt); // Arrondir à l'entier supérieur pour obtenir le nombre total de terrains utilisés
+  };
+  
+
+//  gère la récupération du nombre de participants pour un événement spécifique.
+  const ParticipantCount = ({ eventId }) => {
+    const [participantCount, setParticipantCount] = useState(null);
+// s'assure que le nombre de participants est récupéré chaque fois que eventId change
+    useEffect(() => {
+      const fetchCount = async () => {
+        const count = await fetchParticipantCount(eventId);
+        setParticipantCount(count);
+      };
+
+      fetchCount();
+    }, [eventId]);
+
+    if (participantCount === null) {
+      return <Text style={styles.eventInfo}>Chargement...</Text>;
+    }
+
+    return (
+      <Text style={styles.eventInfo}>
+        Terrains utilisés : {calculateUsedCourts(participantCount)}
+      </Text>
+    );
+  };
 
   const renderEventsForDate = () => {
 
@@ -404,6 +445,7 @@ function Calendrier({ route }) {
             <Text style={styles.eventTitle}>{event.title}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
+            <ParticipantCount eventId={event.id} />
 
             <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
               <Icon name="person" size={30} color="blue" />
