@@ -68,7 +68,7 @@ const Profil = () => {
           },
         });
         await AsyncStorage.removeItem('userToken');
-   
+        setIsSignedIn(false);
       } catch (error) {
         console.error("Erreur lors de la déconnexion :", error);
       }

@@ -1,12 +1,12 @@
 
 
 const express = require("express");
-const db= require("../db.js");
+const db = require("../db.js");
 
 const router = express.Router();
 
 
-  
+
 
 
 const cors = require("cors");
@@ -24,23 +24,8 @@ const pgp = require("pg-promise")();
 
 const app = express();
 const port = process.env.PORT || 3030;
-// Créer un nouvel événement
-router.post("/postcalendar", async (req, res) => {
-    try {
-        const { title, type, user_id, status, terrain_id, date } = req.body;
-        const newEvent = await db.query(
-            "INSERT INTO event (title,type,user_id,status,terrain_id,date ) VALUES ($1, $2, $3, $4,$5,$6)",
-            [title, type, user_id, status, terrain_id, date]
-        );
-        res.json(newEvent[0]);
-        console.log("event crée");
-    } catch (error) {
-        console.error(error);
-        res
-            .status(500)
-            .json({ message: "Erreur lors de la création de l'événement backend" });
-    }
-});
+
+
 
 // Récupérer tous les événements
 router.get("/calendar", async (req, res) => {
@@ -67,5 +52,36 @@ router.delete("/calendar/:id", async (req, res) => {
             .json({ message: "Erreur lors de la suppression de l'événement" });
     }
 });
+
+
+// Créer un nouvel événement pour admin
+router.post("/postcalendar", async (req, res) => {
+    try {
+      const { title, type, user_id, status, terrain_id, date, heure } = req.body;
+  
+      // Log des données reçues pour le débogage
+      console.log("Données reçues pour l'événement:", { title, type, user_id, status, terrain_id, date, heure });
+  
+      // Exécution de la requête d'insertion avec pg-promise
+      const newEvent = await db.query(
+        "INSERT INTO event (title, type, user_id, status, terrain_id, date, heure) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+        [title, type, user_id, status, terrain_id, date, heure]
+      );
+  
+      // Vérifier si l'événement a été inséré et renvoyer les données
+      if (newEvent.length > 0) {
+        console.log("Événement créé avec succès:", newEvent[0]);
+        res.json(newEvent[0]);
+      } else {
+        // Si aucun objet n'est retourné
+        throw new Error("Échec de l'insertion de l'événement dans la base de données.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création de l'événement:", error);
+      res.status(500).json({ message: "Erreur lors de la création de l'événement", error: error.message });
+    }
+  });
+  
+
 
 module.exports = router;

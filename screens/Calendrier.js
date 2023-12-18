@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  Button
+  Button,
+  TextInput
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
@@ -23,11 +24,15 @@ import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from './config';
 import { useUser } from "./UserContext";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { SelectList } from "react-native-dropdown-select-list";
+
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
+  const moment = require("moment-timezone");
   const [customDatesStyles, setCustomDatesStyles] = useState({});
-  const moment = require("moment");
+
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const navigation = useNavigation();
@@ -42,6 +47,24 @@ function Calendrier({ route }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [participantsList, setParticipantsList] = useState([]);
   const [participantsCounts, setParticipantsCounts] = useState({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  //pour admin
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState("");
+  const [status, setStatus] = useState("");
+  const [date, setDate] = useState("");
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isColorModalVisible, setColorModalVisible] = useState(false);
+
+  const COLORS = ['red', 'green', 'blue', 'orange'];
+  const data = [
+    { key: "1", value: "Random" },
+    { key: "2", value: "Par niveau" },
+  ];
+  const [time, setTime] = useState(new Date());
+  const openColorModal = () => {
+    setColorModalVisible(true);
+  };
 
   useEffect(() => {
     fetchLoggedInUserInfo();
@@ -55,12 +78,88 @@ function Calendrier({ route }) {
       fetchEvents();
       fetchDateColors();
 
-    }, 3000000);
+    }, 30000);
 
     return () => {
       clearInterval(refreshInterval);
     };
   }, []);
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+  const handleConfirm = (date) => {
+    console.warn("A date has been picked: ", date);
+    setTime(date);
+    hideDatePicker();
+  };
+
+
+  const combinedDateTime = moment(date).set({
+    hour: time.getHours(),
+    minute: time.getMinutes()
+  }).toISOString();
+  const createEvent = async () => {
+    try {
+      if (!loggedInUser || !loggedInUser.id) {
+        console.error("Les informations de l'utilisateur ne sont pas disponibles");
+        return;
+      }
+  
+      // Afficher les valeurs initiales de date et time
+      console.log("Date initiale:", date);
+      console.log("Heure initiale:", time);
+  
+      const combinedDateTime = moment(date).set({
+        hour: time.getHours(),
+        minute: time.getMinutes()
+      }).toISOString();
+  
+      // Vérifier la valeur de combinedDateTime
+      console.log("combinedDateTime:", combinedDateTime);
+  
+      // Convertissez la date et l'heure en un format valide pour PostgreSQL
+      const dateTime = moment.tz(
+        `${combinedDateTime}`,
+        "YYYY-MM-DDTHH:mm:ss.SSSZ", // Format d'entrée
+        "UTC" // Fuseau horaire source (UTC)
+      ).tz("Europe/Paris"); // Fuseau horaire cible (votre fuseau horaire)
+  
+      // Vérifier la valeur de dateTime
+      console.log("dateTime:", dateTime);
+  
+      // Utilisez la méthode format pour obtenir la date et l'heure au format ISO 8601
+      const formattedDateTime = dateTime.format();
+  
+      // Vérifier la valeur de formattedDateTime
+      console.log("formattedDateTime:", formattedDateTime);
+  
+      await axios.post("http://192.168.1.6:3030/event/postcalendar", {
+        title,
+        type,
+        status,
+        date: formattedDateTime,
+        heure: dateTime.format("HH:mm:ss"),
+        user_id: loggedInUser.id,
+        terrain_id: 1,
+      });
+  
+      // Vérifier les données envoyées
+      console.log("Données envoyées à l'API:", {
+        title,
+        type,
+        status,
+        date: formattedDateTime,
+        heure: dateTime.format("HH:mm:ss"),
+        user_id: loggedInUser.id,
+        terrain_id: 1,
+      });
+  
+      fetchEvents();
+    } catch (error) {
+      console.error("Erreur lors de la création de l'événement", error);
+    }
+  };
+  
 
   const fetchLoggedInUserInfo = async () => {
     try {
@@ -79,6 +178,13 @@ function Calendrier({ route }) {
       const data = await response.json();
       if (data.success) {
         setLoggedInUser(data.user);
+        console.log("data user", data.user);
+        // Vérifiez si 'role' est défini avant d'appeler toLowerCase()
+        const isAdmin = data.user.role && data.user.role.toLowerCase() === 'admin';
+        setIsAdmin(isAdmin);
+
+        // Mettre à jour isAdmin et afficher la valeur mise à jour
+        console.log('isAdmin:', isAdmin);
 
       } else {
         console.error('Raté pour fetch user info page calendrier:', data.message);
@@ -271,6 +377,46 @@ function Calendrier({ route }) {
     }
   };
 
+
+  const changeTerrainColor = async (currentColor) => {
+    try {
+      console.log("Valeur de 'selectedColor' :", currentColor);
+      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); // Ajoutez cette ligne
+      const response = await axios.post(
+        "http://192.168.1.6:3030/date_color/associateColorToDate",
+        {
+          date: selectedDate,
+          color: currentColor,
+        }
+      );
+
+      console.log("Réponse de la requête :", response.data);
+
+      const updatedCustomDatesStyles = { ...customDatesStyles };
+      // Mettez à jour la couleur pour la date sélectionnée
+      updatedCustomDatesStyles[selectedDate] = {
+        customStyles: {
+          container: {
+            backgroundColor: currentColor || "blue",
+          },
+          text: {
+            color: "white",
+          },
+        },
+      };
+
+      // Mettez à jour les styles personnalisés
+      setCustomDatesStyles(updatedCustomDatesStyles);
+
+      setColorModalVisible(false);
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'association de la couleur à la date",
+        error
+      );
+    }
+  };
+
   // fetch participation jeu libre
   const fetchParticipantsJeuLibre = async (selectedDate) => {
     try {
@@ -399,12 +545,12 @@ function Calendrier({ route }) {
     const playersPerCourt = 4; // Nombre de joueurs par terrain
     return Math.ceil(participantCount / playersPerCourt); // Arrondir à l'entier supérieur pour obtenir le nombre total de terrains utilisés
   };
-  
 
-//  gère la récupération du nombre de participants pour un événement spécifique.
+
+  //  gère la récupération du nombre de participants pour un événement spécifique.
   const ParticipantCount = ({ eventId }) => {
     const [participantCount, setParticipantCount] = useState(null);
-// s'assure que le nombre de participants est récupéré chaque fois que eventId change
+    // s'assure que le nombre de participants est récupéré chaque fois que eventId change
     useEffect(() => {
       const fetchCount = async () => {
         const count = await fetchParticipantCount(eventId);
@@ -507,12 +653,59 @@ function Calendrier({ route }) {
         </TouchableOpacity>
         {legendVisible && <Legend />}
         <Calendar
-          onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
+          onDayPress={(day) => {
+            setSelectedDate(day.dateString);
+            setDate(day.dateString);
+            openColorModal();
+          }}
           markedDates={customDatesStyles}
           markingType="custom"
         />
+        {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
+        {isAdmin && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Titre"
+              value={title}
+              onChangeText={(text) => setTitle(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Type"
+              value={type}
+              onChangeText={(text) => setType(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Date"
+              value={date}
+              onChangeText={(text) => setDate(text)}
+            />
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="time"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              textColor="black"
+            />
+
+            <Button title="Choisir l'heure" onPress={() => setDatePickerVisibility(true)} />
+
+            <View style={styles.inputContainer}>
+              <SelectList
+                placeholder="status"
+                setSelected={(val) => setStatus(val)}
+                data={data}
+                save="value"
+                style={styles.choix}
+              />
 
 
+            </View>
+            <Button title="Créer un événement" onPress={createEvent} />
+          </>
+        )}
         <Text style={styles.eventTitle2}>Événements  :</Text>
 
         {renderEventsForDate()}
@@ -529,6 +722,31 @@ function Calendrier({ route }) {
         )}
         {showConfirmButton && (
           <Button title="Confirmer l'heure" onPress={confirmTime} />
+        )}
+        {isAdmin && isColorModalVisible && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isColorModalVisible}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
+              {COLORS.map((color) => (
+                <TouchableOpacity
+                  style={[styles.colorOption, { backgroundColor: color }]}
+                  onPress={() => {
+                    changeTerrainColor(color);
+                  }}
+                />
+              ))}
+              <TouchableOpacity
+                style={styles.closeButtonCouleur}
+                onPress={() => setColorModalVisible(false)}
+              >
+                <Text style={styles.closeButtonTextColor}>Fermer</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
         )}
       </View>
 

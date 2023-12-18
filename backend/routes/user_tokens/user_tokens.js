@@ -61,6 +61,7 @@ const userAuthMiddleware = async (req, res, next) => {
       prenom: user.prenom,
       nom: user.nom,
       email: user.email,
+      role : user.role,
       classement_simple: user.classement_simple,
       classement_double: user.classement_double,
       classement_mixte: user.classement_mixte
@@ -80,11 +81,13 @@ router.get("/get-user-info", userAuthMiddleware, async (req, res) => {
     prenom: req.user.prenom,
     nom: req.user.nom,
     email: req.user.email,
+    role : req.user.role,
     classement_simple: req.user.classement_simple,
     classement_double: req.user.classement_double,
     classement_mixte: req.user.classement_mixte
   };
   res.json({ success: true, user: userInfo });
+
 });
 
 //deconnecter un user
@@ -154,6 +157,7 @@ router.post("/login", async (req, res) => {
       prenom: user.prenom,
       mail: user.email,
       nom: user.nom,
+      role : user.role,
       message: "Connexion réussie."
     });
   } catch (error) {

@@ -7,6 +7,8 @@ import UserContext from "./UserContext";
 import { useUser } from "./UserContext";
 import { BASE_URL } from './config';
 
+
+
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
@@ -24,6 +26,7 @@ const LoginScreen = () => {
         prenom:prenom,
         email: email,
         password: password,
+        role : role
       };
 
       const response = await fetch(`http://192.168.1.6:3030/user_tokens/login`, {

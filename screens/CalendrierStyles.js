@@ -173,7 +173,44 @@ const styles = StyleSheet.create({
     margin: 10,
     color: '#000'
   },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 15,
+    backgroundColor: "#E4ECF1",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  colorselection: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#ccc",
+    color: "black",
+    borderRadius: 10
+  },
+  colorOption: {
+    width: 50,
+    height: 50,
+    margin: 10,
+    borderRadius: 25,
+  },  
+  closeButtonCouleur: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#ccc",
+    borderRadius: 10
+  },
+  closeButtonTextColor:{
+    color: "black",
+    textAlign: "center",
 
+  }
 });
 
 export default styles;
