@@ -62,7 +62,7 @@ router.post("/updateParticipation/:eventId", async (req, res) => {
 
 
 
-// match avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN
+// participation avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN
 router.get("/ouiparticipation", async (req, res) => {
     try {
         const query = `
@@ -85,7 +85,8 @@ router.get("/ouiparticipation", async (req, res) => {
             .json({ message: "Erreur lors de la récupération des événements" });
     }
 });
-// match avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN par apport a un event
+
+// participation avec "oui" comme participation pour les events- recuperation nom prenom et date avec un JOIN par apport a un event
 router.get("/ouiparticipation/:event_id", async (req, res) => {
     try {
         const { event_id } = req.params; // Récupérer l'ID de l'événement depuis les paramètres de l'URL

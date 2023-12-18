@@ -135,58 +135,45 @@ const styles = StyleSheet.create({
     textAlign: 'center', // Centrez le texte
   },
   modalViewPlayers: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)' // Arrière-plan semi-transparent pour l'ombrage
-  },
-  modalContent: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    width: '80%', // Largeur du modal basée sur la taille de l'écran
+    shadowRadius: 4,
+    elevation: 5
   },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  modalText: {
     marginBottom: 15,
-    textAlign: 'center'
-  },
-  pairItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F0F0F0', // Couleur de fond pour chaque élément de paire
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 8
-  },
-  pairText: {
-    fontSize: 16
+    textAlign: "center",
+    fontSize: 16,
+    color: "#333"
   },
   closeButtonText: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 18
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
   },
   closeButton: {
-    backgroundColor: '#D9D9D9', // Couleur de fond du bouton Close
+    backgroundColor: "#2196F3",
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    marginTop: 20
-  }
+    marginTop: 15
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    margin: 10,
+    color: '#000'
+  },
+
 });
 
 export default styles;

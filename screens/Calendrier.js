@@ -39,7 +39,8 @@ function Calendrier({ route }) {
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const { setIsSignedIn } = useUser();
-
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [participantsList, setParticipantsList] = useState([]);
 
   useEffect(() => {
     fetchLoggedInUserInfo();
@@ -135,6 +136,16 @@ function Calendrier({ route }) {
     }
   };
 
+  const fetchParticipantsParEvent = async (eventId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/participation_event/ouiparticipation/${eventId}`);
+      setParticipantsList(response.data);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des participants", error);
+    }
+  };
+
   //participation event
   const handleParticipation = async (eventId, participation) => {
     try {
@@ -150,13 +161,13 @@ function Calendrier({ route }) {
           participation,
           id: loggedInUser.id, // Utiliser l'ID de loggedInUser
           prenom: loggedInUser.prenom, // Utiliser le prénom de loggedInUser
- 
+
         }
       );
 
       if (participation === "Oui") {
- 
-      // Vérifiez si le prénom est correctement défini
+
+        // Vérifiez si le prénom est correctement défini
         Alert.alert("Confirmation", "Vous êtes inscrit à l'événement!", [
           {
             text: "OK",
@@ -167,7 +178,7 @@ function Calendrier({ route }) {
 
       await fetchEvents();
       console.log("Participation validée");
-  
+
     } catch (error) {
       console.error("Erreur lors de la mise à jour de la participation", error);
       if (error.response) {
@@ -362,6 +373,14 @@ function Calendrier({ route }) {
   );
 
 
+  const calculateModalHeight = (numberOfParticipants) => {
+    const minHeight = 200; // Hauteur minimale du modal
+    const maxHeight = 600; // Hauteur maximale du modal
+    const heightPerParticipant = 40; // Hauteur estimée par participant
+
+    const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, numberOfParticipants * heightPerParticipant));
+    return calculatedHeight;
+  };
 
 
 
@@ -386,6 +405,10 @@ function Calendrier({ route }) {
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
 
+            <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
+              <Icon name="person" size={30} color="blue" />
+            </TouchableOpacity>
+
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                 <Icon name="check-circle" size={30} color="green" />
@@ -396,6 +419,37 @@ function Calendrier({ route }) {
             </View>
           </View>
         ))}
+        <Modal
+          visible={isModalVisible}
+          onRequestClose={() => setIsModalVisible(false)}
+          animationType="slide"
+          transparent={true}
+        >
+          <View style={styles.centeredView}>
+            <View style={[styles.modalViewPlayers, { height: calculateModalHeight(participantsList.length) }]}>
+              <Text style={styles.modalTitle}>Participants de l'Événement</Text>
+
+              {participantsList.length === 0 ? (
+                <Text style={styles.modalText}>Pas encore de participants inscrits.</Text>
+              ) : (
+                <ScrollView>
+                  {participantsList.map((participant) => (
+                    <Text key={participant.user_id} style={styles.modalText}>
+                      {participant.prenom} {participant.nom}
+                    </Text>
+                  ))}
+                </ScrollView>
+              )}
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setIsModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Fermer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
       </View>
     );
@@ -435,7 +489,7 @@ function Calendrier({ route }) {
           <Button title="Confirmer l'heure" onPress={confirmTime} />
         )}
       </View>
-    
+
     </ScrollView>
   );
 }
