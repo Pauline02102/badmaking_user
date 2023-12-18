@@ -128,7 +128,13 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         marginTop: 10,
+      },confirmationMessage: {
+        fontSize: 16,
+        color: 'green', // Couleur de texte de confirmation
+        marginVertical: 10, // Espacement vertical
+        textAlign: 'center', // Centrez le texte
       },
+      
   });
   
   export default styles;

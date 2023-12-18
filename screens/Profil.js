@@ -36,6 +36,7 @@ const Profil = () => {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
         console.error('page match : Token non trouvé');
+  
         return;
       }
       const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {

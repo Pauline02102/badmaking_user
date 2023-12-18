@@ -41,6 +41,7 @@ function Calendrier({ route }) {
   const { setIsSignedIn } = useUser();
   const [selectedEvent, setSelectedEvent] = useState(null); // État pour stocker l'événement sélectionné
   const [pairsCount, setPairsCount] = useState(0); // État pour stocker le nombre de paires
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
   useEffect(() => {
     fetchLoggedInUserInfo();
@@ -85,6 +86,7 @@ function Calendrier({ route }) {
       }
     } catch (error) {
       console.error('Erreur pour fetch les info des users:', error);
+    
     }
   };
 
@@ -168,7 +170,12 @@ function Calendrier({ route }) {
       if (participation === "Oui") {
         console.log("ID de l'utilisateur:", id); // Vérifiez si l'ID est correctement défini
         console.log("Prénom de l'utilisateur:", prenom); // Vérifiez si le prénom est correctement défini
-
+        Alert.alert("Confirmation", "Vous êtes inscrit à l'événement!", [
+          {
+            text: "OK",
+            onPress: () => console.log("Confirmation de l'inscription"),
+          },
+        ]);
       }
 
       await fetchEvents();
@@ -401,6 +408,7 @@ function Calendrier({ route }) {
             </View>
           </View>
         ))}
+       
       </View>
     );
 

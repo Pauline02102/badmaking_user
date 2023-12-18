@@ -24,17 +24,6 @@ const app = express();
 const port = process.env.PORT || 3030;
 
 
-const password = 'Leroy'; // Le mot de passe que vous voulez tester
-const hashedPassword = '$2b$10$lAo/2PH8PEFM.zMlRfA3Ke5HXBYpHRS1IwN8i4xIJf/RDjryn/IF6'; // Remplacez ceci par le hash récupéré de la base de données
-
-bcrypt.compare(password, hashedPassword, function (err, result) {
-  if (err) {
-    console.error('Erreur lors de la comparaison', err);
-  } else {
-    console.log('Le mot de passe correspond ?', result); // `result` sera `true` si les mots de passe correspondent
-  }
-});
-
 //verifier que c'est le bon user conecté 
 const userAuthMiddleware = async (req, res, next) => {
   try {
