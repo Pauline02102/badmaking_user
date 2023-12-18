@@ -98,9 +98,7 @@ router.post("/creerPoules", async (req, res) => {
         await client.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la création des poules" });
-    } finally {
-        client.release();
-    }
+    } 
 });
 
 

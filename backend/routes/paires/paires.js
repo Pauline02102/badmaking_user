@@ -60,9 +60,7 @@ router.post("/formerPaires", async (req, res) => {
         await client.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la formation des paires" });
-    } finally {
-        client.release();
-    }
+    } 
 });
 
 //paire aleatoire 
@@ -176,9 +174,7 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Erreur lors de la formation des paires :', error);
         res.status(500).json({ message: "Erreur lors de la formation des paires" });
-    } finally {
-        client.release();
-    }
+    } 
 });
 
 //recupère les paires aves les nom 
@@ -206,7 +202,7 @@ router.get("/recupererPaires", async (req, res) => {
     }
 });
 // Récupère les paires avec les noms pour un ID d'événement spécifique
-router.get("/recupererPaires/:eventId", async (req, res) => {
+router.get("/count/:eventId", async (req, res) => {
     try {
         const eventId = req.params.eventId; // Récupère l'ID de l'événement depuis les paramètres de la requête
         const query = `

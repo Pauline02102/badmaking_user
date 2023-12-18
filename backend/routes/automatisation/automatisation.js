@@ -27,7 +27,7 @@ const app = express();
 const port = process.env.PORT || 3030;
 const cron = require('node-cron');
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('*/30 * * * * *', async () => {
     const client = await db.connect();
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
@@ -36,27 +36,29 @@ cron.schedule('* * * * *', async () => {
 
 
         const eventQuery = `
-    SELECT id, status, TO_CHAR(date, 'YYYY-MM-DD HH24:MI:SS') AS start_time
-    FROM event 
-    WHERE date BETWEEN NOW() AND NOW() + INTERVAL '2 MINUTES'
-    AND paire_creer = false`;
-        const { rows: upcomingEvents } = await client.query(eventQuery);
-        console.log('upcomingEvents:', upcomingEvents);
-        if (upcomingEvents && Array.isArray(upcomingEvents)) {
-            for (const event of upcomingEvents) {
-                console.log('upcomingEvents:', upcomingEvents);
+        SELECT id, status, 
+        TO_CHAR(date, 'YYYY-MM-DD') AS event_date, 
+        TO_CHAR(heure, 'HH24:MI:SS') AS event_time
+ FROM event 
+ WHERE date BETWEEN NOW()::DATE AND NOW()::DATE + INTERVAL '1 DAY'
+   AND heure BETWEEN NOW()::TIME AND NOW()::TIME + INTERVAL '2 MINUTES'
+   AND paire_creer = false`;
+        const upcomingEvents = await client.query(eventQuery);
 
+        if (Array.isArray(upcomingEvents) && upcomingEvents.length > 0) {
+            for (const event of upcomingEvents) {
+                console.log(upcomingEvents);
                 // Fetch participants for the event
                 const participantsQuery = `
-        SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
-               u.classement_double, u.classement_mixte, 
-               TO_CHAR(e.date,'YYYY-MM-DD') AS "date",
-               e.status as status
-        FROM participation_events AS p
-        JOIN users AS u ON p.user_id = u.id
-        JOIN event AS e ON p.event_id = e.id
-        WHERE p.participation = 'True' AND p.event_id = $1`;
-                const { rows: participants } = await client.query(participantsQuery, [event.id]);
+          SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
+                 u.classement_double, u.classement_mixte, 
+                 TO_CHAR(e.date,'YYYY-MM-DD') AS "date",
+                 e.status as status
+          FROM participation_events AS p
+          JOIN users AS u ON p.user_id = u.id
+          JOIN event AS e ON p.event_id = e.id
+          WHERE p.participation = 'True' AND p.event_id = $1`;
+                const participants = await client.query(participantsQuery, [event.id]);
 
                 if (event.status === 'Random') {
                     console.log(`Paire random crée pour l'event : ${event.id}`);
@@ -70,11 +72,9 @@ cron.schedule('* * * * *', async () => {
                 // Update the event as pairs created
                 const updateEventQuery = `UPDATE event SET paire_creer = true WHERE id = $1`;
                 await client.query(updateEventQuery, [event.id]);
-                console.log('upcomingEvents:', upcomingEvents);
-
             }
         } else {
-            console.log('No upcoming events found or unexpected format.');
+            console.log("No upcoming events or invalid format");
         }
     } catch (error) {
         console.error('Error in scheduled task: ', error);
@@ -82,10 +82,9 @@ cron.schedule('* * * * *', async () => {
         client.release();
     }
 });
-
 async function handleCreerPaires(participants) {
     try {
-        const url = 'http://192.168.1.6:3030/formerPaires';
+        const url = 'http://192.168.1.6:3030/paires/formerPaires';
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -93,17 +92,34 @@ async function handleCreerPaires(participants) {
         };
 
         const response = await fetch(url, requestOptions);
-        const data = await response.json();
-        console.log("Données reçues du serveur:", data);
+
+        // Vérifier le statut de la réponse
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Obtenir la réponse brute en texte
+        const text = await response.text();
+
+        try {
+            // Essayer de parser la réponse en JSON
+            const data = JSON.parse(text);
+            console.log("Données reçues du serveur:", data);
+        } catch (error) {
+            // Gérer les erreurs de parsing JSON
+            console.error('Erreur lors du parsing JSON:', error);
+            console.log('Réponse brute:', text);
+        }
+
     } catch (error) {
         console.error('Erreur lors de la création des paires:', error);
     }
-
 }
+
 
 async function handleCreerPairesParClassement(participants) {
     try {
-        const url = 'http://192.168.1.6:3030/formerPaireParClassementDouble';
+        const url = 'http://192.168.1.6:3030/paires/formerPaireParClassementDouble';
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -111,8 +127,24 @@ async function handleCreerPairesParClassement(participants) {
         };
 
         const response = await fetch(url, requestOptions);
-        const data = await response.json();
-        console.log("Données reçues du serveur:", JSON.stringify(data, null, 2));
+        // Vérifier le statut de la réponse
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Obtenir la réponse brute en texte
+        const text = await response.text();
+
+        try {
+            // Essayer de parser la réponse en JSON
+            const data = JSON.parse(text);
+            console.log("Données reçues du serveur:", data);
+        } catch (error) {
+            // Gérer les erreurs de parsing JSON
+            console.error('Erreur lors du parsing JSON:', error);
+            console.log('Réponse brute:', text);
+        }
+
     } catch (error) {
         console.error('Erreur lors de la création des paires:', error);
     }
@@ -121,15 +153,31 @@ async function handleCreerPairesParClassement(participants) {
 
 async function createPools(eventId) {
     try {
-        const url = 'http://192.168.1.6:3030/creerPoules';
+        const url = 'http://192.168.1.6:3030/poule/creerPoules';
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         };
 
         const response = await fetch(url, requestOptions);
-        const data = await response.json();
-        console.log("Données reçues du serveur:", JSON.stringify(data, null, 2));
+        // Vérifier le statut de la réponse
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Obtenir la réponse brute en texte
+        const text = await response.text();
+
+        try {
+            // Essayer de parser la réponse en JSON
+            const data = JSON.parse(text);
+            console.log("Données reçues du serveur:", data);
+        } catch (error) {
+            // Gérer les erreurs de parsing JSON
+            console.error('Erreur lors du parsing JSON:', error);
+            console.log('Réponse brute:', text);
+        }
+
     } catch (error) {
         console.error('Erreur lors de la création des poules:', error);
     }
@@ -137,15 +185,31 @@ async function createPools(eventId) {
 
 async function createMatches(eventId) {
     try {
-        const url = 'http://192.168.1.6:3030/creerMatchs';
+        const url = 'http://192.168.1.6:3030/match/creerMatchs';
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         };
 
         const response = await fetch(url, requestOptions);
-        const data = await response.json();
-        console.log("Matchs créés: ", data);
+        // Vérifier le statut de la réponse
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Obtenir la réponse brute en texte
+        const text = await response.text();
+
+        try {
+            // Essayer de parser la réponse en JSON
+            const data = JSON.parse(text);
+            console.log("Données reçues du serveur:", data);
+        } catch (error) {
+            // Gérer les erreurs de parsing JSON
+            console.error('Erreur lors du parsing JSON:', error);
+            console.log('Réponse brute:', text);
+        }
+
     } catch (error) {
         console.error('Erreur lors de la création des matchs:', error);
     }

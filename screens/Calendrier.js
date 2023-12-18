@@ -41,7 +41,8 @@ function Calendrier({ route }) {
   const { setIsSignedIn } = useUser();
   const [selectedEvent, setSelectedEvent] = useState(null); // État pour stocker l'événement sélectionné
   const [pairsCount, setPairsCount] = useState(0); // État pour stocker le nombre de paires
-  const [confirmationMessage, setConfirmationMessage] = useState("");
+
+
 
   useEffect(() => {
     fetchLoggedInUserInfo();
@@ -372,7 +373,19 @@ function Calendrier({ route }) {
         </View>
       </View>
     </Modal>
-  );
+  ); 
+  
+  // Fonction pour récupérer le nombre de paires pour un événement
+  const handleShowPairsCount = async (eventId) => {
+    try {
+      // Effectuez une requête pour récupérer le nombre de paires pour l'événement spécifié
+      const response = await axios.get(`${BASE_URL}/paires/count/${eventId}`);
+      setPairsCount(response.data.count); // Mettez à jour l'état avec le nombre de paires
+      setSelectedEvent(eventId); // Mettez à jour l'événement sélectionné
+    } catch (error) {
+      console.error("Erreur lors de la récupération du nombre de paires", error);
+    }
+  };
 
   const renderEventsForDate = () => {
 
@@ -395,8 +408,15 @@ function Calendrier({ route }) {
             <Text style={styles.eventTitle}>{event.title}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
-            
 
+              {/* Bouton pour afficher le nombre de paires */}
+              <TouchableOpacity onPress={() => handleShowPairsCount(event.id)}>
+              <Text style={styles.showPairsButton}>Afficher le nombre de paires</Text>
+            </TouchableOpacity>
+            {/* Afficher le nombre de paires pour l'événement sélectionné */}
+            {selectedEvent === event.id && (
+              <Text style={styles.pairsCountText}>Nombre de paires : {pairsCount}</Text>
+            )}
           
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
