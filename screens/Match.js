@@ -30,7 +30,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 200000);
+    }, 2000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -657,7 +657,7 @@ const Match = () => {
       paddingLeft: 15
     },
     highlightedUser: {
-      color: 'red',
+      color: '#467c86',
       fontWeight: 'bold',
 
     },

@@ -173,14 +173,7 @@ const styles = StyleSheet.create({
     margin: 10,
     color: '#000'
   },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 15,
-    backgroundColor: "#E4ECF1",
-  },
+  
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -210,7 +203,54 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "center",
 
-  }
+  },  
+  button: {
+    alignItems: "center",
+    backgroundColor: "#467c86",
+    padding: 10,
+    borderRadius: 15, // Augmenté pour plus de courbure
+    margin: 5, // Ajout d'une marge entre les boutons
+    borderColor: "#000000", // Bordure noire
+    borderWidth: 1, // Bordure fine
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  input: {
+    height: 50,
+    borderColor: "#B0C4DE",
+    borderWidth: 1,
+    marginBottom: 15,
+    paddingLeft: 15,
+    borderRadius: 15, // Augmenté pour plus de courbure
+    backgroundColor: "#F8F8FF",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: "#FFFFFF",
+  },
+  title: {
+    fontSize: 24, // Taille de police importante pour le titre
+    color: "#467c86", // Couleur harmonieuse avec le style du bouton
+    textAlign: "center", // Alignement centré
+    marginTop: 20, // Espace en dessous du titre
+    marginBottom: 20,
+    fontWeight:'bold'
+  },
+  
 });
 
 export default styles;

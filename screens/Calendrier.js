@@ -55,7 +55,7 @@ function Calendrier({ route }) {
   const [date, setDate] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
-
+const [isFormVisible, setIsFormVisible] = useState(false); 
   const COLORS = ['red', 'green', 'blue', 'orange'];
   const data = [
     { key: "1", value: "Random" },
@@ -104,35 +104,35 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
-  
+
       // Afficher les valeurs initiales de date et time
       console.log("Date initiale:", date);
       console.log("Heure initiale:", time);
-  
+
       const combinedDateTime = moment(date).set({
         hour: time.getHours(),
         minute: time.getMinutes()
       }).toISOString();
-  
+
       // Vérifier la valeur de combinedDateTime
       console.log("combinedDateTime:", combinedDateTime);
-  
+
       // Convertissez la date et l'heure en un format valide pour PostgreSQL
       const dateTime = moment.tz(
         `${combinedDateTime}`,
         "YYYY-MM-DDTHH:mm:ss.SSSZ", // Format d'entrée
         "UTC" // Fuseau horaire source (UTC)
       ).tz("Europe/Paris"); // Fuseau horaire cible (votre fuseau horaire)
-  
+
       // Vérifier la valeur de dateTime
       console.log("dateTime:", dateTime);
-  
+
       // Utilisez la méthode format pour obtenir la date et l'heure au format ISO 8601
       const formattedDateTime = dateTime.format();
-  
+
       // Vérifier la valeur de formattedDateTime
       console.log("formattedDateTime:", formattedDateTime);
-  
+
       await axios.post("http://192.168.1.6:3030/event/postcalendar", {
         title,
         type,
@@ -142,7 +142,7 @@ function Calendrier({ route }) {
         user_id: loggedInUser.id,
         terrain_id: 1,
       });
-  
+
       // Vérifier les données envoyées
       console.log("Données envoyées à l'API:", {
         title,
@@ -153,13 +153,13 @@ function Calendrier({ route }) {
         user_id: loggedInUser.id,
         terrain_id: 1,
       });
-  
+
       fetchEvents();
     } catch (error) {
       console.error("Erreur lors de la création de l'événement", error);
     }
   };
-  
+
 
   const fetchLoggedInUserInfo = async () => {
     try {
@@ -664,46 +664,52 @@ function Calendrier({ route }) {
         {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
         {isAdmin && (
           <>
-            <TextInput
-              style={styles.input}
-              placeholder="Titre"
-              value={title}
-              onChangeText={(text) => setTitle(text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Type"
-              value={type}
-              onChangeText={(text) => setType(text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Date"
-              value={date}
-              onChangeText={(text) => setDate(text)}
-            />
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="time"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-              textColor="black"
-            />
+            <View>
+              <Text style={styles.title}>Formulaire</Text>
 
-            <Button title="Choisir l'heure" onPress={() => setDatePickerVisibility(true)} />
 
-            <View style={styles.inputContainer}>
-              <SelectList
-                placeholder="status"
-                setSelected={(val) => setStatus(val)}
-                data={data}
-                save="value"
-                style={styles.choix}
+              <TextInput
+                style={styles.input}
+                placeholder="Titre"
+                value={title}
+                onChangeText={(text) => setTitle(text)}
               />
-
+              <TextInput
+                style={styles.input}
+                placeholder="Type"
+                value={type}
+                onChangeText={(text) => setType(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Date"
+                value={date}
+                onChangeText={(text) => setDate(text)}
+              />
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="time"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+                textColor="black"
+              />
+              <View style={styles.inputContainer}>
+                <SelectList
+                  placeholder="status"
+                  setSelected={(val) => setStatus(val)}
+                  data={data}
+                  save="value"
+                  style={styles.choix}
+                />
+              </View>
+              <TouchableOpacity style={styles.button} onPress={() => setDatePickerVisibility(true)}>
+                <Text style={styles.buttonText}>Choisir l'heure</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={createEvent}>
+                <Text style={styles.buttonText}>Créer un événement</Text>
+              </TouchableOpacity>
 
             </View>
-            <Button title="Créer un événement" onPress={createEvent} />
           </>
         )}
         <Text style={styles.eventTitle2}>Événements  :</Text>
