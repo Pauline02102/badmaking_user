@@ -1,3 +1,5 @@
+
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 // Importez les routes après avoir configuré les middleware et le pool de connexion
@@ -11,10 +13,25 @@ const participation_jeu = require("./participation_jeu/participation_jeu.js");
 const poule = require("./poule/poule.js");
 const resultat = require("./resultat/resultat.js");
 
+
 const user_tokens = require("./user_tokens/user_tokens.js");
 const users = require("./users/users.js");
+console.log('DB Host:', process.env.DB_HOST);
+console.log('DB User:', process.env.DB_USER);
+// ... et ainsi de suite pour les autres variables
 
 const app = express();
+
+const db = require('./db.js'); // Remplacez par le chemin vers votre fichier de configuration de base de données
+
+db.query('SELECT NOW()', [])
+  .then(res => {
+    console.log("Connexion à la base de données PostgreSQL réussie, heure actuelle :", res[0].now);
+  })
+  .catch(err => {
+    console.error("Erreur lors de la connexion à la base de données PostgreSQL :", err);
+  });
+
 app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 

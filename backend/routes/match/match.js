@@ -1,7 +1,7 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -27,7 +27,7 @@ const port = process.env.PORT || 3030;
 
 // post pour créer toutes les combinaisons de matchs 
 router.post("/creerMatchs", async (req, res) => {
-    const client = await pool.connect();
+    const client = await db.connect();
     try {
         await client.query('BEGIN');
 
@@ -36,7 +36,7 @@ router.post("/creerMatchs", async (req, res) => {
         SELECT DISTINCT poule 
         FROM poule;
       `);
-        const poulesExistantes = poulesExistantesResult.rows.map(row => row.poule);
+        const poulesExistantes = poulesExistantesResult.map(row => row.poule);
 
         // Récupérer les paires pour chaque poule
         const poulesResult = await client.query(`
@@ -47,7 +47,7 @@ router.post("/creerMatchs", async (req, res) => {
 
         // Regrouper les paires par poule
         const pairesParPoule = {};
-        poulesResult.rows.forEach(row => {
+        poulesResult.forEach(row => {
             if (!pairesParPoule[row.poule]) {
                 pairesParPoule[row.poule] = [];
             }
@@ -123,8 +123,8 @@ router.get("/recupererMatchs", async (req, res) => {
         JOIN event e ON p1.event_id = e.id
         WHERE e.date >= CURRENT_DATE - INTERVAL '2 day';
       `;
-        const result = await pool.query(query);
-        res.json(result.rows);
+        const result = await db.query(query);
+        res.json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la récupération des matchs" });

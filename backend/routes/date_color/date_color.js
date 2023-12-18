@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -97,11 +97,11 @@ router.get("/getColorForDate/:date", async (req, res) => {
 router.get("/getAllDateColors", async (req, res) => {
     try {
         const query = "SELECT * FROM date_color";
-        const result = await pool.query(query);
+        const result = await db.query(query);
 
-        if (result.rows.length > 0) {
+        if (result && result && result.length > 0) {
             const dateColors = {};
-            result.rows.forEach((row) => {
+            result.forEach((row) => {
                 dateColors[row.date] = row.color;
             });
             res.status(200).json(dateColors);

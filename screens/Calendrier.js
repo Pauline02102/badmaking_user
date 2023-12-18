@@ -22,7 +22,7 @@ import DatePicker from 'react-native-date-picker'
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from './config';
-
+import { useUser } from "./UserContext";
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
@@ -38,25 +38,22 @@ function Calendrier({ route }) {
   const [legendVisible, setLegendVisible] = useState(false);
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
-
+  const { setIsSignedIn } = useUser();
+  const [selectedEvent, setSelectedEvent] = useState(null); // État pour stocker l'événement sélectionné
+  const [pairsCount, setPairsCount] = useState(0); // État pour stocker le nombre de paires
 
   useEffect(() => {
     fetchLoggedInUserInfo();
     fetchEvents();
     fetchDateColors();
 
-    /*fetchDateColors().th §en((colors) => {
-      setCustomDatesStyles(colors);
-    });*/
     moment.locale('fr');
 
     const refreshInterval = setInterval(() => {
       fetchLoggedInUserInfo();
       fetchEvents();
       fetchDateColors();
-      /*fetchDateColors().then((colors) => {
-        setCustomDatesStyles(colors);
-      });*/
+
     }, 3000);
 
     return () => {
@@ -83,7 +80,8 @@ function Calendrier({ route }) {
         setLoggedInUser(data.user);
 
       } else {
-        console.error('Raté pour fetch user info:', data.message);
+        console.error('Raté pour fetch user info page calendrier:', data.message);
+        setIsSignedIn(false);
       }
     } catch (error) {
       console.error('Erreur pour fetch les info des users:', error);

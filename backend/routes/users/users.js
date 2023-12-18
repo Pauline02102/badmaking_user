@@ -1,12 +1,11 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
 
-  
 
 const cors = require("cors");
 
@@ -40,28 +39,22 @@ router.post("/postusers", async (req, response) => {
 
         const values = [nom, prenom, role, email, hashedPassword];
 
-        pool.query(query, values, (err, res) => {
-            if (err) {
-                console.error(err);
-                response
-                    .status(500)
-                    //.send("Erreur lors de l'insertion de l'utilisateur");
-                    .json({ message: "Erreur lors de l'insertion de l'utilisateur" });
-            } else {
-                //  response.status(200).send("Utilisateur ajouté");
-                const id = res.rows[0].id; // Récupère l'ID de l'utilisateur nouvellement inséré
-                response
-                    .status(200)
-                    .json({ id: id, prenom: prenom, message: "Utilisateur ajouté" });
-            }
-        });
+        // Use await to execute the query and retrieve the result
+        const result = await db.query(query, values);
+
+        // Check if the query was successful
+        if (result.rowCount === 1) {
+            const id = result[0].id;
+            response.status(200).json({ id: id, prenom: prenom, message: "Utilisateur ajouté" });
+        } else {
+            response.status(500).json({ message: "Erreur lors de l'insertion de l'utilisateur" });
+        }
     } catch (error) {
         console.error(error);
-        response
-            .status(500)
-            .json({ message: "Erreur lors de la récupération des données" });
+        response.status(500).json({ message: "Erreur lors de la récupération des données" });
     }
 });
+
 
 
 module.exports = router;

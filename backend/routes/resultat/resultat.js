@@ -1,6 +1,6 @@
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -40,8 +40,8 @@ router.get('/joueurs_resultats', async (req, res) => {
         GROUP BY user_id, prenom, nom
         ORDER BY total_victoires DESC
       `;
-        const players = await pool.query(playersQuery);
-        res.status(200).json(players.rows);
+        const players = await db.query(playersQuery);
+        res.status(200).json(players);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la récupération des joueurs" });
@@ -65,11 +65,11 @@ router.get('/check-match-result', async (req, res) => {
         FROM resultat
         WHERE match_id = $1 AND user_id = $2
       `;
-        const existingResult = await pool.query(existingResultQuery, [match_id, user_id]);
+        const existingResult = await db.query(existingResultQuery, [match_id, user_id]);
 
-        if (existingResult.rows.length > 0) {
+        if (existingResult.length > 0) {
             // L'utilisateur a déjà enregistré un résultat
-            return res.status(200).json({ resultExists: true, victory: existingResult.rows[0].victoire, defeat: existingResult.rows[0].defaite });
+            return res.status(200).json({ resultExists: true, victory: existingResult[0].victoire, defeat: existingResult[0].defaite });
         }
 
         // Aucun résultat trouvé
@@ -87,8 +87,8 @@ router.post('/report-match-result', async (req, res) => {
 
         // Recherche d'un résultat existant pour l'utilisateur et le match
         const existingResultQuery = `SELECT * FROM resultat WHERE match_id = $1 AND user_id = $2`;
-        const existingResult = await pool.query(existingResultQuery, [match_id, user_id]);
-        if (existingResult.rows.length > 0) {
+        const existingResult = await db.query(existingResultQuery, [match_id, user_id]);
+        if (existingResult.length > 0) {
             // Avant de mettre à jour, vérifier s'il y a un conflit avec les résultats des adversaires
 
             // Récupérer les identifiants des paires du match
@@ -96,8 +96,8 @@ router.post('/report-match-result', async (req, res) => {
           SELECT paire1, paire2 FROM match
           WHERE id = $1
         `;
-            const pairsResult = await pool.query(pairsQuery, [match_id]);
-            const { paire1, paire2 } = pairsResult.rows[0];
+            const pairsResult = await db.query(pairsQuery, [match_id]);
+            const { paire1, paire2 } = pairsResult[0];
 
             // Récupérer les identifiants des joueurs pour chaque paire
             const playersQuery = `
@@ -105,8 +105,8 @@ router.post('/report-match-result', async (req, res) => {
           UNION
           SELECT user1, user2 FROM paires WHERE id = $2
         `;
-            const playersResult = await pool.query(playersQuery, [paire1, paire2]);
-            const players = playersResult.rows;
+            const playersResult = await db.query(playersQuery, [paire1, paire2]);
+            const players = playersResult;
 
             // Identifier l'équipe du joueur actuel et l'équipe adverse
             let myTeam = [];
@@ -125,8 +125,8 @@ router.post('/report-match-result', async (req, res) => {
           FROM resultat
           WHERE match_id = $1 AND (user_id = ANY($2))
         `;
-            const opponentResults = await pool.query(opponentResultsQuery, [match_id, opponentTeam]);
-            const opponentData = opponentResults.rows[0];
+            const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
+            const opponentData = opponentResults[0];
 
             // Vérifier les conflits de résultat
             if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
@@ -139,7 +139,7 @@ router.post('/report-match-result', async (req, res) => {
           SET victoire = $3, defaite = $4
           WHERE match_id = $1 AND user_id = $2
         `;
-            await pool.query(updateQuery, [match_id, user_id, victoire, defaite]);
+            await db.query(updateQuery, [match_id, user_id, victoire, defaite]);
             return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
         }
 
@@ -150,8 +150,8 @@ router.post('/report-match-result', async (req, res) => {
         WHERE match_id = $1
         GROUP BY match_id
       `;
-        const checkResult = await pool.query(checkQuery, [match_id]);
-        const matchResult = checkResult.rows[0];
+        const checkResult = await db.query(checkQuery, [match_id]);
+        const matchResult = checkResult[0];
 
         // Logique pour éviter plus de 2 victoires ou défaites
         if (matchResult) {
@@ -165,8 +165,8 @@ router.post('/report-match-result', async (req, res) => {
         SELECT paire1, paire2 FROM match
         WHERE id = $1
       `;
-        const pairsResult = await pool.query(pairsQuery, [match_id]);
-        const { paire1, paire2 } = pairsResult.rows[0];
+        const pairsResult = await db.query(pairsQuery, [match_id]);
+        const { paire1, paire2 } = pairsResult[0];
 
         // Récupérer les identifiants des joueurs pour chaque paire
         const playersQuery = `
@@ -174,8 +174,8 @@ router.post('/report-match-result', async (req, res) => {
         UNION
         SELECT user1, user2 FROM paires WHERE id = $2
       `;
-        const playersResult = await pool.query(playersQuery, [paire1, paire2]);
-        const players = playersResult.rows;
+        const playersResult = await db.query(playersQuery, [paire1, paire2]);
+        const players = playersResult;
 
         // Identifier l'équipe du joueur actuel et l'équipe adverse
         let myTeam = [];
@@ -194,8 +194,8 @@ router.post('/report-match-result', async (req, res) => {
         FROM resultat
         WHERE match_id = $1 AND (user_id = ANY($2))
       `;
-        const opponentResults = await pool.query(opponentResultsQuery, [match_id, opponentTeam]);
-        const opponentData = opponentResults.rows[0];
+        const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
+        const opponentData = opponentResults[0];
 
         // Vérifier les conflits de résultat
         if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
@@ -208,7 +208,7 @@ router.post('/report-match-result', async (req, res) => {
         INSERT INTO resultat (match_id, user_id, victoire, defaite)
         VALUES ($1, $2, $3, $4)
       `;
-        await pool.query(insertQuery, [match_id, user_id, victoire, defaite]);
+        await db.query(insertQuery, [match_id, user_id, victoire, defaite]);
 
         res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
         console.log({ message: "Le résultat du match a été signalé avec succès." });

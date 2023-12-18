@@ -2,12 +2,12 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db = require("../db.js");
 
 const router = express.Router();
 
 
-  
+
 
 const cors = require("cors");
 
@@ -28,7 +28,7 @@ const port = process.env.PORT || 3030;
 const cron = require('node-cron');
 
 cron.schedule('* * * * *', async () => {
-    const client = await pool.connect();
+    const client = await db.connect();
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
     try {
@@ -41,10 +41,13 @@ cron.schedule('* * * * *', async () => {
     WHERE date BETWEEN NOW() AND NOW() + INTERVAL '2 MINUTES'
     AND paire_creer = false`;
         const { rows: upcomingEvents } = await client.query(eventQuery);
+        console.log('upcomingEvents:', upcomingEvents);
+        if (upcomingEvents && Array.isArray(upcomingEvents)) {
+            for (const event of upcomingEvents) {
+                console.log('upcomingEvents:', upcomingEvents);
 
-        for (const event of upcomingEvents) {
-            // Fetch participants for the event
-            const participantsQuery = `
+                // Fetch participants for the event
+                const participantsQuery = `
         SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
                u.classement_double, u.classement_mixte, 
                TO_CHAR(e.date,'YYYY-MM-DD') AS "date",
@@ -53,20 +56,25 @@ cron.schedule('* * * * *', async () => {
         JOIN users AS u ON p.user_id = u.id
         JOIN event AS e ON p.event_id = e.id
         WHERE p.participation = 'True' AND p.event_id = $1`;
-            const { rows: participants } = await client.query(participantsQuery, [event.id]);
+                const { rows: participants } = await client.query(participantsQuery, [event.id]);
 
-            if (event.status === 'Random') {
-                console.log(`Paire random crée pour l'event : ${event.id}`);
-                await handleCreerPaires(participants);
-            } else if (event.status === 'par niveau') {
-                console.log(`Paire par classement crée pour l'event : ${event.id}`);
-                await handleCreerPairesParClassement(participants);
+                if (event.status === 'Random') {
+                    console.log(`Paire random crée pour l'event : ${event.id}`);
+                    await handleCreerPaires(participants);
+                } else if (event.status === 'par niveau') {
+                    console.log(`Paire par classement crée pour l'event : ${event.id}`);
+                    await handleCreerPairesParClassement(participants);
+                }
+                await createPools(event.id);
+                await createMatches(event.id);
+                // Update the event as pairs created
+                const updateEventQuery = `UPDATE event SET paire_creer = true WHERE id = $1`;
+                await client.query(updateEventQuery, [event.id]);
+                console.log('upcomingEvents:', upcomingEvents);
+
             }
-            await createPools(event.id);
-            await createMatches(event.id);
-            // Update the event as pairs created
-            const updateEventQuery = `UPDATE event SET paire_creer = true WHERE id = $1`;
-            await client.query(updateEventQuery, [event.id]);
+        } else {
+            console.log('No upcoming events found or unexpected format.');
         }
     } catch (error) {
         console.error('Error in scheduled task: ', error);

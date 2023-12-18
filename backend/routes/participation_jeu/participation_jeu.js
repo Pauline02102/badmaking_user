@@ -1,7 +1,7 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -36,8 +36,8 @@ router.get("/ouiparticipationjeulibre/:selectedDate", async (req, res) => {
         WHERE p.participation = 'True' AND DATE(p.date) = DATE('${selectedDate}');
       `;
 
-        const participations = await pool.query(query);
-        res.json(participations.rows);
+        const participations = await db.query(query);
+        res.json(participations);
     } catch (error) {
         console.error(error);
         res

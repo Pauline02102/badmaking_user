@@ -1,6 +1,6 @@
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -81,8 +81,8 @@ router.get("/ouiparticipation", async (req, res) => {
         
         ;
       `;
-        const events = await pool.query(query);
-        res.json(events.rows);
+        const events = await db.query(query);
+        res.json(events);
     } catch (error) {
         console.error(error);
         res
@@ -91,4 +91,4 @@ router.get("/ouiparticipation", async (req, res) => {
     }
 });
 
-module.exports = router;
+ module.exports = router;

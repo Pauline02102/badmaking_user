@@ -21,13 +21,12 @@ const LoginScreen = () => {
     try {
       const loginData = {
         
-        prenom,
-        email,
-        password,
-        nom
+        prenom:prenom,
+        email: email,
+        password: password,
       };
 
-      const response = await fetch(`${BASE_URL}/user_tokens/login`, {
+      const response = await fetch(`http://192.168.1.6:3030/user_tokens/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

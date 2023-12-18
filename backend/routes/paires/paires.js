@@ -1,8 +1,8 @@
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 const router = express.Router();
-  
+
 
 const cors = require("cors");
 
@@ -22,7 +22,7 @@ const port = process.env.PORT || 3030;
 
 //forme les paires en melangeant les joueurs et en faisant attention a l'event_id
 router.post("/formerPaires", async (req, res) => {
-    const client = await pool.connect();
+    const client = await db.connect();
     try {
         await client.query('BEGIN');
 
@@ -67,7 +67,7 @@ router.post("/formerPaires", async (req, res) => {
 
 //paire aleatoire 
 router.post("/formerPaireParClassementDouble", async (req, res) => {
-    const client = await pool.connect();
+    const client = await db.connect();
     let responseSent = false;
     try {
         await client.query('BEGIN');
@@ -198,13 +198,40 @@ router.get("/recupererPaires", async (req, res) => {
         JOIN users u2 ON p.user2 = u2.id
         JOIN event e ON p.event_id = e.id;  -- Jointure avec la table event
       `;
-        const result = await pool.query(query);
-        res.json(result.rows);
+        const result = await db.query(query);
+        res.json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la récupération des paires" });
     }
 });
+// Récupère les paires avec les noms pour un ID d'événement spécifique
+router.get("/recupererPaires/:eventId", async (req, res) => {
+    try {
+        const eventId = req.params.eventId; // Récupère l'ID de l'événement depuis les paramètres de la requête
+        const query = `
+        SELECT p.id as pair_id, 
+               p.event_id,
+               e.title as nom_event,    -- Nom de l'événement
+              (  e.date + INTERVAL '1 hour') as date_event,    -- Ajout de la date de l'événement
+               u1.nom as user1_nom, 
+               u1.prenom as user1_prenom,
+               u2.nom as user2_nom,
+               u2.prenom as user2_prenom
+        FROM paires p
+        JOIN users u1 ON p.user1 = u1.id
+        JOIN users u2 ON p.user2 = u2.id
+        JOIN event e ON p.event_id = e.id
+        WHERE p.event_id = $1;  -- Filtrer par ID d'événement
+      `;
+        const result = await db.query(query, [eventId]); // Passer l'ID de l'événement en tant que paramètre
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erreur lors de la récupération des paires" });
+    }
+});
+
 // Fonction pour mélanger un tableau (Fisher-Yates shuffle)
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {

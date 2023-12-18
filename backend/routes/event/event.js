@@ -1,7 +1,7 @@
 
 
 const express = require("express");
-const pool = require("../db.js");
+const db= require("../db.js");
 
 const router = express.Router();
 
@@ -28,11 +28,11 @@ const port = process.env.PORT || 3030;
 router.post("/postcalendar", async (req, res) => {
     try {
         const { title, type, user_id, status, terrain_id, date } = req.body;
-        const newEvent = await pool.query(
+        const newEvent = await db.query(
             "INSERT INTO event (title,type,user_id,status,terrain_id,date ) VALUES ($1, $2, $3, $4,$5,$6)",
             [title, type, user_id, status, terrain_id, date]
         );
-        res.json(newEvent.rows[0]);
+        res.json(newEvent[0]);
         console.log("event crée");
     } catch (error) {
         console.error(error);
@@ -45,8 +45,8 @@ router.post("/postcalendar", async (req, res) => {
 // Récupérer tous les événements
 router.get("/calendar", async (req, res) => {
     try {
-        const events = await pool.query("SELECT * FROM event");
-        res.json(events.rows);
+        const events = await db.query("SELECT * FROM event");
+        res.json(events);
     } catch (error) {
         console.error(error);
         res
@@ -58,7 +58,7 @@ router.get("/calendar", async (req, res) => {
 router.delete("/calendar/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.query("DELETE FROM event WHERE id = $1", [id]);
+        await db.query("DELETE FROM event WHERE id = $1", [id]);
         res.json({ message: "Événement supprimé avec succès" });
     } catch (error) {
         console.error(error);

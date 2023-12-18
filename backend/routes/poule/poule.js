@@ -1,6 +1,6 @@
 
 const express = require("express");
-const pool = require("../db.js");
+const db = require("../db.js");
 const router = express.Router();
 
 const cors = require("cors");
@@ -22,7 +22,7 @@ const port = process.env.PORT || 3030;
 
 //post creation de poules
 router.post("/creerPoules", async (req, res) => {
-    const client = await pool.connect();
+    const client = await db.connect();
     try {
         await client.query('BEGIN');
 
@@ -34,7 +34,7 @@ router.post("/creerPoules", async (req, res) => {
 
         let messages = [];
 
-        for (const row of result.rows) {
+        for (const row of result) {
             const nombrePaires = parseInt(row.nombre_paires);
             const eventId = row.event_id;
 
@@ -79,7 +79,7 @@ router.post("/creerPoules", async (req, res) => {
             let indexPaire = 0;
             for (const taille of taillesPoules) {
                 for (let i = 0; i < taille; i++) {
-                    const paireId = paires.rows[indexPaire++].id;
+                    const paireId = paires[indexPaire++].id;
                     await client.query(`
               INSERT INTO poule (poule, paire_id)
               VALUES ($1, $2)
@@ -120,8 +120,8 @@ router.get("/recupererPoules", async (req, res) => {
         JOIN users u1 ON pa.user1 = u1.id
         JOIN users u2 ON pa.user2 = u2.id;
       `;
-        const result = await pool.query(query);
-        res.json(result.rows);
+        const result = await db.query(query);
+        res.json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la récupération des poules et des informations des joueurs" });

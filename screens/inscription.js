@@ -30,7 +30,7 @@ export default function SignupScreen() {
   
   const handleSignup = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/users/postusers`, { 
+      const response = await fetch(`http://192.168.1.6:3030/users/postusers`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,19 +51,7 @@ export default function SignupScreen() {
       if (response.status === 200) {
         console.log("Inscription réussie");
         //console.log({ prenom, id });
-        navigation.navigate("Login", {
-          nom: nom,
-          prenom: prenom,
-          email: email,
-          role: role,
-          id: data.id,
-          onProfilePress: () => navigation.navigate("Profil", {
-            nom: nom,
-            prenom: prenom,
-            email: email,
-            //id: data.id,
-          }) // Remplacez par la clé appropriée pour l'ID renvoyé par le serveur
-        });
+
       } else {
         // Gérer les autres cas d'erreur ou de réponse inattendue
         console.error("Erreur lors de l'inscription: Réponse inattendue du serveur");

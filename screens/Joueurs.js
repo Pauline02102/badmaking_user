@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from './config';
+import { useUser } from "./UserContext";
 const Joueurs = () => {
   const [joueurs, setJoueurs] = useState([]);
   const [recherche, setRecherche] = useState('');
   const [joueurSelectionne, setJoueurSelectionne] = useState(null);
   const [utilisateurConnecte, setUtilisateurConnecte] = useState(null);
-
+  const { setIsSignedIn } = useUser();
 
   const toggleJoueurSelectionne = (id) => {
     setJoueurSelectionne(joueurSelectionne === id ? null : id);
@@ -42,6 +43,7 @@ const Joueurs = () => {
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des informations de l\'utilisateur:', error);
+      setIsSignedIn(false);
     }
   };
 

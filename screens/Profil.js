@@ -38,7 +38,7 @@ const Profil = () => {
         console.error('page match : Token non trouvé');
         return;
       }
-      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, { 
+      const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -50,7 +50,7 @@ const Profil = () => {
         setLoggedInUser(data.user);
         console.log(data.user);
       } else {
-        console.error('Raté pour fetch user info:', data.message);
+        console.error('Raté pour fetch user info page profil :', data.message);
       }
     } catch (error) {
       console.error('Erreur pour fetch les info des users:', error);
