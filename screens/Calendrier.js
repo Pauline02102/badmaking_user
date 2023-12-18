@@ -39,9 +39,6 @@ function Calendrier({ route }) {
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const { setIsSignedIn } = useUser();
-  const [selectedEvent, setSelectedEvent] = useState(null); // État pour stocker l'événement sélectionné
-  const [pairsCount, setPairsCount] = useState(0); // État pour stocker le nombre de paires
-
 
 
   useEffect(() => {
@@ -56,7 +53,7 @@ function Calendrier({ route }) {
       fetchEvents();
       fetchDateColors();
 
-    }, 3000);
+    }, 3000000);
 
     return () => {
       clearInterval(refreshInterval);
@@ -83,11 +80,11 @@ function Calendrier({ route }) {
 
       } else {
         console.error('Raté pour fetch user info page calendrier:', data.message);
-        setIsSignedIn(false);
+
       }
     } catch (error) {
       console.error('Erreur pour fetch les info des users:', error);
-    
+
     }
   };
 
@@ -141,17 +138,6 @@ function Calendrier({ route }) {
   //participation event
   const handleParticipation = async (eventId, participation) => {
     try {
-      // Vérifier si selectedDate est une instance de Date
-      let dateUTC;
-      if (selectedDate instanceof Date) {
-        dateUTC = selectedDate.toISOString();
-      } else if (typeof selectedDate === 'string') {
-        // Convertir depuis une chaîne, si nécessaire
-        dateUTC = new Date(selectedDate).toISOString();
-      } else {
-        console.error("selectedDate n'est pas une date valide");
-        return;
-      }
 
       if (!loggedInUser || !loggedInUser.id) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
@@ -164,13 +150,13 @@ function Calendrier({ route }) {
           participation,
           id: loggedInUser.id, // Utiliser l'ID de loggedInUser
           prenom: loggedInUser.prenom, // Utiliser le prénom de loggedInUser
-          date: dateUTC,
+ 
         }
       );
 
       if (participation === "Oui") {
-        console.log("ID de l'utilisateur:", id); // Vérifiez si l'ID est correctement défini
-        console.log("Prénom de l'utilisateur:", prenom); // Vérifiez si le prénom est correctement défini
+ 
+      // Vérifiez si le prénom est correctement défini
         Alert.alert("Confirmation", "Vous êtes inscrit à l'événement!", [
           {
             text: "OK",
@@ -181,7 +167,7 @@ function Calendrier({ route }) {
 
       await fetchEvents();
       console.log("Participation validée");
-      console.log(dateUTC);
+  
     } catch (error) {
       console.error("Erreur lors de la mise à jour de la participation", error);
       if (error.response) {
@@ -373,22 +359,13 @@ function Calendrier({ route }) {
         </View>
       </View>
     </Modal>
-  ); 
-  
-  // Fonction pour récupérer le nombre de paires pour un événement
-  const handleShowPairsCount = async (eventId) => {
-    try {
-      // Effectuez une requête pour récupérer le nombre de paires pour l'événement spécifié
-      const response = await axios.get(`${BASE_URL}/paires/count/${eventId}`);
-      setPairsCount(response.data.count); // Mettez à jour l'état avec le nombre de paires
-      setSelectedEvent(eventId); // Mettez à jour l'événement sélectionné
-    } catch (error) {
-      console.error("Erreur lors de la récupération du nombre de paires", error);
-    }
-  };
+  );
+
+
+
+
 
   const renderEventsForDate = () => {
-
 
 
     if (
@@ -409,15 +386,6 @@ function Calendrier({ route }) {
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
 
-              {/* Bouton pour afficher le nombre de paires */}
-              <TouchableOpacity onPress={() => handleShowPairsCount(event.id)}>
-              <Text style={styles.showPairsButton}>Afficher le nombre de paires</Text>
-            </TouchableOpacity>
-            {/* Afficher le nombre de paires pour l'événement sélectionné */}
-            {selectedEvent === event.id && (
-              <Text style={styles.pairsCountText}>Nombre de paires : {pairsCount}</Text>
-            )}
-          
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                 <Icon name="check-circle" size={30} color="green" />
@@ -428,7 +396,7 @@ function Calendrier({ route }) {
             </View>
           </View>
         ))}
-       
+
       </View>
     );
 
@@ -467,6 +435,7 @@ function Calendrier({ route }) {
           <Button title="Confirmer l'heure" onPress={confirmTime} />
         )}
       </View>
+    
     </ScrollView>
   );
 }

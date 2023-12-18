@@ -188,7 +188,7 @@ const Match = () => {
           setLoggedInUser(data.user);
         } else {
           console.error('Raté pour fetch user info page match:', data.message);
-          setIsSignedIn(false);
+      
         }
       } catch (error) {
         console.error('Erreur pour fetch les info des users:', error);
