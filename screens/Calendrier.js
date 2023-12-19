@@ -54,6 +54,8 @@ function Calendrier({ route }) {
   const [date, setDate] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
+  const [colorsApplied, setColorsApplied] = useState(false);
+
 
   const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
   const data = [
@@ -776,8 +778,9 @@ function Calendrier({ route }) {
           >
             <View style={styles.modalContainer}>
               <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
-              {COLORS.map((color) => (
+              {COLORS.map((color,index) => (
                 <TouchableOpacity
+                  key={index}
                   style={[styles.colorOption, { backgroundColor: color }]}
                   onPress={() => {
                     changeTerrainColor(color);
