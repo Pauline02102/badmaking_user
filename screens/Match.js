@@ -537,7 +537,7 @@ const Match = () => {
     headerRow: {
       // Style pour l'en-tête du tableau
       flexDirection: 'row',
-      backgroundColor: '#007AFF', // Couleur d'arrière-plan pour l'en-tête
+      backgroundColor: '#467c86', // Couleur d'arrière-plan pour l'en-tête
       borderBottomWidth: 1,
       borderBottomColor: '#000',
       borderColor: '#121f2d',

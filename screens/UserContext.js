@@ -11,12 +11,15 @@ const UserContext = createContext(null);
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  // Mettez à disposition l'état isSignedIn et la fonction setIsSignedIn
+  const [userRole, setUserRole] = useState(null); // pour le rôle
+
   const contextValue = {
     isSignedIn,
     setIsSignedIn,
     user,
-    setUser
+    setUser,
+    userRole,    
+    setUserRole
   };
 
   return (

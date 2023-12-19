@@ -632,18 +632,20 @@ function Calendrier({ route }) {
         {events[selectedDate].map((event) => (
 
           <View key={event.id} style={styles.eventItem}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
+            <Text style={styles.eventTitle}>{event.status}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
+          
             <ParticipantCount eventId={event.id} />
 
             <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
               <Icon name="person" size={30} color="blue" />
             </TouchableOpacity>
+            {isAdmin && (
             <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
               <Icon name="edit" size={30} color="purple" />
             </TouchableOpacity>
-
+            )}
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                 <Icon name="check-circle" size={30} color="green" />

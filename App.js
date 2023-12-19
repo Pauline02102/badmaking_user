@@ -4,7 +4,7 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { UserProvider } from './screens/UserContext';
+import { UserProvider, useUser } from './screens/UserContext';
 
 import Calendrier from "./screens/Calendrier";
 
@@ -16,7 +16,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { AntDesign } from '@expo/vector-icons';
 import inscription from "./screens/inscription";
-import { useUser } from "./screens/UserContext";
+import { BASE_URL } from './screens/config';
 import GestionEvent from './screens/gestionEvent';
 
 const AuthStack = createStackNavigator();
@@ -55,6 +55,7 @@ function AuthStackNavigator() {
 }
 
 function AppTabs() {
+  const { userRole } = useUser();
   return (
     <Tabs.Navigator>
       <Tabs.Screen name="Calendrier" component={Calendrier} options={{
@@ -82,13 +83,16 @@ function AppTabs() {
 
         ),
       }} />
-      <Tabs.Screen name="Gestion d'évenement" component={GestionEvent} options={{
-        tabBarLabel: "Gestion d'évenement",
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="account-edit" size={24} color="black" />
 
-        ),
-      }} />
+      {userRole === 'admin' && (
+        <Tabs.Screen name="Gestion d'évenement" component={GestionEvent} options={{
+          tabBarLabel: "Gestion d'évenement",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account-edit" size={24} color="black" />
+
+          ),
+        }} />
+      )}
     </Tabs.Navigator>
   );
 }
@@ -101,19 +105,47 @@ export default function App() {
   );
 }
 
+
+
+const fetchUserRole = async (token) => {
+  try {
+    const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, { 
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log("role", data.user.role , ": prenom", data.user.prenom)
+      return data.user.role; 
+      
+    } else {
+      throw new Error(data.message || 'Impossible de récupérer le rôle de l\'utilisateur.');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération du rôle de l\'utilisateur:', error);
+    return null; 
+  }
+};
+
 function AppContent() {
-  const { isSignedIn, setIsSignedIn } = useUser();
+  const { isSignedIn, setIsSignedIn, setUserRole } = useUser();
 
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('userToken');
       if (token) {
         setIsSignedIn(true);
+        const role = await fetchUserRole(token);
+        setUserRole(role);
       }
     };
 
     checkToken();
-  }, [setIsSignedIn]);
+  }, [setIsSignedIn, setUserRole]);
 
   return (
     <NavigationContainer>

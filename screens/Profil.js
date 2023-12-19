@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: "#467c86",
+    color: "#123e53",
   },
   infoContainer: {
     backgroundColor: "#f9f9f9",
