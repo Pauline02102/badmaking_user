@@ -206,10 +206,10 @@ function Calendrier({ route }) {
 
       let body;
       if (currentColor === 'white') {
-    
-        body = { date: selectedDate, color: null }; 
+
+        body = { date: selectedDate, color: null };
       } else {
-      
+
         body = { date: selectedDate, color: currentColor };
       }
 
@@ -226,29 +226,29 @@ function Calendrier({ route }) {
       const updatedCustomDatesStyles = { ...customDatesStyles };
 
       if (currentColor === 'white') {
-        // When removing the color, reset to default styles
+
         updatedCustomDatesStyles[selectedDate] = {
           customStyles: {
-            container: {}, // Empty container styles will revert to default
+            container: {},
             text: {
-              color: 'black' // Set text color to black or any default color
+              color: 'black'
             },
           },
         };
       } else {
-        // Set the new color and ensure text color is white for visibility
+
         updatedCustomDatesStyles[selectedDate] = {
           customStyles: {
             container: {
               backgroundColor: currentColor,
             },
             text: {
-              color: 'white', // White text for colored backgrounds
+              color: 'white',
             },
           },
         };
       }
-      // Mettez à jour les styles personnalisés
+
       setCustomDatesStyles(updatedCustomDatesStyles);
 
       setColorModalVisible(false);
@@ -653,7 +653,7 @@ function Calendrier({ route }) {
               )}
 
               <TouchableOpacity
-                style={styles.closeButton}
+                style={styles.button}
                 onPress={() => setIsModalVisible(false)}
               >
                 <Text style={styles.closeButtonText}>Fermer</Text>
@@ -698,46 +698,55 @@ function Calendrier({ route }) {
         {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
         {isAdmin && (
           <>
-            <TextInput
-              style={styles.input}
-              placeholder="Titre"
-              value={title}
-              onChangeText={(text) => setTitle(text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Type"
-              value={type}
-              onChangeText={(text) => setType(text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Date"
-              value={date}
-              onChangeText={(text) => setDate(text)}
-            />
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="time"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-              textColor="black"
-            />
+            <View style={styles.formContainer}>
+              <Text style={styles.title}>Formulaire</Text>
 
-            <Button title="Choisir l'heure" onPress={() => setDatePickerVisibility(true)} />
+              <View style={[styles.inputContainer, { marginBottom: 18 }]}>
+                <SelectList
+                  placeholder="status"
+                  setSelected={(val) => setStatus(val)}
+                  data={data}
+                  save="value"
+                  style={styles.choix}
+                />
+              </View>
 
-            <View style={styles.inputContainer}>
-              <SelectList
-                placeholder="status"
-                setSelected={(val) => setStatus(val)}
-                data={data}
-                save="value"
-                style={styles.choix}
+              <TextInput
+                style={styles.input}
+                placeholder="Titre"
+                value={title}
+                onChangeText={(text) => setTitle(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Type"
+                value={type}
+                onChangeText={(text) => setType(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Date"
+                value={date}
+                onChangeText={(text) => setDate(text)}
+              />
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="time"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+                textColor="black"
               />
 
 
+              <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
+                <Text style={styles.buttonTextHeure}>Choisir l'heure</Text>
+              </TouchableOpacity>
+
+
+              <TouchableOpacity style={styles.button} onPress={createEvent}>
+                <Text style={styles.buttonText}>Créer un événement</Text>
+              </TouchableOpacity>
             </View>
-            <Button title="Créer un événement" onPress={createEvent} />
           </>
         )}
         <Text style={styles.eventTitle2}>Événements  :</Text>

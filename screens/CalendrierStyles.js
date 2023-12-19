@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "white",
     fontWeight: "bold",
-    textAlign: "center"
+    textAlign: "center",
   },
   closeButton: {
     backgroundColor: "#2196F3",
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   button: {
     alignItems: "center",
     backgroundColor: "#467c86",
-    padding: 10,
+    padding: 12,
     borderRadius: 15, // Augmenté pour plus de courbure
     margin: 5, // Ajout d'une marge entre les boutons
     borderColor: "#000000", // Bordure noire
@@ -244,11 +244,49 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24, // Taille de police importante pour le titre
-    color: "#467c86", // Couleur harmonieuse avec le style du bouton
+    color: "#123e53", // Couleur harmonieuse avec le style du bouton
     textAlign: "center", // Alignement centré
     marginTop: 20, // Espace en dessous du titre
     marginBottom: 20,
     fontWeight:'bold'
+  },
+  buttonHeure:{
+    alignItems: "Left",
+    height: 50,
+    backgroundColor: "#F8F8FF",
+    padding: 10,
+    paddingLeft: 15,
+    borderRadius: 15, // Augmenté pour plus de courbure
+    margin: 5, // Ajout d'une marge entre les boutons
+    borderColor: "#000000", // Bordure noire
+    borderWidth: 1, // Bordure fine
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonTextHeure:{
+    paddingTop:15,
+    fontSize: 15,
+    color: "#141607",
+  },
+  formContainer: {
+    borderWidth: 1, 
+    borderColor: 'gray',
+    borderRadius: 10, 
+    padding: 10,
+    backgroundColor: 'white', 
+    shadowColor: 'black', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.5, 
+    shadowRadius: 4,
+    elevation: 4, 
+    marginBottom: 17, 
+    marginTop : 20
   },
   
 });
