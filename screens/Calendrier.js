@@ -55,7 +55,7 @@ function Calendrier({ route }) {
   const [date, setDate] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
-const [isFormVisible, setIsFormVisible] = useState(false); 
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const COLORS = ['red', 'green', 'blue', 'orange'];
   const data = [
     { key: "1", value: "Random" },
@@ -155,6 +155,7 @@ const [isFormVisible, setIsFormVisible] = useState(false);
       });
 
       fetchEvents();
+      setIsFormVisible(false);
     } catch (error) {
       console.error("Erreur lors de la création de l'événement", error);
     }
@@ -409,6 +410,7 @@ const [isFormVisible, setIsFormVisible] = useState(false);
       setCustomDatesStyles(updatedCustomDatesStyles);
 
       setColorModalVisible(false);
+      setIsFormVisible(true);
     } catch (error) {
       console.error(
         "Erreur lors de l'association de la couleur à la date",
@@ -662,8 +664,63 @@ const [isFormVisible, setIsFormVisible] = useState(false);
           markingType="custom"
         />
         {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
-        {isAdmin && (
-          <>
+
+        <Text style={styles.eventTitle2}>Événements  :</Text>
+
+        {renderEventsForDate()}
+        {showTimePicker && (
+          <DateTimePicker
+            value={selectedTime}
+            mode="time"
+            is24Hour={true}
+            display="default"
+            onChange={onTimeSelected}
+
+          />
+
+        )}
+        {showConfirmButton && (
+          <Button title="Confirmer l'heure" onPress={confirmTime} />
+        )}
+
+
+        {isAdmin && isColorModalVisible && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isColorModalVisible}
+            onRequestClose={() => setColorModalVisible(false)}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
+              {COLORS.map((color) => (
+                <TouchableOpacity
+                  style={[styles.colorOption, { backgroundColor: color }]}
+                  onPress={() => {
+                    changeTerrainColor(color);
+                  }}
+                />
+              ))}
+              <TouchableOpacity
+                style={styles.closeButtonCouleur}
+                onPress={() => setColorModalVisible(false)}
+              >
+                <Text style={styles.closeButtonTextColor}>Fermer</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+
+        )}
+
+        {/* Modal pour le formulaire de création d'événement */}
+        <Modal
+          visible={isFormVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsFormVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+  
             <View>
               <Text style={styles.title}>Formulaire</Text>
 
@@ -710,50 +767,11 @@ const [isFormVisible, setIsFormVisible] = useState(false);
               </TouchableOpacity>
 
             </View>
-          </>
-        )}
-        <Text style={styles.eventTitle2}>Événements  :</Text>
-
-        {renderEventsForDate()}
-        {showTimePicker && (
-          <DateTimePicker
-            value={selectedTime}
-            mode="time"
-            is24Hour={true}
-            display="default"
-            onChange={onTimeSelected}
-
-          />
-
-        )}
-        {showConfirmButton && (
-          <Button title="Confirmer l'heure" onPress={confirmTime} />
-        )}
-        {isAdmin && isColorModalVisible && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isColorModalVisible}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
-              {COLORS.map((color) => (
-                <TouchableOpacity
-                  style={[styles.colorOption, { backgroundColor: color }]}
-                  onPress={() => {
-                    changeTerrainColor(color);
-                  }}
-                />
-              ))}
-              <TouchableOpacity
-                style={styles.closeButtonCouleur}
-                onPress={() => setColorModalVisible(false)}
-              >
-                <Text style={styles.closeButtonTextColor}>Fermer</Text>
-              </TouchableOpacity>
-            </View>
-          </Modal>
-        )}
+            <TouchableOpacity style={styles.button} onPress={() => setIsFormVisible(false)}>
+              <Text style={styles.buttonText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </View>
 
     </ScrollView>
