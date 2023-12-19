@@ -65,7 +65,7 @@ router.post("/postcalendar", async (req, res) => {
     // Exécution de la requête d'insertion avec pg-promise
     const newEvent = await db.query(
       "INSERT INTO event (title, user_id, status, terrain_id, date, heure) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [title, type, user_id, status, terrain_id, date, heure]
+      [title, user_id, status, terrain_id, date, heure]
     );
 
     // Vérifier si l'événement a été inséré et renvoyer les données

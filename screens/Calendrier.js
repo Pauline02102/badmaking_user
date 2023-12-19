@@ -8,7 +8,8 @@ import {
   Alert,
   Modal,
   Button,
-  TextInput
+  TextInput,
+  KeyboardAvoidingView
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
@@ -26,6 +27,7 @@ import { BASE_URL } from './config';
 import { useUser } from "./UserContext";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SelectList } from "react-native-dropdown-select-list";
+
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
@@ -83,7 +85,7 @@ function Calendrier({ route }) {
     return () => {
       clearInterval(refreshInterval);
     };
-  }, []); 
+  }, []);
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
@@ -611,7 +613,7 @@ function Calendrier({ route }) {
   const handleEditEvent = (eventId) => {
     navigation.navigate("Gestion d'évenement", { eventId });
   };
-  
+
 
   const renderEventsForDate = () => {
 
@@ -690,130 +692,137 @@ function Calendrier({ route }) {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView>
+        <View style={styles.container}>
+          <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
+            <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
+          </TouchableOpacity>
+          {legendVisible && <Legend />}
 
-    <ScrollView>
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
-          <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
-        </TouchableOpacity>
-        {legendVisible && <Legend />}
+          {isJoueur && (
+            <Calendar
+              onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
+              markedDates={customDatesStyles}
+              markingType="custom"
+            />
+          )}
 
-        {isJoueur && (
-          <Calendar
-            onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
-            markedDates={customDatesStyles}
-            markingType="custom"
-          />
-        )}
+          {isAdmin && (
+            <Calendar
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString);
+                setDate(day.dateString);
+                openColorModal();
+              }}
+              markedDates={customDatesStyles}
+              markingType="custom"
+            />
+          )}
+          {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
+          {isAdmin && (
+            <>
+              <View style={styles.formContainer}>
+                <Text style={styles.title}>Formulaire</Text>
 
-        {isAdmin && (
-          <Calendar
-            onDayPress={(day) => {
-              setSelectedDate(day.dateString);
-              setDate(day.dateString);
-              openColorModal();
-            }}
-            markedDates={customDatesStyles}
-            markingType="custom"
-          />
-        )}
-        {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
-        {isAdmin && (
-          <>
-            <View style={styles.formContainer}>
-              <Text style={styles.title}>Formulaire</Text>
+                <View style={[styles.inputContainer, { marginBottom: 18 }]}>
+                  <SelectList
+                    placeholder="status"
+                    setSelected={(val) => setStatus(val)}
+                    data={data}
+                    save="value"
+                    style={styles.choix}
+                  />
+                </View>
 
-              <View style={[styles.inputContainer, { marginBottom: 18 }]}>
-                <SelectList
-                  placeholder="status"
-                  setSelected={(val) => setStatus(val)}
-                  data={data}
-                  save="value"
-                  style={styles.choix}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Titre"
+                  value={title}
+                  onChangeText={(text) => setTitle(text)}
                 />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Date"
+                  value={date}
+                  onChangeText={(text) => setDate(text)}
+                />
+
+                <DateTimePickerModal
+                  isVisible={isDatePickerVisible}
+                  mode="time"
+                  onConfirm={handleConfirm}
+                  onCancel={hideDatePicker}
+                  textColor="black"
+
+                />
+
+
+                <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
+                  <Text style={styles.buttonTextHeure}>
+                    {time ? moment(time).format('HH:mm') : 'Choisir l\'heure'}
+                  </Text>
+                </TouchableOpacity>
+
+
+                <TouchableOpacity style={styles.button} onPress={createEvent}>
+                  <Text style={styles.buttonText}>Créer un événement</Text>
+                </TouchableOpacity>
               </View>
+            </>
+          )}
+          <Text style={styles.eventTitle2}>Événements  :</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Titre"
-                value={title}
-                onChangeText={(text) => setTitle(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Date"
-                value={date}
-                onChangeText={(text) => setDate(text)}
-              />
+          {renderEventsForDate()}
 
-              <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="time"
-                onConfirm={handleConfirm}
-                onCancel={hideDatePicker}
-                textColor="black"
-              />
+          {showTimePicker && (
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={onTimeSelected}
 
+            />
 
-              <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
-                <Text style={styles.buttonTextHeure}>Choisir l'heure</Text>
-              </TouchableOpacity>
+          )}
+          {showConfirmButton && (
+            <Button title="Confirmer l'heure" onPress={confirmTime} />
+          )}
 
-
-              <TouchableOpacity style={styles.button} onPress={createEvent}>
-                <Text style={styles.buttonText}>Créer un événement</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-        <Text style={styles.eventTitle2}>Événements  :</Text>
-
-        {renderEventsForDate()}
-
-        {showTimePicker && (
-          <DateTimePicker
-            value={selectedTime}
-            mode="time"
-            is24Hour={true}
-            display="default"
-            onChange={onTimeSelected}
-
-          />
-
-        )}
-        {showConfirmButton && (
-          <Button title="Confirmer l'heure" onPress={confirmTime} />
-        )}
-
-        {isAdmin && isColorModalVisible && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isColorModalVisible}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
-              {COLORS.map((color, index) => (
+          {isAdmin && isColorModalVisible && (
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={isColorModalVisible}
+            >
+              <View style={styles.modalContainer}>
+                <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
+                {COLORS.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.colorOption, { backgroundColor: color }]}
+                    onPress={() => {
+                      changeTerrainColor(color);
+                    }}
+                  />
+                ))}
                 <TouchableOpacity
-                  key={index}
-                  style={[styles.colorOption, { backgroundColor: color }]}
-                  onPress={() => {
-                    changeTerrainColor(color);
-                  }}
-                />
-              ))}
-              <TouchableOpacity
-                style={styles.closeButtonCouleur}
-                onPress={() => setColorModalVisible(false)}
-              >
-                <Text style={styles.closeButtonTextColor}>Fermer</Text>
-              </TouchableOpacity>
-            </View>
-          </Modal>
-        )}
-      </View>
+                  style={styles.closeButtonCouleur}
+                  onPress={() => setColorModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonTextColor}>Fermer</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+          )}
+        </View>
 
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
