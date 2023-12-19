@@ -83,7 +83,8 @@ function Calendrier({ route }) {
     return () => {
       clearInterval(refreshInterval);
     };
-  }, []); const hideDatePicker = () => {
+  }, []); 
+  const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
   const handleConfirm = (date) => {
@@ -101,11 +102,11 @@ function Calendrier({ route }) {
     });
   };
 
-    // Mise à jour des couleurs
-    const updateDayColor = (day, color) => {
-      setDayColors({...dayColors, [day]: color});
-    };
-    
+  // Mise à jour des couleurs
+  const updateDayColor = (day, color) => {
+    setDayColors({ ...dayColors, [day]: color });
+  };
+
   const combinedDateTime = moment(date).set({
     hour: time.getHours(),
     minute: time.getMinutes()
@@ -149,7 +150,6 @@ function Calendrier({ route }) {
 
       await axios.post("http://192.168.1.6:3030/event/postcalendar", {
         title,
-        type,
         status,
         date: formattedDateTime,
         heure: dateTime.format("HH:mm:ss"),
@@ -160,7 +160,6 @@ function Calendrier({ route }) {
       // Vérifier les données envoyées
       console.log("Données envoyées à l'API:", {
         title,
-        type,
         status,
         date: formattedDateTime,
         heure: dateTime.format("HH:mm:ss"),
@@ -609,6 +608,11 @@ function Calendrier({ route }) {
     );
   };
 
+  const handleEditEvent = (eventId) => {
+    navigation.navigate("Gestion d'évenement", { eventId });
+  };
+  
+
   const renderEventsForDate = () => {
 
 
@@ -633,6 +637,9 @@ function Calendrier({ route }) {
 
             <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
               <Icon name="person" size={30} color="blue" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
+              <Icon name="edit" size={30} color="purple" />
             </TouchableOpacity>
 
             <View style={styles.participationButtons}>
@@ -734,16 +741,11 @@ function Calendrier({ route }) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Type"
-                value={type}
-                onChangeText={(text) => setType(text)}
-              />
-              <TextInput
-                style={styles.input}
                 placeholder="Date"
                 value={date}
                 onChangeText={(text) => setDate(text)}
               />
+
               <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode="time"
@@ -791,7 +793,7 @@ function Calendrier({ route }) {
           >
             <View style={styles.modalContainer}>
               <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
-              {COLORS.map((color,index) => (
+              {COLORS.map((color, index) => (
                 <TouchableOpacity
                   key={index}
                   style={[styles.colorOption, { backgroundColor: color }]}

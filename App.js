@@ -1,6 +1,6 @@
-import React, { useState, useEffect ,useContext} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator ,TransitionPresets } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,6 +17,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { AntDesign } from '@expo/vector-icons';
 import inscription from "./screens/inscription";
 import { useUser } from "./screens/UserContext";
+import GestionEvent from './screens/gestionEvent';
 
 const AuthStack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -26,8 +27,8 @@ function AuthStackNavigator() {
     <AuthStack.Navigator
       screenOptions={{
         // Animation et transition
-        ...TransitionPresets.ModalPresentationIOS    , // Choisissez l'animation que vous préférez
-  
+        ...TransitionPresets.ModalPresentationIOS, // Choisissez l'animation que vous préférez
+
         // Style de l'en-tête
         headerStyle: {
           backgroundColor: '#467c86', // Couleur de fond de l'en-tête
@@ -36,7 +37,7 @@ function AuthStackNavigator() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-  
+
         // Masquer l'en-tête pour un look épuré
         headerShown: false,
       }}
@@ -81,13 +82,20 @@ function AppTabs() {
 
         ),
       }} />
+      <Tabs.Screen name="Gestion d'évenement" component={GestionEvent} options={{
+        tabBarLabel: "Gestion d'évenement",
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="account-edit" size={24} color="black" />
+
+        ),
+      }} />
     </Tabs.Navigator>
   );
 }
 
 export default function App() {
   return (
-    <UserProvider> 
+    <UserProvider>
       <AppContent />
     </UserProvider>
   );

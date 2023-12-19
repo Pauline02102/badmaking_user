@@ -288,6 +288,10 @@ const styles = StyleSheet.create({
     marginBottom: 17, 
     marginTop : 20
   },
+  editButton: {
+    color: 'blue',
+    marginTop: 8,
+  },
   
 });
 
