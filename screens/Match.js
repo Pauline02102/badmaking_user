@@ -343,7 +343,7 @@ const Match = () => {
             <Text style={styles.cell1equipe1}>EQUIPE 1</Text>
             <Text style={styles.vscellaudessu}>VS</Text>
             <Text style={styles.cell1equipe1}>EQUIPE 2</Text>
-            <Text style={styles.dateCellhaut}>Date</Text>
+            
 
           </View>
 
@@ -365,7 +365,7 @@ const Match = () => {
                   {'\n'}
                   {renderPlayerName(match.user2_prenom_paire2, match.user2_nom_paire2, match.user4_double, match.match_id)}
                 </Text>
-                <Text style={styles.dateCellbas}>{formatDayAndMonth(match.event_date)}{match.event_time}</Text>
+
 
 
               </View>
