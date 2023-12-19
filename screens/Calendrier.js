@@ -26,13 +26,11 @@ import { BASE_URL } from './config';
 import { useUser } from "./UserContext";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SelectList } from "react-native-dropdown-select-list";
-
 moment.locale('fr'); // Définir la locale de moment en français
 
 function Calendrier({ route }) {
   const moment = require("moment-timezone");
   const [customDatesStyles, setCustomDatesStyles] = useState({});
-
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const navigation = useNavigation();
@@ -48,6 +46,7 @@ function Calendrier({ route }) {
   const [participantsList, setParticipantsList] = useState([]);
   const [participantsCounts, setParticipantsCounts] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isJoueur, setIsJoueur] = useState(false);
   //pour admin
   const [title, setTitle] = useState("");
   const [type, setType] = useState("");
@@ -55,7 +54,7 @@ function Calendrier({ route }) {
   const [date, setDate] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
-  const [isFormVisible, setIsFormVisible] = useState(false);
+
   const COLORS = ['red', 'green', 'blue', 'orange'];
   const data = [
     { key: "1", value: "Random" },
@@ -65,7 +64,6 @@ function Calendrier({ route }) {
   const openColorModal = () => {
     setColorModalVisible(true);
   };
-
   useEffect(() => {
     fetchLoggedInUserInfo();
     fetchEvents();
@@ -83,8 +81,7 @@ function Calendrier({ route }) {
     return () => {
       clearInterval(refreshInterval);
     };
-  }, []);
-  const hideDatePicker = () => {
+  }, []); const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
   const handleConfirm = (date) => {
@@ -98,6 +95,8 @@ function Calendrier({ route }) {
     hour: time.getHours(),
     minute: time.getMinutes()
   }).toISOString();
+
+
   const createEvent = async () => {
     try {
       if (!loggedInUser || !loggedInUser.id) {
@@ -155,7 +154,6 @@ function Calendrier({ route }) {
       });
 
       fetchEvents();
-      setIsFormVisible(false);
     } catch (error) {
       console.error("Erreur lors de la création de l'événement", error);
     }
@@ -182,10 +180,15 @@ function Calendrier({ route }) {
         console.log("data user", data.user);
         // Vérifiez si 'role' est défini avant d'appeler toLowerCase()
         const isAdmin = data.user.role && data.user.role.toLowerCase() === 'admin';
+        const isJoueur = data.user.role && data.user.role.toLowerCase() === 'joueur';
+
         setIsAdmin(isAdmin);
+
+        setIsJoueur(isJoueur);
 
         // Mettre à jour isAdmin et afficher la valeur mise à jour
         console.log('isAdmin:', isAdmin);
+        console.log('isJoueur:', isJoueur);
 
       } else {
         console.error('Raté pour fetch user info page calendrier:', data.message);
@@ -196,7 +199,44 @@ function Calendrier({ route }) {
 
     }
   };
+  const changeTerrainColor = async (currentColor) => {
+    try {
+      console.log("Valeur de 'selectedColor' :", currentColor);
+      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); // Ajoutez cette ligne
+      const response = await axios.post(
+        "http://192.168.1.6:3030/date_color/associateColorToDate",
+        {
+          date: selectedDate,
+          color: currentColor,
+        }
+      );
 
+      console.log("Réponse de la requête :", response.data);
+
+      const updatedCustomDatesStyles = { ...customDatesStyles };
+      // Mettez à jour la couleur pour la date sélectionnée
+      updatedCustomDatesStyles[selectedDate] = {
+        customStyles: {
+          container: {
+            backgroundColor: currentColor || "blue",
+          },
+          text: {
+            color: "white",
+          },
+        },
+      };
+
+      // Mettez à jour les styles personnalisés
+      setCustomDatesStyles(updatedCustomDatesStyles);
+
+      setColorModalVisible(false);
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'association de la couleur à la date",
+        error
+      );
+    }
+  };
 
   // Fonction pour afficher ou cacher la légende
   const toggleLegend = () => {
@@ -375,47 +415,6 @@ function Calendrier({ route }) {
     } catch (error) {
       console.error("Erreur lors de la récupération de toutes les couleurs de date", error);
       return {};
-    }
-  };
-
-
-  const changeTerrainColor = async (currentColor) => {
-    try {
-      console.log("Valeur de 'selectedColor' :", currentColor);
-      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); // Ajoutez cette ligne
-      const response = await axios.post(
-        "http://192.168.1.6:3030/date_color/associateColorToDate",
-        {
-          date: selectedDate,
-          color: currentColor,
-        }
-      );
-
-      console.log("Réponse de la requête :", response.data);
-
-      const updatedCustomDatesStyles = { ...customDatesStyles };
-      // Mettez à jour la couleur pour la date sélectionnée
-      updatedCustomDatesStyles[selectedDate] = {
-        customStyles: {
-          container: {
-            backgroundColor: currentColor || "blue",
-          },
-          text: {
-            color: "white",
-          },
-        },
-      };
-
-      // Mettez à jour les styles personnalisés
-      setCustomDatesStyles(updatedCustomDatesStyles);
-
-      setColorModalVisible(false);
-      setIsFormVisible(true);
-    } catch (error) {
-      console.error(
-        "Erreur lors de l'association de la couleur à la date",
-        error
-      );
     }
   };
 
@@ -654,20 +653,75 @@ function Calendrier({ route }) {
           <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
         </TouchableOpacity>
         {legendVisible && <Legend />}
-        <Calendar
-          onDayPress={(day) => {
-            setSelectedDate(day.dateString);
-            setDate(day.dateString);
-            openColorModal();
-          }}
-          markedDates={customDatesStyles}
-          markingType="custom"
-        />
-        {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
 
+        {isJoueur && (
+          <Calendar
+            onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
+            markedDates={customDatesStyles}
+            markingType="custom"
+          />
+        )}
+
+        {isAdmin && (
+          <Calendar
+            onDayPress={(day) => {
+              setSelectedDate(day.dateString);
+              setDate(day.dateString);
+              openColorModal();
+            }}
+            markedDates={customDatesStyles}
+            markingType="custom"
+          />
+        )}
+        {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
+        {isAdmin && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Titre"
+              value={title}
+              onChangeText={(text) => setTitle(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Type"
+              value={type}
+              onChangeText={(text) => setType(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Date"
+              value={date}
+              onChangeText={(text) => setDate(text)}
+            />
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="time"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              textColor="black"
+            />
+
+            <Button title="Choisir l'heure" onPress={() => setDatePickerVisibility(true)} />
+
+            <View style={styles.inputContainer}>
+              <SelectList
+                placeholder="status"
+                setSelected={(val) => setStatus(val)}
+                data={data}
+                save="value"
+                style={styles.choix}
+              />
+
+
+            </View>
+            <Button title="Créer un événement" onPress={createEvent} />
+          </>
+        )}
         <Text style={styles.eventTitle2}>Événements  :</Text>
 
         {renderEventsForDate()}
+
         {showTimePicker && (
           <DateTimePicker
             value={selectedTime}
@@ -683,13 +737,11 @@ function Calendrier({ route }) {
           <Button title="Confirmer l'heure" onPress={confirmTime} />
         )}
 
-
         {isAdmin && isColorModalVisible && (
           <Modal
             animationType="slide"
             transparent={true}
             visible={isColorModalVisible}
-            onRequestClose={() => setColorModalVisible(false)}
           >
             <View style={styles.modalContainer}>
               <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
@@ -709,69 +761,7 @@ function Calendrier({ route }) {
               </TouchableOpacity>
             </View>
           </Modal>
-
         )}
-
-        {/* Modal pour le formulaire de création d'événement */}
-        <Modal
-          visible={isFormVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setIsFormVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-  
-            <View>
-              <Text style={styles.title}>Formulaire</Text>
-
-
-              <TextInput
-                style={styles.input}
-                placeholder="Titre"
-                value={title}
-                onChangeText={(text) => setTitle(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Type"
-                value={type}
-                onChangeText={(text) => setType(text)}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Date"
-                value={date}
-                onChangeText={(text) => setDate(text)}
-              />
-              <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="time"
-                onConfirm={handleConfirm}
-                onCancel={hideDatePicker}
-                textColor="black"
-              />
-              <View style={styles.inputContainer}>
-                <SelectList
-                  placeholder="status"
-                  setSelected={(val) => setStatus(val)}
-                  data={data}
-                  save="value"
-                  style={styles.choix}
-                />
-              </View>
-              <TouchableOpacity style={styles.button} onPress={() => setDatePickerVisibility(true)}>
-                <Text style={styles.buttonText}>Choisir l'heure</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={createEvent}>
-                <Text style={styles.buttonText}>Créer un événement</Text>
-              </TouchableOpacity>
-
-            </View>
-            <TouchableOpacity style={styles.button} onPress={() => setIsFormVisible(false)}>
-              <Text style={styles.buttonText}>Fermer</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
       </View>
 
     </ScrollView>
