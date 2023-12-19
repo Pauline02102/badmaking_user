@@ -55,7 +55,7 @@ function Calendrier({ route }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
 
-  const COLORS = ['red', 'green', 'blue', 'orange'];
+  const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
   const data = [
     { key: "1", value: "Random" },
     { key: "2", value: "Par niveau" },
@@ -203,6 +203,16 @@ function Calendrier({ route }) {
     try {
       console.log("Valeur de 'selectedColor' :", currentColor);
       console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); // Ajoutez cette ligne
+
+      let body;
+      if (currentColor === 'white') {
+    
+        body = { date: selectedDate, color: null }; 
+      } else {
+      
+        body = { date: selectedDate, color: currentColor };
+      }
+
       const response = await axios.post(
         "http://192.168.1.6:3030/date_color/associateColorToDate",
         {
@@ -214,18 +224,30 @@ function Calendrier({ route }) {
       console.log("Réponse de la requête :", response.data);
 
       const updatedCustomDatesStyles = { ...customDatesStyles };
-      // Mettez à jour la couleur pour la date sélectionnée
-      updatedCustomDatesStyles[selectedDate] = {
-        customStyles: {
-          container: {
-            backgroundColor: currentColor || "blue",
-          },
-          text: {
-            color: "white",
-          },
-        },
-      };
 
+      if (currentColor === 'white') {
+        // When removing the color, reset to default styles
+        updatedCustomDatesStyles[selectedDate] = {
+          customStyles: {
+            container: {}, // Empty container styles will revert to default
+            text: {
+              color: 'black' // Set text color to black or any default color
+            },
+          },
+        };
+      } else {
+        // Set the new color and ensure text color is white for visibility
+        updatedCustomDatesStyles[selectedDate] = {
+          customStyles: {
+            container: {
+              backgroundColor: currentColor,
+            },
+            text: {
+              color: 'white', // White text for colored backgrounds
+            },
+          },
+        };
+      }
       // Mettez à jour les styles personnalisés
       setCustomDatesStyles(updatedCustomDatesStyles);
 

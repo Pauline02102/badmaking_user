@@ -13,7 +13,7 @@ const router = express.Router();
 const cors = require("cors");
 
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -32,27 +32,33 @@ router.post("/associateColorToDate", async (req, res) => {
         const { date, color } = req.body;
         console.log("Valeur de 'color' dans la requête :", color);
         console.log("Valeur de 'date' dans la requête :", date);
-        // Assurez-vous que la couleur et la date sont des valeurs valides
-        // Vous pouvez ajouter une validation supplémentaire ici si nécessaire
 
-        // Requête SQL pour associer la couleur à une date
-        const associateColorQuery = `
-        INSERT INTO date_color (date, color)
-        VALUES ($1, $2)
-        ON CONFLICT (date) DO UPDATE
-        SET color = EXCLUDED.color;
-      `;
+        if (color === 'white') {
+            // Requête SQL pour supprimer la couleur associée à une date
+            const removeColorQuery = `
+            DELETE FROM date_color WHERE date = $1;
+            `;
 
-        // Exécutez la requête pour associer la couleur à une date
-        await db.none(associateColorQuery, [date, color]);
+            // Exécutez la requête pour supprimer la couleur
+            await db.none(removeColorQuery, [date]);
+            res.json({ message: "Couleur supprimée de la date avec succès" });
+            console.log("Couleur supprimée de la date avec succès");
+        } else {
+            // Requête SQL pour associer la couleur à une date
+            const associateColorQuery = `
+            INSERT INTO date_color (date, color)
+            VALUES ($1, $2)
+            ON CONFLICT (date) DO UPDATE
+            SET color = EXCLUDED.color;
+            `;
 
-        res.json({ message: "Couleur associée à la date avec succès" });
-        console.log("Couleur associée à la date avec succès");
+            // Exécutez la requête pour associer la couleur à une date
+            await db.none(associateColorQuery, [date, color]);
+            res.json({ message: "Couleur associée à la date avec succès" });
+            console.log("Couleur associée à la date avec succès");
+        }
     } catch (error) {
-        console.error(
-            "Erreur lors de l'association de la couleur à la date",
-            error
-        );
+        console.error("Erreur lors de l'association de la couleur à la date", error);
         res.status(500).json({
             message: "Erreur lors de l'association de la couleur à la date",
         });
@@ -74,7 +80,7 @@ router.get("/getColorForDate/:date", async (req, res) => {
           WHERE date = $1;
         `;
 
-        // Exécutez la requête pour récupérer la couleur
+        //  récupérer la couleur
         const result = await db.oneOrNone(getColorQuery, [date]);
 
         if (result) {
