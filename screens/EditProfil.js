@@ -11,20 +11,31 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const [classement_mixte, setclassement_mixte] = useState(user ? user.classement_mixte : '');
 
     const handleSubmit = async () => {
+        // Vérifier que classement_simple, classement_double et classement_mixte contiennent uniquement des chiffres
+        if (!/^\d+$/.test(classement_simple) || !/^\d+$/.test(classement_double) || !/^\d+$/.test(classement_mixte)) {
+            Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres.");
+            return;
+        }
+
+        // Vérifier que l'email contient "@" et "."
+        if (!email.includes("@") || !email.includes(".")) {
+            Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+            return;
+        }
+
         try {
-            // Remplacer avec votre URL de backend
             const response = await fetch(`${BASE_URL}/user_tokens/update-profile`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,
                 },
-                body: JSON.stringify({ prenom, nom, email ,classement_simple, classement_double, classement_mixte}),
+                body: JSON.stringify({ prenom, nom, email, classement_simple, classement_double, classement_mixte }),
             });
 
             const data = await response.json();
             if (data.message) {
-                onProfileUpdated({ prenom, nom, email ,classement_simple, classement_double, classement_mixte});
+                onProfileUpdated({ prenom, nom, email, classement_simple, classement_double, classement_mixte });
                 Alert.alert("Succès", "Profil mis à jour avec succès");
             }
         } catch (error) {
@@ -33,7 +44,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     };
 
     return (
-        
+
         <View style={styles.container}>
             <TextInput
                 style={styles.input}
@@ -52,24 +63,29 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
                 onChangeText={setEmail}
                 value={email}
                 placeholder="Email"
+                keyboardType="email-address" // Utilise le clavier adapté aux adresses email
+                autoCapitalize="none" 
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setclassement_simple}
                 value={classement_simple}
                 placeholder="Classement simple"
+                keyboardType="numeric"
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setclassement_double}
                 value={classement_double}
                 placeholder="Classement double"
+                keyboardType="numeric"
             />
             <TextInput
                 style={styles.input}
                 onChangeText={setclassement_mixte}
                 value={classement_mixte}
                 placeholder="Classement mixte"
+                keyboardType="numeric"
             />
             <Button title="Mettre à jour" onPress={handleSubmit} />
         </View>
