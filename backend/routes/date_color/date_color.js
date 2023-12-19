@@ -2,18 +2,18 @@
 
 
 const express = require("express");
-const db= require("../db.js");
+const db = require("../db.js");
 
 const router = express.Router();
 
 
-  
+
 
 
 const cors = require("cors");
 
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -122,5 +122,58 @@ router.get("/getAllDateColors", async (req, res) => {
             .json({ message: "Erreur lors de la récupération des couleurs de date" });
     }
 });
+
+
+const cron = require('node-cron');
+// Planifier la tâche pour s'exécuter tous les trois mois
+cron.schedule('0 0 1 */3 *', async () => {
+    await updateDayColors();
+  });
+
+
+function getNextDayOfWeek(date, dayOfWeek) {
+    const resultDate = new Date(date.getTime());
+    resultDate.setDate(resultDate.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+    return resultDate;
+}
+
+
+  async function updateDayColors() {
+    const client = await db.connect();
+    console.log("Mise à jour des couleurs des jours pour les trois prochains mois");
+  
+    try {
+      const today = new Date();
+      const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+      const dayColors = {
+        '1': 'green', // Lundi
+        '2': 'blue',  // Mardi
+        '4': 'blue',  // Jeudi
+        '0': 'blue'   // Dimanche
+      };
+  
+      while (today <= threeMonthsLater) {
+        for (const dayOfWeek in dayColors) {
+          const nextDate = getNextDayOfWeek(today, parseInt(dayOfWeek));
+          const color = dayColors[dayOfWeek];
+          const formattedDate = nextDate.toISOString().split('T')[0];
+  
+          // Insérez ou mettez à jour la couleur pour la date calculée
+          await client.query(`
+            INSERT INTO date_color (date, color) 
+            VALUES ($1, $2) 
+            ON CONFLICT (date) 
+            DO UPDATE SET color = EXCLUDED.color`,
+            [formattedDate, color]);
+        }
+        today.setDate(today.getDate() + 7); // Avancer d'une semaine
+      }
+    } catch (error) {
+      console.error("Database Error in updateDayColors:", error);
+    } finally {
+      client.release();
+    }
+  }
+  
 
 module.exports = router;

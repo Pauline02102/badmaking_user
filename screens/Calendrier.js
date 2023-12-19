@@ -54,7 +54,7 @@ function Calendrier({ route }) {
   const [date, setDate] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
-  const [colorsApplied, setColorsApplied] = useState(false);
+  const [dayColors, setDayColors] = useState({});
 
 
   const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
@@ -70,7 +70,7 @@ function Calendrier({ route }) {
     fetchLoggedInUserInfo();
     fetchEvents();
     fetchDateColors();
-
+    initializeDayColors();
     moment.locale('fr');
 
     const refreshInterval = setInterval(() => {
@@ -92,7 +92,20 @@ function Calendrier({ route }) {
     hideDatePicker();
   };
 
+  const initializeDayColors = () => {
+    setDayColors({
+      'monday': 'green',
+      'tuesday': 'blue',
+      'thursday': 'blue',
+      'sunday': 'blue'
+    });
+  };
 
+    // Mise à jour des couleurs
+    const updateDayColor = (day, color) => {
+      setDayColors({...dayColors, [day]: color});
+    };
+    
   const combinedDateTime = moment(date).set({
     hour: time.getHours(),
     minute: time.getMinutes()
