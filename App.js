@@ -76,7 +76,7 @@ function AppTabs() {
         headerShown: false,
       }} />
       <Tabs.Screen name="Joueurs" component={Joueurs} options={{
-        tabBarLabel: "Joueurs",
+        tabBarLabel: "Résultats",
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name="format-list-bulleted" size={24} color="black" />
         ),

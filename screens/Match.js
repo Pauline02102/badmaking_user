@@ -514,10 +514,11 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     marginTop: 20,
-    textAlign: 'center'
+    textAlign: 'center',
+    color: "#123e53",
   },
   paireContainer: {
     marginBottom: 15,
@@ -549,7 +550,7 @@ const styles = StyleSheet.create({
   headerRow: {
     // Style pour l'en-tête du tableau
     flexDirection: 'row',
-    backgroundColor: '#467c86', // Couleur d'arrière-plan pour l'en-tête
+    backgroundColor: '#467c86',
     borderBottomWidth: 1,
     borderBottomColor: '#000',
     borderColor: '#121f2d',

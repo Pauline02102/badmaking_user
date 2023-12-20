@@ -57,6 +57,8 @@ function Calendrier({ route }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [dayColors, setDayColors] = useState({});
+  const [selectedDateColor, setSelectedDateColor] = useState('');
+
 
 
   const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
@@ -483,9 +485,11 @@ function Calendrier({ route }) {
       const color =
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
+      setSelectedDateColor(color);
       if (color === "green" || color === "blue") {
         setShowTimePicker(true); // Afficher le sélecteur de temps
         setShowConfirmButton(true); // Afficher le bouton de confirmation
+
         // Afficher la liste des participants
         console.log("Participants présents :", participants);
 
@@ -635,16 +639,16 @@ function Calendrier({ route }) {
             <Text style={styles.eventTitle}>{event.status}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
-          
+
             <ParticipantCount eventId={event.id} />
 
             <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
               <Icon name="person" size={30} color="blue" />
             </TouchableOpacity>
             {isAdmin && (
-            <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
-              <Icon name="edit" size={30} color="purple" />
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
+                <Icon name="edit" size={30} color="purple" />
+              </TouchableOpacity>
             )}
             <View style={styles.participationButtons}>
               <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
@@ -776,25 +780,36 @@ function Calendrier({ route }) {
               </View>
             </>
           )}
-          <Text style={styles.eventTitle2}>Événements  :</Text>
 
-          {renderEventsForDate()}
 
           {showTimePicker && (
-            <DateTimePicker
-              value={selectedTime}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              onChange={onTimeSelected}
+            <View style={styles.dateTimePickerContainer}>
+              <Text style={styles.instructions}>Choisissez l'heure avant de confirmer</Text>
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                is24Hour={true}
+                display="default"
+                onChange={onTimeSelected}
+                style={styles.dateTimePicker}
+              />
+              {showConfirmButton && (
 
-            />
-
+                <TouchableOpacity style={styles.confirmButton} onPress={confirmTime}>
+                  <Text style={styles.confirmButtonText}>Confirmer la participation</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
-          {showConfirmButton && (
-            <Button title="Confirmer l'heure" onPress={confirmTime} />
-          )}
 
+
+
+
+          <Text style={styles.eventTitle2}>{selectedDateColor !== 'blue' && selectedDateColor !== 'green'
+            ? ' Événements :'
+            : ''}</Text>
+
+          {renderEventsForDate()}
           {isAdmin && isColorModalVisible && (
             <Modal
               animationType="slide"

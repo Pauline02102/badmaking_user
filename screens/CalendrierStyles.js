@@ -293,6 +293,45 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginTop: 8,
   },
+  dateTimePickerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+        marginTop : 20,
+  },
+  dateTimePicker: {
+    // Vos styles spécifiques au DateTimePicker ici
+  },
+  instructions: {
+    marginTop: 8,
+    marginBottom : 20,
+    fontSize: 16,
+    color: '#333',
+    fontWeight:'bold'
+  },
+  confirmButton: {
+    backgroundColor: '#467c86',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   
 });
 

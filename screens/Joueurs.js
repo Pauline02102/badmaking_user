@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333', // Texte plus sombre pour le titre
+    color: '#123e53', // Texte plus sombre pour le titre
     marginBottom: 20,
     marginTop: 20,
     textAlign: 'center', // Centrer le titre
