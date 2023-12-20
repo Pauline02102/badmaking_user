@@ -1,7 +1,7 @@
 
 
 const express = require("express");
-const db= require("../db.js");
+const db = require("../db.js");
 
 const router = express.Router();
 
@@ -24,34 +24,41 @@ const app = express();
 const port = process.env.PORT || 3030;
 
 //creer nouvel user
-router.post("/postusers", async (req, response) => {
+router.post("/postusers", async (req, res) => {
     try {
         const { nom, prenom, role, email, password } = req.body;
 
-        // Crypter le mot de passe avec bcrypt
+        // Vérifiez d'abord si l'utilisateur avec cet e-mail existe déjà dans la base de données
+        const checkUserQuery = 'SELECT * FROM users WHERE email = $1';
+        const existingUsers = await db.manyOrNone(checkUserQuery, [email]);
+        if (existingUsers.length > 0) {
+            return res.status(400).json({ message: 'L\'utilisateur avec cet e-mail existe déjà.' });
+          }
+
+        // Hash du mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const query = `
-        INSERT INTO users (nom, prenom, role, email, password)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id 
-      `;
+        // Insérez l'utilisateur dans la base de données
+        const insertUserQuery = `
+          INSERT INTO users (nom, prenom, role, email, password)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING id, prenom
+        `;
 
-        const values = [nom, prenom, role, email, hashedPassword];
+        const newUser = await db.one(insertUserQuery, [nom, prenom, role, email, hashedPassword]);
 
-        // Use await to execute the query and retrieve the result
-        const result = await db.query(query, values);
-
-        // Check if the query was successful
-        if (result.rowCount === 1) {
-            const id = result[0].id;
-            response.status(200).json({ id: id, prenom: prenom, message: "Utilisateur ajouté" });
+        if (newUser) {
+            return res.status(201).json({
+                id: newUser.id,
+                prenom: newUser.prenom,
+                message: 'Inscription réussie.'
+            });
         } else {
-            response.status(500).json({ message: "Erreur lors de l'insertion de l'utilisateur" });
+            return res.status(500).json({ message: 'Erreur lors de l\'inscription.' });
         }
     } catch (error) {
         console.error(error);
-        response.status(500).json({ message: "Erreur lors de la récupération des données" });
+        res.status(500).json({ message: 'Erreur lors de l\'inscription.' });
     }
 });
 

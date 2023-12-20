@@ -58,23 +58,29 @@ function AppTabs() {
   const { userRole } = useUser();
   return (
     <Tabs.Navigator>
-      <Tabs.Screen name="Calendrier" component={Calendrier} options={{
-        tabBarLabel: "Calendrier",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="calendar" size={24} color="black" />
-        ),
-      }} />
+      <Tabs.Screen name="Calendrier" component={Calendrier}
+        options={{
+          cardStyle: { marginTop: 110 },
+          tabBarLabel: "Calendrier",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={24} color="black" />
+          ),
+          headerShown: false,
+
+        }} />
       <Tabs.Screen name="Match" component={Match} options={{
         tabBarLabel: "Match",
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name="badminton" size={24} color="black" />
         ),
+        headerShown: false,
       }} />
       <Tabs.Screen name="Joueurs" component={Joueurs} options={{
         tabBarLabel: "Joueurs",
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name="format-list-bulleted" size={24} color="black" />
         ),
+        headerShown: false,
       }} />
       <Tabs.Screen name="Profil" component={Profil} options={{
         tabBarLabel: "Profil",
@@ -82,6 +88,7 @@ function AppTabs() {
           <MaterialCommunityIcons name="account-edit" size={24} color="black" />
 
         ),
+        headerShown: false,
       }} />
 
       {userRole === 'admin' && (
@@ -91,6 +98,7 @@ function AppTabs() {
             <MaterialCommunityIcons name="account-edit" size={24} color="black" />
 
           ),
+          headerShown: false,
         }} />
       )}
     </Tabs.Navigator>
@@ -109,7 +117,7 @@ export default function App() {
 
 const fetchUserRole = async (token) => {
   try {
-    const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, { 
+    const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -119,15 +127,15 @@ const fetchUserRole = async (token) => {
 
     const data = await response.json();
     if (response.ok) {
-      console.log("role", data.user.role , ": prenom", data.user.prenom)
-      return data.user.role; 
-      
+      console.log("role", data.user.role, ": prenom", data.user.prenom)
+      return data.user.role;
+
     } else {
       throw new Error(data.message || 'Impossible de récupérer le rôle de l\'utilisateur.');
     }
   } catch (error) {
     console.error('Erreur lors de la récupération du rôle de l\'utilisateur:', error);
-    return null; 
+    return null;
   }
 };
 

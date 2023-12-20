@@ -29,15 +29,17 @@ router.get('/joueurs_resultats', async (req, res) => {
   try {
     const playersQuery = `
         SELECT  
-          user_id, 
-          prenom, 
-          nom, 
-          COUNT(CASE WHEN victoire = 1 THEN 1 END) as total_victoires, 
-          COUNT(CASE WHEN defaite = 1 THEN 1 END) as total_defaites,
-          ARRAY_AGG(DISTINCT match_id) as match_ids
+          users.id as user_id, 
+          users.prenom, 
+          users.nom,   
+          (event.date + INTERVAL '1 hour') as date,
+          COUNT(CASE WHEN resultat.victoire = 1 THEN 1 END) as total_victoires, 
+          COUNT(CASE WHEN resultat.defaite = 1 THEN 1 END) as total_defaites,
+          ARRAY_AGG(DISTINCT resultat.match_id) as match_ids
         FROM resultat 
         JOIN users ON resultat.user_id = users.id
-        GROUP BY user_id, prenom, nom
+        JOIN event ON resultat.event_id = event.id  -- Jointure avec la table event
+        GROUP BY users.id, users.prenom, users.nom, event.date  -- Ajout de la date dans le GROUP BY
         ORDER BY total_victoires DESC
       `;
     const players = await db.query(playersQuery);
@@ -47,6 +49,42 @@ router.get('/joueurs_resultats', async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la récupération des joueurs" });
   }
 });
+
+
+// get resultats par date 
+router.get('/joueurs_resultatsPardate/:date', async (req, res) => {
+  try {
+    const date = req.params.date; // Assume date is passed as a query parameter in 'YYYY-MM-DD' format
+
+    const playersQuery = `
+    SELECT  
+    users.id as user_id, 
+    users.prenom, 
+    users.nom, 
+    COUNT(CASE WHEN resultat.victoire = 1 THEN 1 END) as total_victoires, 
+    COUNT(CASE WHEN resultat.defaite = 1 THEN 1 END) as total_defaites,
+    ARRAY_AGG(DISTINCT resultat.match_id) as match_ids
+    FROM resultat 
+    INNER JOIN event ON resultat.event_id = event.id
+    INNER JOIN users ON resultat.user_id = users.id
+    WHERE event.date = $1
+    GROUP BY users.id, users.prenom, users.nom
+    ORDER BY total_victoires DESC
+
+    `;
+
+    console.log('Executing query with date:', date); // Log the date being used in the query
+    const players = await db.query(playersQuery, [date]);
+
+    console.log('Query result:', players); // Log the result of the query
+
+    res.status(200).json(players);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des joueurs" });
+  }
+});
+
 
 
 // recuperer les resultats d'un match

@@ -11,7 +11,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from './config';
+
 export default function SignupScreen() {
+
   const navigation = useNavigation();
   const [nom, setnom] = useState("");
   const [prenom, setprenom] = useState("");
@@ -20,17 +22,19 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [role, setRole] = React.useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  
+
 
   const data = [
-    { key: "1", value: "Admin" },
-    { key: "2", value: "Joueur" },
+    { key: "1", value: "admin" },
+    { key: "2", value: "joueur" },
   ];
 
-  
   const handleSignup = async () => {
+
     try {
-      const response = await fetch(`http://192.168.1.6:3030/users/postusers`, { 
+      console.log("Avant l'envoi de la requête au serveur"); // Avant l'envoi de la requête au serveur
+
+      const response = await fetch(`http://192.168.1.6:3030/users/postusers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,26 +47,33 @@ export default function SignupScreen() {
           password: password,
         }),
       });
-  
-      const data = await response.json(); // Extraction des données JSON de la réponse
-  
-      console.log("Réponse du serveur:", data,prenom); // Afficher la réponse du serveur
-  
-      if (response.status === 200) {
-        console.log("Inscription réussie");
-        //console.log({ prenom, id });
 
+      console.log("Après la réponse du serveur"); // Après la réponse du serveur
+
+      const data = await response.json(); // Extraction des données JSON de la réponse
+
+      console.log("Réponse du serveur:", data, prenom); // Afficher la réponse du serveur
+
+      if (response.status === 201) {
+        console.log("Inscription réussie");
+        navigation.navigate("Login"); // Redirection vers la page de connexion
+      }else if (response.status === 400) {
+        // Gérer le cas où l'utilisateur existe déjà
+        console.error("L'utilisateur existe déjà.");
+        setErrorMessage("L'utilisateur existe déjà.");
       } else {
         // Gérer les autres cas d'erreur ou de réponse inattendue
         console.error("Erreur lors de l'inscription: Réponse inattendue du serveur");
+        setErrorMessage("Erreur lors de l'inscription");
       }
     } catch (error) {
       console.error("Erreur lors de l'inscription", error);
       setErrorMessage("Erreur lors de l'inscription");
     }
   };
-  
-  
+
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Inscription</Text>
