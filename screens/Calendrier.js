@@ -355,7 +355,7 @@ function Calendrier({ route }) {
       if (participation === "Oui") {
 
         // Vérifiez si le prénom est correctement défini
-        Alert.alert("Confirmation", "Vous êtes inscrit à l'événement!", [
+        Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponnible 24h avant l'évenement", [
           {
             text: "OK",
             onPress: () => console.log("Confirmation de l'inscription"),

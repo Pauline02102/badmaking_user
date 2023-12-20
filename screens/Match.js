@@ -17,20 +17,23 @@ const Match = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [currentMatchId, setCurrentMatchId] = useState(null);
   const [reportVictory, setReportVictory] = useState(null);
+  const [currentEventId, setCurrentEventId] = useState(null);
 
   const [resultModalVisible, setResultModalVisible] = useState(false);
   const [resultModalMessage, setResultModalMessage] = useState('');
 
   const { setIsSignedIn } = useUser();
   useEffect(() => {
+    console.log("Updated matches state:", matches);
     // Définition de l'intervalle pour exécuter les fetch toutes les 30 secondes
     const intervalId = setInterval(() => {
+      console.log("Updated matches state:", matches);
       fetchLoggedInUserInfo();
       fetchParticipations();
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 2000);
+    }, 2000000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -252,7 +255,7 @@ const Match = () => {
         const url = `${BASE_URL}/match/recupererMatchs`;
         const response = await fetch(url);
         const data = await response.json();
-        //console.log('Match data:', data);
+        console.log("Fetched matches data:", data);
         setMatches(data); // Stocke les données des matchs dans l'état
 
       } catch (error) {
@@ -292,23 +295,28 @@ const Match = () => {
       }, {});
     };
 
-    const reportMatchResult = async (matchId, userId, didWin) => {
+    const reportMatchResult = async (matchId, userId, didWin, event_id) => {
+      console.log("Reporting match result with:", { matchId, userId, didWin, event_id });
       try {
         const body = {
           match_id: matchId,
           user_id: userId,
           victoire: didWin ? 1 : 0,
-          defaite: didWin ? 0 : 1
+          defaite: didWin ? 0 : 1,
+          event_id: event_id
         };
+        console.log(body)
         const response = await fetch(`${BASE_URL}/resultat/report-match-result`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
+          
         });
         const data = await response.json();
         if (response.ok) {
           // match succes
           console.log(data.message);
+          console.log(body)
         } else {
           // erreur
           console.error(data.message);
@@ -378,11 +386,14 @@ const Match = () => {
       ));
     };
     const handlePlayerPress = (matchId, prenom, nom) => {
-      if (!loggedInUser || (prenom !== loggedInUser.prenom || nom !== loggedInUser.nom)) {
-        console.error("Erreur : L'utilisateur connecté ne correspond pas.");
+      const match = matches.find(match => match.match_id === matchId);
+      console.log("Selected match details:", match); // Log the match details
+      
+      if (!match || !loggedInUser || (prenom !== loggedInUser.prenom || nom !== loggedInUser.nom)) {
+        console.error("Erreur :  Match non trouvé ou L'utilisateur connecté ne correspond pas.");
         return;
       }
-
+      setCurrentEventId(match.event_id);
       fetch(`http://192.168.1.6:3030/resultat/check-match-result?match_id=${matchId}&user_id=${loggedInUser.id}`)
         .then(response => response.json())
         .then(data => {
@@ -439,7 +450,7 @@ const Match = () => {
             <>
               {matches.map((match, index) => (
                 <View key={match.match_id} >
-                  {/* ... (le reste de votre code pour afficher les détails du match) */}
+                 
                 </View>
               ))}
               <Text style={styles.dateCellbas}>
@@ -466,7 +477,7 @@ const Match = () => {
           isVisible={modalVisible}
           message={modalMessage}
           onConfirm={() => {
-            reportMatchResult(currentMatchId, loggedInUser.id, reportVictory);
+            reportMatchResult(currentMatchId, loggedInUser.id, reportVictory, currentEventId);
             setModalVisible(false);
           }}
           onCancel={() => setModalVisible(false)}
@@ -479,11 +490,11 @@ const Match = () => {
           isVisible={resultModalVisible}
           message={resultModalMessage}
           onConfirm={() => {
-            reportMatchResult(currentMatchId, loggedInUser.id, true);
+            reportMatchResult(currentMatchId, loggedInUser.id, true,currentEventId);
             setResultModalVisible(false);
           }}
           onCancel={() => {
-            reportMatchResult(currentMatchId, loggedInUser.id, false);
+            reportMatchResult(currentMatchId, loggedInUser.id, false, match.event_id);
             setResultModalVisible(false);
           }}
           confirmText="Oui"
