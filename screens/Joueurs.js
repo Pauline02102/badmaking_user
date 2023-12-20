@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   joueurConnecte: {
-    color: '#467c86',
+    color: '#890936',
     fontWeight: 'bold',
   },
   pickerContainer: {

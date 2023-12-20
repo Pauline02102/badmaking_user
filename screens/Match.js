@@ -33,7 +33,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 20000);
+    }, 200000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -203,31 +203,28 @@ const Match = () => {
   const renderPlayerName = (userPrenom, userNom, doubleInfo, matchId) => {
     const isUser = loggedInUser && userPrenom === loggedInUser.prenom && userNom === loggedInUser.nom;
 
-    const playerName = (
-      <Text style={isUser ? styles.highlightedUser : {}}>
-        {userPrenom} {userNom}
-      </Text>
-    );
+    // Define the name style, applying the highlighted color if it's the logged-in user
+    const nameStyle = isUser ? [styles.playerName, styles.highlightedUser] : styles.playerName;
 
-    const doubleInfoText = (
-      <Text style={styles.doubleText}>{" ("}{doubleInfo}{")"}</Text>
-    );
-
-    return isUser ? (
-      <TouchableOpacity
-        onPress={() => handlePlayerPress(matchId, userPrenom, userNom)}
-        style={styles.playerNameTouchable}
-      >
-        {playerName}
-        {doubleInfoText}
-      </TouchableOpacity>
-    ) : (
-      <>
-        {playerName}
-        {doubleInfoText}
-      </>
+    return (
+      <View style={styles.nameContainer}>
+        <Text style={nameStyle}>
+          {userPrenom} {userNom}
+        </Text>
+        <Text style={styles.doubleText}>
+          {" ("}{doubleInfo}{")"}
+        </Text>
+        {isUser && (
+          <TouchableOpacity
+            style={styles.touchableArea}
+            onPress={() => handlePlayerPress(matchId, userPrenom, userNom)}>
+            {/* This touchable area is invisible but allows the text to be clicked. */}
+          </TouchableOpacity>
+        )}
+      </View>
     );
   };
+
 
 
 
@@ -347,12 +344,9 @@ const Match = () => {
         <Text style={styles.pouleTitle}>Poule {pouleId}</Text><Text></Text>
         {/* En-tête du tableau */}
         <View style={styles.headerRow}>
-
-          <Text style={styles.cell1equipe1}>EQUIPE 1</Text>
-          <Text style={styles.vscellaudessu}>VS</Text>
-          <Text style={styles.cell1equipe1}>EQUIPE 2</Text>
-
-
+          <Text style={styles.teamHeader}>ÉQUIPE 1</Text>
+          <Text style={styles.vsHeader}>VS</Text>
+          <Text style={styles.teamHeader}>ÉQUIPE 2</Text>
         </View>
 
         {/* Lignes du tableau */}
@@ -360,22 +354,21 @@ const Match = () => {
 
           return (
 
-            <View key={match.match_id} style={[styles.row, index % 2 ? styles.rowEven : styles.rowOdd]}>
-              <Text style={styles.cell}>
-
+            <View style={[styles.row, index % 2 ? styles.rowEven : styles.rowOdd]}>
+              {/* Team 1 */}
+              <View style={styles.teamColumn}>
                 {renderPlayerName(match.user1_prenom_paire1, match.user1_nom_paire1, match.user1_double, match.match_id)}
-                {'\n'}
                 {renderPlayerName(match.user2_prenom_paire1, match.user2_nom_paire1, match.user2_double, match.match_id)}
-              </Text>
-              <Text style={[styles.cell, styles.vsCell]}>VS</Text>
-              <Text style={styles.cell}>
+              </View>
+
+              {/* VS */}
+              <Text style={styles.vsColumn}>VS</Text>
+
+              {/* Team 2 */}
+              <View style={styles.teamColumn}>
                 {renderPlayerName(match.user1_prenom_paire2, match.user1_nom_paire2, match.user3_double, match.match_id)}
-                {'\n'}
                 {renderPlayerName(match.user2_prenom_paire2, match.user2_nom_paire2, match.user4_double, match.match_id)}
-              </Text>
-
-
-
+              </View>
             </View>
           );
 
@@ -494,7 +487,7 @@ const Match = () => {
           setResultModalVisible(false);
         }}
         onCancel={() => {
-          reportMatchResult(currentMatchId, loggedInUser.id, false, match.event_id);
+          reportMatchResult(currentMatchId, loggedInUser.id, false, currentEventId);
           setResultModalVisible(false);
         }}
         confirmText="Oui"
@@ -527,6 +520,23 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
   },
+  teamHeader: {
+    flex: 1.5, // Takes up 3 times more space than the VS column
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    color: '#FFFFFF', // White text color for the header
+    fontWeight: 'bold',
+    marginLeft:40
+  },
+  vsHeader: {
+    flex: 0.3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    color: '#FFFFFF', // White text color for the header
+    fontWeight: 'bold',
+  },
   paireText: {
     fontSize: 16,
     marginBottom: 5,
@@ -537,6 +547,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 5,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Adjust as needed
   },
   pouleText: {
     fontSize: 16,
@@ -551,9 +566,7 @@ const styles = StyleSheet.create({
     // Style pour l'en-tête du tableau
     flexDirection: 'row',
     backgroundColor: '#467c86',
-    borderBottomWidth: 1,
-    borderBottomColor: '#000',
-    borderColor: '#121f2d',
+    paddingVertical: 10, // Adjust the padding as needed
   },
   headerCell: {
     // Style pour la cellule de l'en-tête
@@ -561,6 +574,10 @@ const styles = StyleSheet.create({
     padding: 10,
     fontWeight: 'bold',
     color: '#FFFFFF', // Texte blanc pour l'en-tête
+    textAlign: 'center',
+  },
+  playerName: {
+    fontSize: 14,
     textAlign: 'center',
   },
   row: {
@@ -571,6 +588,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',// Ligne séparatrice plus claire
   },
+  touchableArea: {
+    // Style for the touchable area
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   rowEven: {
     backgroundColor: '#f9f9f9', // Une couleur bleu clair pour les lignes paires
   },
@@ -579,8 +604,10 @@ const styles = StyleSheet.create({
   },
   cell: {
     flex: 1.5, // Augmente la largeur des colonnes "Paire 1" et "Paire 2"
-    padding: 10,
+    padding: 6,
     textAlign: 'center',
+    justifyContent: 'center',
+    marginLeft: 8
 
   },
   cell1equipe1: {
@@ -645,7 +672,8 @@ const styles = StyleSheet.create({
   },
   doubleText: {
     fontStyle: 'italic', // Style italique pour le texte entre parenthèses
-    color: '#3498db', // Couleur personnalisée pour le texte entre parenthèses
+    color: '#3498db',
+    textAlign: 'center',// Couleur personnalisée pour le texte entre parenthèses
   },
   dateCellhaut: {
     flex: 0.5, // Régle la largeur de la cellule de date en fonction de vos besoins
@@ -667,12 +695,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: -6.5,
-    paddingLeft: 15
+    paddingLeft: 15,
   },
   highlightedUser: {
-    color: '#467c86',
+    color: '#890936',
     fontWeight: 'bold',
+    paddingTop: 2
 
+  },
+  playerTextContainer: {
+    // New style for the text container
+    flexDirection: 'row', // Arrange name and double info in a row
+    flexWrap: 'wrap', // Wrap to the next line if needed
+    alignItems: 'center', // Align items vertically
+    justifyContent: 'center', // Center items horizontally
   },
   modalContent: {
     backgroundColor: 'white',
@@ -715,8 +751,20 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
   },
-
-
+  teamColumn: {
+    flex: 1.5, // Same flex as teamHeader for alignment
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  vsColumn: {
+    flex: 0.3, // Same flex as vsHeader for alignment
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    color: '#FF9500', // Orange text color for the VS column
+    fontWeight: 'bold',
+  },
 });
 
 export default Match;
