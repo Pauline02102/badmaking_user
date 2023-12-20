@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from './config';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import RNPickerSelect from "react-native-picker-select";
 export default function SignupScreen() {
 
   const navigation = useNavigation();
@@ -24,7 +24,9 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [role, setRole] = React.useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [classementSimple, setClassementSimple] = useState(null);
+  const [classementDouble, setClassementDouble] = useState(null);
+  const [classementMixte, setClassementMixte] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -36,7 +38,7 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
 
- 
+
 
     // Vérifier que l'email contient "@" et "."
     if (!email.includes("@") || !email.includes(".")) {
@@ -58,6 +60,9 @@ export default function SignupScreen() {
           role: role,
           email: email,
           password: password,
+          classementSimple: classementSimple,
+          classementDouble: classementDouble,
+          classementMixte: classementMixte,
         }),
       });
 
@@ -85,12 +90,61 @@ export default function SignupScreen() {
     }
   };
 
-
+  function generateClassementItems() {
+    const classements = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+    return classements.map((classement) => ({
+      label: classement,
+      value: classement,
+    }));
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Inscription</Text>
       <View style={styles.inputContainer}>
+        <View style={styles.classementContainer}>
+          <Text style={styles.classementTitle}>Classements :</Text>
+          <View style={styles.classementInputs}>
+            <View style={[styles.classementInput, { flex: 1 }]}>
+              <Text>Simple:</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setClassementSimple(value)}
+                items={generateClassementItems()}
+                value={classementSimple}
+                placeholder={{
+                  label: "Simple",
+                  value: null,
+                }}
+              />
+            </View>
+            <View style={[styles.classementInput, { flex: 1 }]}>
+              <Text>Double:</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setClassementDouble(value)}
+                items={generateClassementItems()}
+                value={classementDouble}
+                placeholder={{
+                  label: "Double",
+                  value: null,
+                }}
+              />
+            </View>
+            <View style={[styles.classementInput, { flex: 1 }]}>
+              <Text>Mixte:</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setClassementMixte(value)}
+                items={generateClassementItems()}
+                value={classementMixte}
+                placeholder={{
+                  label: "Mixte",
+                  value: null,
+                }}
+              />
+            </View>
+          </View>
+        </View>
+
+
         <TextInput
           placeholder="Nom"
           value={nom}
@@ -103,9 +157,8 @@ export default function SignupScreen() {
           onChangeText={(text) => setprenom(text)}
           style={styles.inputField}
         />
-      </View>
 
-      <View style={styles.inputContainer}>
+
         <TextInput
           placeholder="Email"
           value={email}
@@ -114,32 +167,34 @@ export default function SignupScreen() {
           keyboardType="email-address" // Utilise le clavier adapté aux adresses email
           autoCapitalize="none"
         />
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Mot de passe"
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          style={styles.inputField}
-        />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-          <Icon
-            name={showPassword ? 'eye-slash' : 'eye'}
-            size={20}
-            color="#000"
-          />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.inputContainer}>
-        <SelectList
-          placeholder="Rôle"
-          setSelected={(val) => setRole(val)}
-          data={data}
-          save="value"
-          style={styles.choix}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Mot de passe"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            style={styles.inputField}
+          />
+          <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+            <Icon
+              name={showPassword ? 'eye-slash' : 'eye'}
+              size={20}
+              color="#000"
+            />
+          </TouchableOpacity>
+        </View>
+
+
+        <View style={styles.inputContainer}>
+          <SelectList
+            placeholder="Rôle"
+            setSelected={(val) => setRole(val)}
+            data={data}
+            save="value"
+            style={styles.choix}
+          />
+        </View>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Inscription</Text>
@@ -167,20 +222,19 @@ const styles = StyleSheet.create({
     shadowRadius: 40,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 26,
     color: "#2e2e2e",
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 40, // Ajustez la marge inférieure selon vos préférences
   },
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 20,
+    marginBottom: 30, // Ajustez la marge inférieure pour plus d'espace
   },
   inputField: {
-
     width: "100%",
-    height: 40,
+    minHeight: 60, // Définissez la hauteur minimale souhaitée (par exemple, 40 pixels)
     borderBottomWidth: 2,
     borderBottomColor: "rgb(173, 173, 173)",
     backgroundColor: "transparent",
@@ -199,6 +253,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
     justifyContent: "center",
+    marginTop:-20
   },
   buttonText: {
     color: "white",
@@ -228,7 +283,25 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     position: "absolute",
-    right: 10, // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+    right: 12,
+    marginTop:20 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
   },
-
+  classementContainer: {
+    marginTop: 20,
+    marginBottom: 20, // Ajustez la marge inférieure pour plus d'espace
+  },
+  classementTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+  },
+  classementInputs: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  classementInput: {
+    flex: 1, // Chacun des trois champs occupe un tiers de l'espace horizontal
+    marginHorizontal: 5, // Marge horizontale entre les champs
+  },
 });
