@@ -26,26 +26,26 @@ const port = process.env.PORT || 3030;
 //creer nouvel user
 router.post("/postusers", async (req, res) => {
     try {
-        const { nom, prenom, role, email, password } = req.body;
+        const { nom, prenom, role, email, password, classementSimple, classementDouble, classementMixte } = req.body;
 
         // Vérifiez d'abord si l'utilisateur avec cet e-mail existe déjà dans la base de données
         const checkUserQuery = 'SELECT * FROM users WHERE email = $1';
         const existingUsers = await db.manyOrNone(checkUserQuery, [email]);
         if (existingUsers.length > 0) {
             return res.status(400).json({ message: 'L\'utilisateur avec cet e-mail existe déjà.' });
-          }
+        }
 
         // Hash du mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insérez l'utilisateur dans la base de données
         const insertUserQuery = `
-          INSERT INTO users (nom, prenom, role, email, password)
-          VALUES ($1, $2, $3, $4, $5)
+          INSERT INTO users (nom, prenom, role, email, password, classement_simple, classement_double, classement_mixte)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING id, prenom
         `;
 
-        const newUser = await db.one(insertUserQuery, [nom, prenom, role, email, hashedPassword]);
+        const newUser = await db.one(insertUserQuery, [nom, prenom, role, email, hashedPassword, classementSimple, classementDouble, classementMixte]);
 
         if (newUser) {
             return res.status(201).json({

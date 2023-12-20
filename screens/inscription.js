@@ -39,17 +39,38 @@ export default function SignupScreen() {
   const handleSignup = async () => {
 
 
-
+    if (
+      nom === "" ||
+      prenom === "" ||
+      email === "" ||
+      password === "" ||
+      role === "" ||
+      classementSimple === null ||
+      classementDouble === null ||
+      classementMixte === null
+    ) {
+      Alert.alert("Erreur", "Tous les champs sont obligatoires.");
+      return;
+    }
     // Vérifier que l'email contient "@" et "."
     if (!email.includes("@") || !email.includes(".")) {
       Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
       return;
     }
 
+    // Vérifier que le mot de passe satisfait les critères
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!])/;
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        "Erreur",
+        "Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre."
+      );
+      return;
+    }
     try {
       console.log("Avant l'envoi de la requête au serveur"); // Avant l'envoi de la requête au serveur
 
-      const response = await fetch(`http://192.168.1.6:3030/users/postusers`, {
+      const response = await fetch(`${BASE_URL}/users/postusers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,13 +95,16 @@ export default function SignupScreen() {
 
       if (response.status === 201) {
         console.log("Inscription réussie");
-        navigation.navigate("Login"); // Redirection vers la page de connexion
+        navigation.navigate("Login");
       } else if (response.status === 400) {
-        // Gérer le cas où l'utilisateur existe déjà
-        console.error("L'utilisateur existe déjà.");
-        setErrorMessage("L'utilisateur existe déjà.");
+        const errorMessage = data.message;
+        if (errorMessage === "L'utilisateur avec cet e-mail existe déjà.") {
+          Alert.alert("Erreur", "L'utilisateur avec cet e-mail existe déjà.");
+        } else {
+          console.error("Erreur lors de l'inscription: Réponse inattendue du serveur");
+          setErrorMessage("Erreur lors de l'inscription");
+        }
       } else {
-        // Gérer les autres cas d'erreur ou de réponse inattendue
         console.error("Erreur lors de l'inscription: Réponse inattendue du serveur");
         setErrorMessage("Erreur lors de l'inscription");
       }
@@ -100,6 +124,9 @@ export default function SignupScreen() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.classementInfo}>
+        * Classement 1 = le plus élevé , 12 = le plus bas
+      </Text>
       <Text style={styles.heading}>Inscription</Text>
       <View style={styles.inputContainer}>
         <View style={styles.classementContainer}>
@@ -221,6 +248,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 40,
   },
+  classementInfo: {
+    position: "absolute",
+    bottom: 10, // Placez le texte en bas de l'écran
+    left: 10,
+    fontSize: 12,
+    color: "#333",
+    paddingBottom:10
+  },
   heading: {
     fontSize: 26,
     color: "#2e2e2e",
@@ -253,7 +288,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop:-20
+    marginTop: -20
   },
   buttonText: {
     color: "white",
@@ -284,7 +319,7 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    marginTop:20 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+    marginTop: 20 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
   },
   classementContainer: {
     marginTop: 20,

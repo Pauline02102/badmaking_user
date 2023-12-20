@@ -152,7 +152,7 @@ function Calendrier({ route }) {
       // Vérifier la valeur de formattedDateTime
       console.log("formattedDateTime:", formattedDateTime);
 
-      await axios.post("http://192.168.1.6:3030/event/postcalendar", {
+      await axios.post(`${BASE_URL}/event/postcalendar`, {
         title,
         status,
         date: formattedDateTime,

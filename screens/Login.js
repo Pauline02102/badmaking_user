@@ -6,7 +6,7 @@ import { CommonActions } from '@react-navigation/native';
 import UserContext from "./UserContext";
 import { useUser } from "./UserContext";
 import { BASE_URL } from './config';
-
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 
 const LoginScreen = () => {
@@ -14,22 +14,25 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [prenom, setPrenom] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [nom, setnom] = useState("");
   const [role, setRole] = React.useState("");
   const { setIsSignedIn } = useUser();
-  
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleLogin = async () => {
     try {
       const loginData = {
-        
-        prenom:prenom,
+
+        prenom: prenom,
         email: email,
         password: password,
-        role : role
+        role: role
       };
 
-      const response = await fetch(`http://192.168.1.6:3030/user_tokens/login`, {
+      const response = await fetch(`${BASE_URL}/user_tokens/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,16 +40,16 @@ const LoginScreen = () => {
         body: JSON.stringify(loginData),
       });
       const data = await response.json(); // Extraction des données JSON de la réponse
-  
+
       console.log("Réponse du serveur:", data); // Afficher la réponse du serveur
-  
+
       if (response.status === 200 && data.token) {
         console.log("Storing token:", data.token);
         await AsyncStorage.setItem('userToken', data.token);
         console.log("Token stored successfully"); //stocker le token
 
         setIsSignedIn(true); // Mettre à jour l'état global de connexion
-        
+
         console.log("Connexion réussie");
       } else {
         console.error("Token manquant ou erreur de connexion");
@@ -59,6 +62,7 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Connexion</Text>
+
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Email"
@@ -72,23 +76,30 @@ const LoginScreen = () => {
           onChangeText={(text) => setPrenom(text)}
           style={styles.inputField}
         />
-      </View>
-      <View style={styles.inputContainer}>
+
         <TextInput
-          placeholder="Password"
-          secureTextEntry
+          placeholder="Mot de passe"
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={(text) => setPassword(text)}
           style={styles.inputField}
         />
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+          <Icon
+            name={showPassword ? 'eye-slash' : 'eye'}
+            size={20}
+            color="#000"
+          />
+        </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Connexion</Text>
       </TouchableOpacity>
+
       <View style={styles.signupContainer}>
         <Text style={styles.already}>Tu n'as pas de compte ?</Text>
         <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
-          name:'Inscription',
+          name: 'Inscription',
         }))}>
           <Text style={styles.signupLink}>Inscription</Text>
         </TouchableOpacity>
@@ -110,37 +121,38 @@ const styles = StyleSheet.create({
     shadowRadius: 40,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 26,
     color: "#2e2e2e",
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 40,
   },
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   inputField: {
     width: "100%",
-    height: 40,
+    minHeight: 60, // Définissez la hauteur minimale souhaitée (par exemple, 40 pixels)
     borderBottomWidth: 2,
     borderBottomColor: "rgb(173, 173, 173)",
     backgroundColor: "transparent",
     color: "black",
     fontSize: 16,
     fontWeight: "500",
-    paddingLeft: 40,
+    paddingLeft: 30,
   },
   button: {
     width: "100%",
     borderWidth: 2,
-    borderColor: "#8000ff",
-    backgroundColor: "#8000ff",
+    borderColor: "#283b67",
+    backgroundColor: "#4d8194",
     height: 40,
     borderRadius: 30,
     marginVertical: 10,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: -5
   },
   buttonText: {
     color: "white",
@@ -165,9 +177,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 20,
   },
-  already:{
-    padding:15,
-  }
+  already: {
+    padding: 15,
+  }, 
+  eyeIcon: {
+    position: "absolute",
+    right: 12,
+    marginTop: 140 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+  },
 });
 
 export default LoginScreen;
