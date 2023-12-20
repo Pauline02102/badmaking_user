@@ -6,11 +6,13 @@ import {
   Button,
   StyleSheet,
   Text,
+  Alert,
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from './config';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function SignupScreen() {
 
@@ -23,13 +25,24 @@ export default function SignupScreen() {
   const [role, setRole] = React.useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const data = [
     { key: "1", value: "admin" },
     { key: "2", value: "joueur" },
   ];
 
   const handleSignup = async () => {
+
+ 
+
+    // Vérifier que l'email contient "@" et "."
+    if (!email.includes("@") || !email.includes(".")) {
+      Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+      return;
+    }
 
     try {
       console.log("Avant l'envoi de la requête au serveur"); // Avant l'envoi de la requête au serveur
@@ -57,7 +70,7 @@ export default function SignupScreen() {
       if (response.status === 201) {
         console.log("Inscription réussie");
         navigation.navigate("Login"); // Redirection vers la page de connexion
-      }else if (response.status === 400) {
+      } else if (response.status === 400) {
         // Gérer le cas où l'utilisateur existe déjà
         console.error("L'utilisateur existe déjà.");
         setErrorMessage("L'utilisateur existe déjà.");
@@ -91,23 +104,34 @@ export default function SignupScreen() {
           style={styles.inputField}
         />
       </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Mot de passe"
-          secureTextEntry
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          style={styles.inputField}
-        />
-      </View>
+
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
           style={styles.inputField}
+          keyboardType="email-address" // Utilise le clavier adapté aux adresses email
+          autoCapitalize="none"
         />
       </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Mot de passe"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          style={styles.inputField}
+        />
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+          <Icon
+            name={showPassword ? 'eye-slash' : 'eye'}
+            size={20}
+            color="#000"
+          />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.inputContainer}>
         <SelectList
           placeholder="Rôle"
@@ -154,6 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputField: {
+
     width: "100%",
     height: 40,
     borderBottomWidth: 2,
@@ -167,8 +192,8 @@ const styles = StyleSheet.create({
   button: {
     width: "100%",
     borderWidth: 2,
-    borderColor: "#8000ff",
-    backgroundColor: "#8000ff",
+    borderColor: "#283b67",
+    backgroundColor: "#4d8194",
     height: 40,
     borderRadius: 30,
     marginVertical: 10,
@@ -201,4 +226,9 @@ const styles = StyleSheet.create({
   already: {
     padding: 15,
   },
+  eyeIcon: {
+    position: "absolute",
+    right: 10, // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+  },
+
 });
