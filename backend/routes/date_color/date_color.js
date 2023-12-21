@@ -6,10 +6,6 @@ const db = require("../db.js");
 
 const router = express.Router();
 
-
-
-
-
 const cors = require("cors");
 
 const bcrypt = require("bcrypt");

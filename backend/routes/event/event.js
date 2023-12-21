@@ -4,11 +4,6 @@ const express = require("express");
 const db = require("../db.js");
 
 const router = express.Router();
-
-
-
-
-
 const cors = require("cors");
 
 const bcrypt = require("bcrypt");
@@ -37,19 +32,6 @@ router.get("/calendar", async (req, res) => {
     res
       .status(500)
       .json({ message: "Erreur lors de la récupération des événements" });
-  }
-});
-// Supprimer un événement par ID
-router.delete("/calendar/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.query("DELETE FROM event WHERE id = $1", [id]);
-    res.json({ message: "Événement supprimé avec succès" });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la suppression de l'événement" });
   }
 });
 

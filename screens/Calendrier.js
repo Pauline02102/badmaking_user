@@ -699,8 +699,7 @@ function Calendrier({ route }) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
+      
     >
       <ScrollView>
         <View style={styles.container}>

@@ -11,7 +11,7 @@ const router = express.Router();
 const cors = require("cors");
 
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -23,7 +23,7 @@ const pgp = require("pg-promise")();
 
 const app = express();
 const port = process.env.PORT || 3030;
-// Supprimez la référence à la date dans l'endpoint de mise à jour de la participation
+
 router.post("/updateParticipation/:eventId", async (req, res) => {
     try {
         const { participation, id } = req.body;

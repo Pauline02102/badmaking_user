@@ -81,7 +81,8 @@ cron.schedule('*/30 * * * * *', async () => {
     } finally {
         client.release();
     }
-});
+})
+
 async function handleCreerPaires(participants) {
     try {
         const url = 'http://192.168.1.6:3030/paires/formerPaires';
