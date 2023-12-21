@@ -8,14 +8,22 @@ import {
   Text,
   Alert,
   TouchableOpacity,
+  Switch
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from './config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNPickerSelect from "react-native-picker-select";
-export default function SignupScreen() {
+import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 
+
+export default function SignupScreen() {
+  const [isConsentChecked, setConsentChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setConsentChecked(!isConsentChecked);
+  };
   const navigation = useNavigation();
   const [nom, setnom] = useState("");
   const [prenom, setprenom] = useState("");
@@ -37,7 +45,10 @@ export default function SignupScreen() {
   ];
 
   const handleSignup = async () => {
-
+    if (!isConsentChecked) {
+      Alert.alert("Erreur", "Vous devez accepter les conditions générales d'utilisation et la politique de confidentialité pour vous inscrire.");
+      return;
+    }
 
     if (
       nom === "" ||
@@ -68,7 +79,7 @@ export default function SignupScreen() {
       return;
     }
     try {
-      console.log("Avant l'envoi de la requête au serveur"); // Avant l'envoi de la requête au serveur
+      console.log("Avant l'envoi de la requête au serveur"); 
 
       const response = await fetch(`${BASE_URL}/users/postusers`, {
         method: "POST",
@@ -124,6 +135,8 @@ export default function SignupScreen() {
 
   return (
     <View style={styles.container}>
+  
+
       <Text style={styles.classementInfo}>
         * Classement 1 = le plus élevé , 12 = le plus bas
       </Text>
@@ -223,15 +236,37 @@ export default function SignupScreen() {
           />
         </View>
       </View>
+
+      <View style={styles.switchContainer}>
+        <Switch
+          value={isConsentChecked}
+          onValueChange={handleCheckboxChange}
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={isConsentChecked ? "#f5dd4b" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+        />
+        <Text style={styles.consentText}>
+          J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
+          <Text
+            style={styles.linkText}
+            onPress={() => navigation.navigate("PrivacyPolicy")} 
+          >
+            En savoir plus.
+          </Text>
+        </Text>
+      </View>
+
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Inscription</Text>
       </TouchableOpacity>
+
       <View style={styles.signupContainer}>
         <Text style={styles.already}>Tu as deja un compte ?</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
           <Text style={styles.signupLink}>Connecte-toi</Text>
         </TouchableOpacity>
       </View>
+
     </View>
   );
 }
@@ -250,26 +285,26 @@ const styles = StyleSheet.create({
   },
   classementInfo: {
     position: "absolute",
-    bottom: 10, // Placez le texte en bas de l'écran
+    bottom: 10, 
     left: 10,
     fontSize: 12,
     color: "#333",
-    paddingBottom:10
+    paddingBottom: 10
   },
   heading: {
     fontSize: 26,
     color: "#2e2e2e",
     fontWeight: "bold",
-    marginBottom: 40, // Ajustez la marge inférieure selon vos préférences
+    marginBottom: 40, 
   },
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 30, // Ajustez la marge inférieure pour plus d'espace
+    marginBottom: 20, 
   },
   inputField: {
     width: "100%",
-    minHeight: 60, // Définissez la hauteur minimale souhaitée (par exemple, 40 pixels)
+    minHeight: 60,
     borderBottomWidth: 2,
     borderBottomColor: "rgb(173, 173, 173)",
     backgroundColor: "transparent",
@@ -319,11 +354,11 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    marginTop: 20 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+    marginTop: 20 
   },
   classementContainer: {
-    marginTop: 20,
-    marginBottom: 20, // Ajustez la marge inférieure pour plus d'espace
+    marginTop: 7,
+    marginBottom: 10, 
   },
   classementTitle: {
     fontSize: 18,
@@ -336,7 +371,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   classementInput: {
-    flex: 1, // Chacun des trois champs occupe un tiers de l'espace horizontal
-    marginHorizontal: 5, // Marge horizontale entre les champs
+    flex: 1, 
+    marginHorizontal: 5, 
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom:30,
+    paddingTop:2,
+    
+  
+  },
+  consentText: {
+    marginLeft: 10,
+    fontSize: 13,
+    color: "#333",
+  },
+  linkText: {
+    color: "#007bff", 
+    textDecorationLine: "underline",
   },
 });

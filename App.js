@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import { UserProvider, useUser } from './screens/UserContext';
 
 import Calendrier from "./screens/Calendrier";
@@ -49,6 +49,11 @@ function AuthStackNavigator() {
       <AuthStack.Screen
         name="Inscription"
         component={inscription}
+      />
+      <AuthStack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ title: 'CGU et Politique de Confidentialité' }}
       />
     </AuthStack.Navigator>
   );
@@ -101,6 +106,8 @@ function AppTabs() {
           headerShown: false,
         }} />
       )}
+
+
     </Tabs.Navigator>
   );
 }
