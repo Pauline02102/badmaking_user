@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
-import { useNavigation } from "@react-navigation/native";
-import { CommonActions } from '@react-navigation/native';
 import { useUser } from "./UserContext";
 import EditProfileForm from "./EditProfil";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { BASE_URL } from './config';
 
 const Profil = () => {
@@ -98,7 +94,9 @@ const Profil = () => {
     >
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.container}>
-          <Text style={styles.title}>Mon profil</Text>
+      
+          <Text style={styles.title} accessibilityRole="header">Mon profil</Text>
+
 
           {loggedInUser ? (
             <>
