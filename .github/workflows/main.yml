@@ -1,0 +1,11 @@
+name: test react
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: test react
+      run: |
+        npm i test@3.3.0
+        npx test
