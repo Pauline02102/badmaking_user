@@ -39,56 +39,36 @@ router.get("/calendar", async (req, res) => {
 // Créer un nouvel événement pour admin
 router.post("/postcalendar", async (req, res) => {
   try {
-    const { title, user_id, status, terrain_id, date, heure } = req.body;
+      const { title, user_id, status, terrain_id, date, heure } = req.body;
 
-    // Log des données reçues pour le débogage
-    console.log("Données reçues pour l'événement:", { title, user_id, status, terrain_id, date, heure });
+      const insertEventQuery = 'CALL insert_event($1, $2, $3, $4, $5, $6)';
+      await db.none(insertEventQuery, [title, user_id, status, terrain_id, date, heure]);
 
-    // Exécution de la requête d'insertion avec pg-promise
-    const newEvent = await db.query(
-      "INSERT INTO event (title, user_id, status, terrain_id, date, heure) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [title, user_id, status, terrain_id, date, heure]
-    );
-
-    // Vérifier si l'événement a été inséré et renvoyer les données
-    if (newEvent.length > 0) {
-      console.log("Événement créé avec succès:", newEvent[0]);
-      res.json(newEvent[0]);
-    } else {
-      // Si aucun objet n'est retourné
-      throw new Error("Échec de l'insertion de l'événement dans la base de données.");
-    }
+      res.status(201).json({
+          message: 'Événement créé avec succès.'
+      });
   } catch (error) {
-    console.error("Erreur lors de la création de l'événement:", error);
-    res.status(500).json({ message: "Erreur lors de la création de l'événement", error: error.message });
+      console.error("Erreur lors de la création de l'événement :", error);
+      res.status(500).json({ message: 'Erreur lors de la création de l\'événement' });
   }
 });
+
 
 // Mettre à jour un événement existant par ID pour admin
 router.put("/modifier/:eventId", async (req, res) => {
   try {
-    const eventId = req.params.eventId;
-    const { title, status, date, heure } = req.body;
+      const eventId = req.params.eventId;
+      const { title, status, date, heure } = req.body;
 
-    // Log des données reçues pour le débogage
-    console.log("Données reçues pour la mise à jour de l'événement:", { title, status, date, heure });
+      const updateEventQuery = 'CALL update_event($1, $2, $3, $4, $5)';
+      await db.none(updateEventQuery, [eventId, title, status, date, heure]);
 
-    const updatedEvent = await db.query(
-      "UPDATE event SET title = $1, status = $2, date = $3, heure = $4 WHERE id = $5 RETURNING *",
-      [title, status, date, heure, eventId]
-    );
-
-    // Vérifier si l'événement a été mis à jour et renvoyer les données
-    if (updatedEvent.length > 0) {
-      console.log("Événement mis à jour avec succès:", updatedEvent[0]);
-      res.json(updatedEvent[0]);
-    } else {
-      // Si aucun objet n'est retourné
-      throw new Error("Échec de la mise à jour de l'événement dans la base de données.");
-    }
+      res.status(200).json({
+          message: 'Événement mis à jour avec succès.'
+      });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de l'événement:", error);
-    res.status(500).json({ message: "Erreur lors de la mise à jour de l'événement", error: error.message });
+      console.error("Erreur lors de la mise à jour de l'événement :", error);
+      res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'événement' });
   }
 });
 

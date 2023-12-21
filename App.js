@@ -17,7 +17,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { AntDesign } from '@expo/vector-icons';
 import inscription from "./screens/inscription";
 import { BASE_URL } from './screens/config';
-import GestionEvent from './screens/gestionEvent';
+import gestionEvent from './screens/gestionEvent';
 
 const AuthStack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -92,7 +92,7 @@ function AppTabs() {
       }} />
 
       {userRole === 'admin' && (
-        <Tabs.Screen name="Gestion d'évenement" component={GestionEvent} options={{
+        <Tabs.Screen name="Gestion d'évenement" component={gestionEvent} options={{
           tabBarLabel: "Gestion d'évenement",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="account-edit" size={24} color="black" />

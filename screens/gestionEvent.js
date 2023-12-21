@@ -1,7 +1,7 @@
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar } from 'react-native-calendars';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, SelectList, StyleSheet, Alert, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, Button, SelectList, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { BASE_URL } from './config';
@@ -23,7 +23,7 @@ const ModifierEvent = ({ route, navigation }) => {
     const { eventId } = route.params;
 
     useEffect(() => {
-        fetchEvent();
+        // fetchEvent();
     }, []);
 
 
@@ -143,11 +143,16 @@ const ModifierEvent = ({ route, navigation }) => {
                                 { label: 'Par niveau', value: 'Par niveau' },
                             ]}
                         />
+
                     </View>
-                    <Button title="Enregistrer les modifications" onPress={handleUpdateEvent} color="transparent" />
-                    <View style={styles.button}>
+
+
+
+                    <TouchableOpacity style={styles.button} onPress={handleUpdateEvent}>
                         <Text style={styles.buttonText}>Enregistrer les modifications</Text>
-                    </View>
+                    </TouchableOpacity>
+
+
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -186,6 +191,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#eef2f3', // Arrière-plan doux
         padding: 20,
+        paddingTop: 30,
+        marginTop: 40,
     },
     header: {
         fontSize: 24,
@@ -234,7 +241,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 4,
         elevation: 6,
-        marginTop: -25,
+        marginTop: 15,
 
     },
     buttonText: {
