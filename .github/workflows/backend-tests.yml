@@ -10,7 +10,7 @@ jobs:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_USER: ${{ secrets.DB_USER }} 
           POSTGRES_PASSWORD: ${{ secrets.DB_PASS }}
           POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
         ports:
@@ -41,7 +41,7 @@ jobs:
         env:
           NODE_ENV: test
           DB_HOST: localhost
-          DB_USER: ${{ secrets.DB_USER }}
+          DB_USER: ${{ secrets.DB_USER }}  
           DB_PASS: ${{ secrets.DB_PASS }}
           DB_PORT: 5432
           TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
