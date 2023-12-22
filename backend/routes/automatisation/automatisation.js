@@ -28,6 +28,7 @@ const port = process.env.PORT || 3030;
 const cron = require('node-cron');
 
 // 30 secondes : */30 * * * * *
+if (process.env.NODE_ENV !== 'test') {
 cron.schedule('**/3 * * * *', async () => {
     const client = await db.connect();
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
@@ -81,7 +82,8 @@ cron.schedule('**/3 * * * *', async () => {
     } finally {
         client.release();
     }
-})
+});
+}
 
 async function handleCreerPaires(participants) {
     try {
