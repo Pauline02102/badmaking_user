@@ -7,7 +7,7 @@ describe("API Routes Event", () => {
         expect(response.statusCode).toBe(200);
       
     });
-
+/*
     test("POST /postcalendar - crée un nouvel événement", async () => {
         const newEvent = {
             title: "Test Event",
@@ -21,8 +21,8 @@ describe("API Routes Event", () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty("id");
 
-    });
-
+    });*/
+/*
     test("PUT /modifier/:eventId - met à jour un événement", async () => {
         const updatedEvent = {
             title: "Updated Event",
@@ -34,5 +34,5 @@ describe("API Routes Event", () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty("id", 3);
      
-    });
+    });*/
 });

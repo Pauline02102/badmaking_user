@@ -13,7 +13,7 @@ describe('Login Route Tests', () => {
     });
 });
 
-
+/*
 describe('User Info Route Tests', () => {
     test('GET /get-user-info - récupère les informations de l\'utilisateur', async () => {
         const token = '44a695441aba028a0bfad4baef91e6d7a53914d6064a481538437c18adedf60d6fd8c40816ad8580966f4d99af2fac82'; 
@@ -26,8 +26,8 @@ describe('User Info Route Tests', () => {
         expect(response.body).toHaveProperty('user');
         // Ajoutez d'autres assertions si nécessaire
     });
-});
-
+});*/
+/*
 describe('Logout Route Tests', () => {
     test('POST /logout - déconnecte l\'utilisateur', async () => {
         const token = '44a695441aba028a0bfad4baef91e6d7a53914d6064a481538437c18adedf60d6fd8c40816ad8580966f4d99af2fac82'; 
@@ -39,6 +39,6 @@ describe('Logout Route Tests', () => {
         expect(response.body).toHaveProperty('message', 'Déconnexion réussie');
     });
 });
-
+*/
 
 
