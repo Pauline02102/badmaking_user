@@ -61,7 +61,7 @@ const userAuthMiddleware = async (req, res, next) => {
       prenom: user.prenom,
       nom: user.nom,
       email: user.email,
-      role : user.role,
+      role: user.role,
       classement_simple: user.classement_simple,
       classement_double: user.classement_double,
       classement_mixte: user.classement_mixte
@@ -81,7 +81,7 @@ router.get("/get-user-info", userAuthMiddleware, async (req, res) => {
     prenom: req.user.prenom,
     nom: req.user.nom,
     email: req.user.email,
-    role : req.user.role,
+    role: req.user.role,
     classement_simple: req.user.classement_simple,
     classement_double: req.user.classement_double,
     classement_mixte: req.user.classement_mixte
@@ -142,7 +142,7 @@ router.post("/login", async (req, res) => {
     // Générer un token opaque
     const token = crypto.randomBytes(48).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expire dans 24 heures
-
+    console.log("expire",expiresAt);
     // Stocker le token dans la base de données avec une transaction
     await db.query('BEGIN');
     const tokenQuery = "INSERT INTO user_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)";
@@ -157,7 +157,7 @@ router.post("/login", async (req, res) => {
       prenom: user.prenom,
       mail: user.email,
       nom: user.nom,
-      role : user.role,
+      role: user.role,
       message: "Connexion réussie."
     });
   } catch (error) {

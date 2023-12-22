@@ -14,6 +14,5 @@ jobs:
         run: |
           cd backend
           npm install
-          npm install crypto
           npm test
         

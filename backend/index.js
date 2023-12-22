@@ -37,8 +37,8 @@ app.use(express.json());
 const port = process.env.PORT || 3030;
 /*app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);
-});*/
-
+});
+*/
 // Montez les routes sur les chemins appropriés
 app.use("/paires", paires);
 app.use("/automatisation", automatisation);
