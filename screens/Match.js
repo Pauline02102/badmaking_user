@@ -33,7 +33,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 200000);
+    }, 20000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -354,7 +354,7 @@ const Match = () => {
 
           return (
 
-            <View style={[styles.row, index % 2 ? styles.rowEven : styles.rowOdd]}>
+            <View key={match.match_id} style={[styles.row, index % 2 ? styles.rowEven : styles.rowOdd]}>
               {/* Team 1 */}
               <View style={styles.teamColumn}>
                 {renderPlayerName(match.user1_prenom_paire1, match.user1_nom_paire1, match.user1_double, match.match_id)}

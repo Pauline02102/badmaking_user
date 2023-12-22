@@ -44,8 +44,15 @@ const Joueurs = () => {
     try {
       const response = await fetch(`${BASE_URL}/resultat/joueurs_resultats`);
       const data = await response.json();
-      setJoueurs(data);
-      console.log("date", data)
+      if (Array.isArray(data)) {
+        setJoueurs(data);
+      } else {
+        // Gérez l'erreur ou définissez l'état à un tableau vide
+        console.error('La réponse n\'est pas un tableau:', data);
+        setJoueurs([]);
+      }
+      
+      console.log("data joueurs", data)
       const uniqueDates = [...new Set(data.map((joueur) => joueur.date))];
       setDatesDisponibles(uniqueDates);
       console.log(uniqueDates)
@@ -58,7 +65,15 @@ const Joueurs = () => {
     try {
       const response = await fetch(`${BASE_URL}/resultat/joueurs_resultatsPardate/${date}`);
       const data = await response.json();
-      setJoueurs(data);
+      console.log("avec date",data);
+      if (Array.isArray(data)) {
+        setJoueurs(data);
+      } else {
+        // Gérez l'erreur ou définissez l'état à un tableau vide
+        console.error('La réponse n\'est pas un tableau:', data);
+        setJoueurs([]);
+      }
+      
     } catch (error) {
       console.error('Erreur lors de la récupération des joueurs:', error);
     }
