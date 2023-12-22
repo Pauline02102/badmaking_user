@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
-// Importez les routes après avoir configuré les middleware et le pool de connexion
+
 const paires = require("./routes/paires/paires.js");
 const automatisation = require("./routes/automatisation/automatisation.js");
 const date_color = require("./routes/date_color/date_color.js");
@@ -35,10 +35,10 @@ app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 
 const port = process.env.PORT || 3030;
-/*app.listen(port, () => {
+app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);
 });
-*/
+
 // Montez les routes sur les chemins appropriés
 app.use("/paires", paires);
 app.use("/automatisation", automatisation);
