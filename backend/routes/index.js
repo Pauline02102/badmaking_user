@@ -42,7 +42,7 @@ app.listen(port, () => {
 
 // Montez les routes sur les chemins appropriés
 app.use("/paires", paires);
-//app.use("/automatisation", automatisation);
+app.use("/automatisation", automatisation);
 app.use("/date_color", date_color);
 app.use("/event", event);
 app.use("/match", match);

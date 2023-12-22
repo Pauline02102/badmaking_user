@@ -82,7 +82,7 @@ function Calendrier({ route }) {
       fetchEvents();
       fetchDateColors();
 
-    }, 30000);
+    }, 300000);
 
     return () => {
       clearInterval(refreshInterval);

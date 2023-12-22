@@ -32,22 +32,20 @@ cron.schedule('*/30 * * * * *', async () => {
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
     try {
-        // Get events starting within the next 24 hours
-
-
         const eventQuery = `
         SELECT id, status, 
         TO_CHAR(date, 'YYYY-MM-DD') AS event_date, 
         TO_CHAR(heure, 'HH24:MI:SS') AS event_time
- FROM event 
- WHERE date BETWEEN NOW()::DATE AND NOW()::DATE + INTERVAL '1 DAY'
-   AND heure BETWEEN NOW()::TIME AND NOW()::TIME + INTERVAL '2 MINUTES'
-   AND paire_creer = false`;
+        FROM event 
+        WHERE date BETWEEN NOW()::DATE AND NOW()::DATE + INTERVAL '1 DAY'
+        AND heure BETWEEN NOW()::TIME AND NOW()::TIME + INTERVAL '2 MINUTES'
+        AND paire_creer = false`;
         const upcomingEvents = await client.query(eventQuery);
-
+ 
         if (Array.isArray(upcomingEvents) && upcomingEvents.length > 0) {
             for (const event of upcomingEvents) {
                 console.log(upcomingEvents);
+                console.log("Données reçues du serveur:", event);
                 // Fetch participants for the event
                 const participantsQuery = `
           SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
@@ -59,11 +57,12 @@ cron.schedule('*/30 * * * * *', async () => {
           JOIN event AS e ON p.event_id = e.id
           WHERE p.participation = 'True' AND p.event_id = $1`;
                 const participants = await client.query(participantsQuery, [event.id]);
-
+                    console.log(participantsQuery);
+                    console.log(participants);
                 if (event.status === 'Random') {
                     console.log(`Paire random crée pour l'event : ${event.id}`);
                     await handleCreerPaires(participants);
-                } else if (event.status === 'par niveau') {
+                } else if (event.status === 'Par niveau') {
                     console.log(`Paire par classement crée pour l'event : ${event.id}`);
                     await handleCreerPairesParClassement(participants);
                 }
