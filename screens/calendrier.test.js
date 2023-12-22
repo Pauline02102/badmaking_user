@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render,waitFor } from '@testing-library/react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -51,7 +51,10 @@ describe('Calendrier Component', () => {
     const { findByText } = render(<UserProvider><Calendrier route={mockRoute} /></UserProvider>);
 
     const event = await findByText('Événement 1');
-    expect(event).toBeTruthy();
+    
+    await waitFor(() => {
+      expect(event).toBeTruthy();
+  });
   });
 
   // Ajoutez d'autres tests selon vos besoins

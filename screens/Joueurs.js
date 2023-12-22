@@ -13,7 +13,18 @@ const Joueurs = () => {
   const { setIsSignedIn } = useUser();
   const [selectedDate, setSelectedDate] = useState(null);
   const [datesDisponibles, setDatesDisponibles] = useState([]);
+  useEffect(() => {
+    fetchJoueurs(); // Charge initialement les données
+    fetchUserInfo();
+    fetchJoueursByDate();
+    const intervalId = setInterval(() => {
+      fetchUserInfo();
+      fetchJoueurs(); // Rafraîchit les données toutes les 30 secondes
+      fetchJoueursByDate();
+    }, 3000);
 
+    return () => clearInterval(intervalId); // Nettoie l'intervalle lors du démontage du composant
+  }, []);
   const toggleJoueurSelectionne = (id) => {
     setJoueurSelectionne(joueurSelectionne === id ? null : id);
   };
@@ -76,17 +87,7 @@ const Joueurs = () => {
     }
   };
 
-  useEffect(() => {
-    fetchJoueurs(); // Charge initialement les données
-    fetchUserInfo();
 
-    const intervalId = setInterval(() => {
-      fetchUserInfo();
-      fetchJoueurs(); // Rafraîchit les données toutes les 30 secondes
-    }, 30000);
-
-    return () => clearInterval(intervalId); // Nettoie l'intervalle lors du démontage du composant
-  }, []);
 
 
   const handleSearch = (text) => {

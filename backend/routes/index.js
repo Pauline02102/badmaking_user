@@ -36,9 +36,9 @@ app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 
 const port = process.env.PORT || 3030;
-app.listen(port, () => {
+/*app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);
-});
+});*/
 
 // Montez les routes sur les chemins appropriés
 app.use("/paires", paires);

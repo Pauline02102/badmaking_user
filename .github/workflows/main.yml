@@ -7,5 +7,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: test react
       run: |
-        npm i test@3.3.0
-        npx test
+        npm test

@@ -33,7 +33,7 @@ const Match = () => {
       fetchPaires();
       fetchPoules();
       fetchMatches();
-    }, 200000);
+    }, 200);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);

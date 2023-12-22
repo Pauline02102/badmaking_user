@@ -27,7 +27,8 @@ const app = express();
 const port = process.env.PORT || 3030;
 const cron = require('node-cron');
 
-cron.schedule('*/30 * * * * *', async () => {
+// 30 secondes : */30 * * * * *
+cron.schedule('**/3 * * * *', async () => {
     const client = await db.connect();
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
