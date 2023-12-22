@@ -21,7 +21,7 @@ const Joueurs = () => {
       fetchUserInfo();
       fetchJoueurs(); // Rafraîchit les données toutes les 30 secondes
       fetchJoueursByDate();
-    }, 3000);
+    }, 300000);
 
     return () => clearInterval(intervalId); // Nettoie l'intervalle lors du démontage du composant
   }, []);
