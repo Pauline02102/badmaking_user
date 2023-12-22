@@ -45,7 +45,17 @@ router.post("/creerPoules", async (req, res) => {
             }
 
             let taillesPoules = [];
-            let totalPaires = nombrePaires; // Utilisation d'une variable temporaire pour ne pas modifier nombrePaires directement
+            let totalPaires = nombrePaires; 
+
+            if (nombrePaires % 9 === 0) {
+                // Logique spécifique pour les multiples de 9
+                const nombreGroupes = nombrePaires / 9;
+                for (let i = 0; i < nombreGroupes; i++) {
+                    taillesPoules.push(4);
+                    taillesPoules.push(5);
+                }
+            }
+
             if (nombrePaires % 5 === 0) {
                 taillesPoules = new Array(nombrePaires / 5).fill(5);
             } else if (nombrePaires % 4 === 0) {
@@ -98,7 +108,7 @@ router.post("/creerPoules", async (req, res) => {
         await client.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la création des poules" });
-    } 
+    }
 });
 
 
@@ -127,4 +137,3 @@ router.get("/recupererPoules", async (req, res) => {
 });
 module.exports = router;
 
- 
