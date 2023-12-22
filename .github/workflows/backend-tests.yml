@@ -10,9 +10,9 @@ jobs:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_USER: DB_USER  # Utilisez les secrets GitHub pour ces valeurs
-          POSTGRES_PASSWORD: DB_PASS
-          POSTGRES_DB: TEST_DB_NAME
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASS }}
+          POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -41,7 +41,7 @@ jobs:
         env:
           NODE_ENV: test
           DB_HOST: localhost
-          DB_USER: DB_USER
-          DB_PASS: DB_PASS
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
           DB_PORT: 5432
-          TEST_DB_NAME: TEST_DB_NAME
+          TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
