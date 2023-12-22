@@ -14,4 +14,4 @@ jobs:
       run: |
         cd backend
         cd routes
-        npx jest
+        npm test
