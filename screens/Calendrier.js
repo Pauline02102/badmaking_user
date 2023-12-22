@@ -618,6 +618,12 @@ function Calendrier({ route }) {
     navigation.navigate("Gestion d'évenement", { eventId });
   };
 
+  // vérifie si l'inscription est encore possible pour un événement donné
+  const isRegistrationOpen = (eventDate) => {
+    const now = moment();
+    const eventMoment = moment(eventDate);
+    return eventMoment.diff(now, 'hours') > 25;
+  };
 
   const renderEventsForDate = () => {
 
@@ -650,14 +656,27 @@ function Calendrier({ route }) {
                 <Icon name="edit" size={30} color="purple" />
               </TouchableOpacity>
             )}
+
             <View style={styles.participationButtons}>
-              <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
-                <Icon name="check-circle" size={30} color="green" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
-                <Icon name="cancel" size={30} color="red" />
-              </TouchableOpacity>
+
+              {isRegistrationOpen(event.date) ? (
+                <>
+                  {/* Afficher le bouton d'inscription ou de désinscription si l'inscription est encore ouverte */}
+                  <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
+                    <Icon name="check-circle" size={30} color="green" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
+                    <Icon name="cancel" size={30} color="red" />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                // Afficher le message indiquant que l'inscription est fermée
+                <Text style={styles.closedRegistrationText}>
+                  Les inscriptions à l'événement sont fermées
+                </Text>
+              )}
             </View>
+
           </View>
         ))}
         <Modal
@@ -699,7 +718,7 @@ function Calendrier({ route }) {
 
   return (
     <KeyboardAvoidingView
-      
+
     >
       <ScrollView>
         <View style={styles.container}>

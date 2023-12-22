@@ -332,7 +332,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  
+  closedRegistrationText: {
+    color: 'red', // Couleur du texte
+    fontSize: 16, // Taille de la police
+    fontWeight: 'bold', // Gras
+    textAlign: 'center', // Alignement du texte
+    marginTop: 10, // Marge en haut
+    marginBottom: 10, // Marge en bas
+  },
 });
 
 export default styles;
