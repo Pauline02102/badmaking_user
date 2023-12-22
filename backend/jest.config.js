@@ -1,1 +1,5 @@
-module.exports={testMatch : ["<rootDir>/*.test.js"]}
+module.exports = {
+  testMatch: [
+    "**/routes/**/*test.js"
+  ]
+};
