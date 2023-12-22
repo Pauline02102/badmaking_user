@@ -73,6 +73,7 @@ const userAuthMiddleware = async (req, res, next) => {
   }
 };
 router.use(express.json());
+
 router.get("/get-user-info", userAuthMiddleware, async (req, res) => {
   // Si le middleware réussit,  un utilisateur valide
   // req.user est ajouté par userAuthMiddleware
