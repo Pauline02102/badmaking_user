@@ -1,9 +1,6 @@
 // jest.config.js
 module.exports = {
-  transformIgnorePatterns: [
-    "node_modules/(?!(uuid)/)" // Exclure uuid de la transformation
-  ],
-  transform: {
-    "^.+\\.[t|j]sx?$": "babel-jest"
-  }
-};
+    preset: "jest-expo",
+    roots: ["."],
+    setupFiles: ['./__mocks__/@react-native-async-storage/async-storage.js'],
+  };
