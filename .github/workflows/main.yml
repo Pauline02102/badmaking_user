@@ -5,8 +5,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: test react
+    - name: Install dependencies
       run: |
         cd backend
         cd routes
-        npm test
+        npm install
+    - name: Run tests
+      run: |
+        cd backend
+        cd routes
+        npx jest
