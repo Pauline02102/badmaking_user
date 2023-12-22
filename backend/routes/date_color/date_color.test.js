@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index');
+const app = require('../../index');
 
 describe('Tests pour les routes des couleurs des dates', () => {
     test('POST /associateColorToDate - Associer une couleur à une date', async () => {

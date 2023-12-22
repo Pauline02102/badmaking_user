@@ -3,15 +3,14 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+   
     steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: |
-        cd backend
-        cd routes
-        npm install
-    - name: Run tests
-      run: |
-        cd backend
-        cd routes
-        npm test
+      - uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./badmaking_joueurs/backend
+  
+      - name: Run tests
+        run: npm test
+        working-directory: ./badmaking_joueurs/backend

@@ -3,19 +3,18 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 // Importez les routes après avoir configuré les middleware et le pool de connexion
-const paires = require("./paires/paires.js");
-const automatisation = require("./automatisation/automatisation.js");
-const date_color = require("./date_color/date_color.js");
-const event = require("./event/event.js");
-const match = require("./match/match.js");
-const participation_event = require("./participation_event/participation_event.js");
-const participation_jeu = require("./participation_jeu/participation_jeu.js");
-const poule = require("./poule/poule.js");
-const resultat = require("./resultat/resultat.js");
+const paires = require("./routes/paires/paires.js");
+const automatisation = require("./routes/automatisation/automatisation.js");
+const date_color = require("./routes/date_color/date_color.js");
+const event = require("./routes/event/event.js");
+const match = require("./routes/match/match.js");
+const participation_event = require("./routes/participation_event/participation_event.js");
+const participation_jeu = require("./routes/participation_jeu/participation_jeu.js");
+const poule = require("./routes/poule/poule.js");
+const resultat = require("./routes/resultat/resultat.js");
+const user_tokens = require("./routes/user_tokens/user_tokens.js");
+const users = require("./routes/users/users.js");
 
-
-const user_tokens = require("./user_tokens/user_tokens.js");
-const users = require("./users/users.js");
 console.log('DB Host:', process.env.DB_HOST);
 console.log('DB User:', process.env.DB_USER);
 // ... et ainsi de suite pour les autres variables

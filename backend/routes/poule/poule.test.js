@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index'); 
+const app = require('../../index'); 
 
 describe('Tests pour les routes des poules', () => {
     test('POST /creerPoules - Créer des poules', async () => {

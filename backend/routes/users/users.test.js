@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index.js');
+const app = require('../../index');
 
 describe("API Routes Users", () => {
     test('POST /postusers - Créer un nouvel utilisateur', async () => {

@@ -3,7 +3,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+
   "scripts": {
     "test": "set NODE_ENV=test&& jest",
     "start": "node index.js"

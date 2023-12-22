@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index');
+const app = require('../../index');
 
 describe('Tests pour les routes de participation au jeu libre', () => {
     test('POST /participationJeuLibre/:userId - enregistre la participation d\'un utilisateur', async () => {
