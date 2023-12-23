@@ -17,6 +17,7 @@ const users = require("./routes/users/users.js");
 
 console.log('DB Host:', process.env.DB_HOST);
 console.log('DB User:', process.env.DB_USER);
+console.log('DB User:', process.env.DB_NAME);
 // ... et ainsi de suite pour les autres variables
 
 const app = express();
@@ -34,7 +35,8 @@ db.query('SELECT NOW()', [])
 app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 if (process.env.NODE_ENV !== 'test') {
-const port = process.env.DB_PORT || 3030;
+  const port = process.env.PORT || 3030;
+
 app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);
 });}
