@@ -20,7 +20,6 @@ import 'moment/locale/fr'; // Importez le locale français
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
 import styles from './CalendrierStyles';
-import DatePicker from 'react-native-date-picker'
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from './config';
