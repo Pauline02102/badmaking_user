@@ -5,9 +5,8 @@
   "description": "",
   "scripts": {
     "test": "set NODE_ENV=test&& jest",
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
-
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -19,11 +18,11 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
-    "nodemon": "^3.0.2",
     "pg-promise": "^11.5.4"
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
     "supertest": "^6.3.3"
   }
 }
