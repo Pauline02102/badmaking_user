@@ -34,7 +34,7 @@ db.query('SELECT NOW()', [])
 app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 if (process.env.NODE_ENV !== 'test') {
-const port =3030;
+const port = process.env.PORT || 3030;
 app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);
 });}
