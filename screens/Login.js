@@ -7,9 +7,9 @@ import UserContext from "./UserContext";
 import { useUser } from "./UserContext";
 import { BASE_URL } from './config';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { SelectList } from "react-native-dropdown-select-list";
 
-
-const LoginScreen = () => {
+export default function LoginScreen () {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [prenom, setPrenom] = useState("");
@@ -22,16 +22,19 @@ const LoginScreen = () => {
     setShowPassword(!showPassword);
   };
 
+  const data = [
+    { key: "1", value: "admin" },
+    { key: "2", value: "joueur" },
+  ];
+
   const handleLogin = async () => {
     try {
       const loginData = {
-
         prenom: prenom,
         email: email,
         password: password,
-        role: role
       };
-
+  
       const response = await fetch(`${BASE_URL}/user_tokens/login`, {
         method: "POST",
         headers: {
@@ -39,17 +42,18 @@ const LoginScreen = () => {
         },
         body: JSON.stringify(loginData),
       });
-      const data = await response.json(); // Extraction des données JSON de la réponse
-
-      console.log("Réponse du serveur:", data); // Afficher la réponse du serveur
-
+  
+      const data = await response.json();
+  
+      console.log("Réponse du serveur:", data);
+  
       if (response.status === 200 && data.token) {
         console.log("Storing token:", data.token);
         await AsyncStorage.setItem('userToken', data.token);
-        console.log("Token stored successfully"); //stocker le token
-
-        setIsSignedIn(true); // Mettre à jour l'état global de connexion
-
+        console.log("Token stored successfully");
+  
+        setIsSignedIn(true);
+  
         console.log("Connexion réussie");
       } else {
         console.error("Token manquant ou erreur de connexion");
@@ -58,6 +62,7 @@ const LoginScreen = () => {
       console.error("Erreur lors de la connexion :", error);
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -91,6 +96,16 @@ const LoginScreen = () => {
             color="#000"
           />
         </TouchableOpacity>
+        
+        <View style={styles.inputContainer}>
+          <SelectList
+            placeholder="Rôle"
+            setSelected={(val) => setRole(val)}
+            data={data}
+            save="value"
+            style={styles.choix}
+          />
+        </View>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Connexion</Text>
@@ -187,4 +202,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;

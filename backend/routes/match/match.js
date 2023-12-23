@@ -118,7 +118,7 @@ router.get("/recupererMatchs", async (req, res) => {
         JOIN users u3 ON p2.user1 = u3.id
         JOIN users u4 ON p2.user2 = u4.id
         JOIN event e ON p1.event_id = e.id
-        WHERE e.date >= CURRENT_DATE - INTERVAL '2 day';
+        WHERE e.date >= CURRENT_DATE - INTERVAL '1 day';
       `;
         const result = await db.query(query);
         res.json(result);

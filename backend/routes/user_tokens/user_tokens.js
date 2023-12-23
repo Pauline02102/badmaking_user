@@ -27,7 +27,11 @@ const port = process.env.PORT || 3030;
 //verifier que c'est le bon user conecté 
 const userAuthMiddleware = async (req, res, next) => {
   try {
-
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Token manquant ou mal formaté" });
+    }
     const token = req.headers.authorization.split(" ")[1]; // Bearer TOKEN_VALUE
 
     // Interroge la base de données pour le jeton
@@ -72,6 +76,21 @@ const userAuthMiddleware = async (req, res, next) => {
     res.status(500).json({ message: "Erreur durant l'authentification" });
   }
 };
+
+const isAdminMiddleware = (req, res, next) => {
+
+  if (!req.user) {
+    return res.status(401).json({ message: "Utilisateur non authentifié" });
+  }
+
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Accès interdit. Vous devez être administrateur pour effectuer cette action." });
+  }
+  next();
+};
+
+module.exports = userAuthMiddleware;
+module.exports = isAdminMiddleware;
 router.use(express.json());
 
 router.get("/get-user-info", userAuthMiddleware, async (req, res) => {
@@ -106,6 +125,9 @@ router.post("/logout", userAuthMiddleware, async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la déconnexion" });
   }
 });
+const hashedPassword = "$2b$10$lAo/2PH8PEFM.zMlRfA3Ke5HXBYpHRS1IwN8i4xIJf/RDjryn/IF6"; // La version hashée
+const plainPassword = "Leroy"; // Votre mot de passe en clair
+
 
 //nouvelle login securisé token opaque
 
@@ -118,14 +140,15 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: "L'email et le mot de passe sont requis." });
     }
+
     // Normaliser l'email pour la comparaison
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Préparer la requête SQL
+
+    // Préparer la requête SQL pour trouver un utilisateur par email
     const userQuery = "SELECT * FROM users WHERE LOWER(email) = LOWER($1)";
     const userResult = await db.query(userQuery, [normalizedEmail]);
-    console.log(userResult)
-    // Vérifier si un utilisateur a été trouvé
+
     // Vérifier si un utilisateur a été trouvé
     if (userResult.length === 0) {
       return res.status(401).json({ message: "Adresse e-mail incorrecte." });
@@ -134,21 +157,34 @@ router.post("/login", async (req, res) => {
     const user = userResult[0];
 
     // Vérifier le mot de passe
-    console.log(user)
     const passwordMatch = await bcrypt.compare(password, user.password);
+    
     if (!passwordMatch) {
       return res.status(401).json({ message: "Mot de passe incorrect." });
     }
 
-    // Générer un token opaque
-    const token = crypto.randomBytes(48).toString('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expire dans 24 heures
-    console.log("expire",expiresAt);
-    // Stocker le token dans la base de données avec une transaction
-    await db.query('BEGIN');
-    const tokenQuery = "INSERT INTO user_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)";
-    await db.query(tokenQuery, [token, user.id, expiresAt]);
-    await db.query('COMMIT');
+    // Vérifier si un token existe déjà pour cet utilisateur
+    const existingTokenQuery = "SELECT * FROM user_tokens WHERE user_id = $1";
+    const existingTokenResult = await db.query(existingTokenQuery, [user.id]);
+
+    let token;
+    let expiresAt;
+
+    if (existingTokenResult.length > 0) {
+      // Un token existe déjà, mettez à jour ce token existant
+      token = existingTokenResult[0].token;
+      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Mettre à jour la date d'expiration si nécessaire
+      const updateTokenQuery = "UPDATE user_tokens SET expires_at = $1 WHERE user_id = $2";
+      await db.query(updateTokenQuery, [expiresAt, user.id]);
+    } else {
+      // Générer un nouveau token opaque
+      token = crypto.randomBytes(48).toString('hex');
+      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Expire dans 24 heures
+
+      // Stocker le nouveau token dans la base de données
+      const insertTokenQuery = "INSERT INTO user_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)";
+      await db.query(insertTokenQuery, [token, user.id, expiresAt]);
+    }
 
     // Envoyer le token au client
     res.cookie('session_token', token, { httpOnly: true, secure: true }); // Utilisez secure: true en production
@@ -162,12 +198,10 @@ router.post("/login", async (req, res) => {
       message: "Connexion réussie."
     });
   } catch (error) {
-    await db.query('ROLLBACK');
     console.error('Erreur lors de la connexion:', error);
     res.status(500).json({ message: "Erreur lors de la connexion." });
   }
 });
-
 
 // Route pour la mise à jour du profil
 router.put('/update-profile', userAuthMiddleware, async (req, res) => {

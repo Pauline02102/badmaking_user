@@ -16,6 +16,8 @@ const secretKey = crypto.randomBytes(32).toString("hex");
 const bodyParser = require("body-parser");
 const pgp = require("pg-promise")();
 
+const userAuthMiddleware  = require('../user_tokens/user_tokens');
+const isAdminMiddleware   = require('../user_tokens/user_tokens');
 
 const app = express();
 const port = process.env.PORT || 3030;
@@ -37,7 +39,7 @@ router.get("/calendar", async (req, res) => {
 
 
 // Créer un nouvel événement pour admin
-router.post("/postcalendar", async (req, res) => {
+router.post("/postcalendar",  userAuthMiddleware, isAdminMiddleware, async (req, res) => {
   try {
       const { title, user_id, status, terrain_id, date, heure } = req.body;
 
