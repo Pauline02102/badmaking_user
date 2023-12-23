@@ -11,15 +11,32 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const [classement_mixte, setclassement_mixte] = useState(user ? user.classement_mixte : '');
 
     const handleSubmit = async () => {
-        // Vérifier que classement_simple, classement_double et classement_mixte contiennent uniquement des chiffres
-        if (!/^\d+$/.test(classement_simple) || !/^\d+$/.test(classement_double) || !/^\d+$/.test(classement_mixte)) {
+        // classement_simple, classement_double et classement_mixte contiennent uniquement des chiffres
+        if ((!classement_simple || /^\d+$/.test(classement_simple)) &&
+            (!classement_double || /^\d+$/.test(classement_double)) &&
+            (!classement_mixte || /^\d+$/.test(classement_mixte))) {
+            // OK, les champs sont soit vides, soit valides
+        } else {
             Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres.");
             return;
         }
-
         // Vérifier que l'email contient "@" et "."
-        if (!email.includes("@") || !email.includes(".")) {
+        if (email && (!email.includes("@") || !email.includes("."))) {
             Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+            return;
+        }
+        const updatedFields = {};
+        // Ajoute seulement les champs non vides et modifiés
+        if (prenom && prenom !== user.prenom) updatedFields.prenom = prenom;
+        if (nom && nom !== user.nom) updatedFields.nom = nom;
+        if (email && email !== user.email) updatedFields.email = email;
+        if (classement_simple && classement_simple !== user.classement_simple) updatedFields.classement_simple = classement_simple;
+        if (classement_double && classement_double !== user.classement_double) updatedFields.classement_double = classement_double;
+        if (classement_mixte && classement_mixte !== user.classement_mixte) updatedFields.classement_mixte = classement_mixte;
+
+
+        if (Object.keys(updatedFields).length === 0) {
+            Alert.alert("Aucune modification", "Vous n'avez modifié aucun champ.");
             return;
         }
 
@@ -30,12 +47,12 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,
                 },
-                body: JSON.stringify({ prenom, nom, email, classement_simple, classement_double, classement_mixte }),
+                body: JSON.stringify(updatedFields),
             });
 
             const data = await response.json();
             if (data.message) {
-                onProfileUpdated({ prenom, nom, email, classement_simple, classement_double, classement_mixte });
+                onProfileUpdated({ ...user, ...updatedFields });
                 Alert.alert("Succès", "Profil mis à jour avec succès");
             }
         } catch (error) {
@@ -64,7 +81,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
                 value={email}
                 placeholder="Email"
                 keyboardType="email-address" // Utilise le clavier adapté aux adresses email
-                autoCapitalize="none" 
+                autoCapitalize="none"
             />
             <TextInput
                 style={styles.input}

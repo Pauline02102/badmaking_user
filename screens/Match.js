@@ -387,7 +387,7 @@ const Match = () => {
       return;
     }
     setCurrentEventId(match.event_id);
-    fetch(`http://192.168.1.6:3030/resultat/check-match-result?match_id=${matchId}&user_id=${loggedInUser.id}`)
+    fetch(`${BASE_URL}/resultat/check-match-result?match_id=${matchId}&user_id=${loggedInUser.id}`)
       .then(response => response.json())
       .then(data => {
         if (data.resultExists) {

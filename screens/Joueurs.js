@@ -16,11 +16,11 @@ const Joueurs = () => {
   useEffect(() => {
     fetchJoueurs(); // Charge initialement les données
     fetchUserInfo();
-    fetchJoueursByDate();
+
     const intervalId = setInterval(() => {
       fetchUserInfo();
       fetchJoueurs(); // Rafraîchit les données toutes les 30 secondes
-      fetchJoueursByDate();
+    
     }, 300000);
 
     return () => clearInterval(intervalId); // Nettoie l'intervalle lors du démontage du composant
@@ -40,6 +40,7 @@ const Joueurs = () => {
       fetchJoueursByDate(value);
     }
   };
+  
   const fetchJoueurs = async () => {
     try {
       const response = await fetch(`${BASE_URL}/resultat/joueurs_resultats`);
@@ -70,7 +71,7 @@ const Joueurs = () => {
         setJoueurs(data);
       } else {
         // Gérez l'erreur ou définissez l'état à un tableau vide
-        console.error('La réponse n\'est pas un tableau:', data);
+        
         setJoueurs([]);
       }
       

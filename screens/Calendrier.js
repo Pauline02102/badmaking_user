@@ -231,7 +231,7 @@ function Calendrier({ route }) {
       }
 
       const response = await axios.post(
-        "http://192.168.1.6:3030/date_color/associateColorToDate",
+        `${BASE_URL}/date_color/associateColorToDate`,
         {
           date: selectedDate,
           color: currentColor,
