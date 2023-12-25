@@ -45,7 +45,7 @@ router.post("/creerPoules", async (req, res) => {
             }
 
             let taillesPoules = [];
-            let totalPaires = nombrePaires; 
+            let totalPaires = nombrePaires;
 
             if (nombrePaires % 9 === 0) {
                 // Logique spécifique pour les multiples de 9
@@ -77,7 +77,6 @@ router.post("/creerPoules", async (req, res) => {
                     }
                 }
             }
-
             const paires = await client.query(`
           SELECT id
           FROM paires
@@ -97,7 +96,6 @@ router.post("/creerPoules", async (req, res) => {
                 }
                 pouleNum++;
             }
-
             messages.push(`Poules créées pour l'événement ${eventId} avec des tailles de ${taillesPoules.join(', ')}`);
             console.log(`Poules créées pour l'événement ${eventId} avec des tailles de ${taillesPoules.join(', ')}`);
         }

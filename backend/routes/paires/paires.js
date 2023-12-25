@@ -20,13 +20,12 @@ const pgp = require("pg-promise")();
 const app = express();
 const port = process.env.PORT || 3030;
 
-//forme les paires en melangeant les joueurs et en faisant attention a l'event_id
 router.post("/formerPaires", async (req, res) => {
     const client = await db.connect();
     try {
         await client.query('BEGIN');
 
-        const participants = req.body; // Les données des participants
+        const participants = req.body; 
         const groupedByEvent = participants.reduce((acc, participant) => {
             // Regrouper les participants par event_id
             acc[participant.event_id] = acc[participant.event_id] || [];
@@ -39,7 +38,6 @@ router.post("/formerPaires", async (req, res) => {
         for (const [eventId, users] of Object.entries(groupedByEvent)) {
             // Mélanger l'array pour former des paires aléatoires
             shuffleArray(users);
-
             // Former des paires
             for (let i = 0; i < users.length; i += 2) {
                 if (users[i + 1]) {
@@ -53,7 +51,6 @@ router.post("/formerPaires", async (req, res) => {
                 }
             }
         }
-
         await client.query('COMMIT');
         res.status(200).json(response.length > 0 ? response : { message: "Toutes les paires ont été formées avec succès" });
     } catch (error) {
@@ -63,25 +60,22 @@ router.post("/formerPaires", async (req, res) => {
     } 
 });
 
-//paire aleatoire 
+
 router.post("/formerPaireParClassementDouble", async (req, res) => {
     const client = await db.connect();
     let responseSent = false;
     try {
         await client.query('BEGIN');
-
-        const participants = req.body; // Les données des participants
-        // Extrait le tableau de participants
+        const participants = req.body;
         const waitingList = []; // Liste d'attente pour les joueurs du groupe moyen
-        const formedPairs = []; // Paires formées
+        const formedPairs = []; 
         console.log(participants)
         if (!Array.isArray(participants)) {
             return res.status(400).json({ message: 'Les données des participants ne sont pas au format attendu' });
         }
 
         const groupedByEvent = participants.reduce((acc, participant) => {
-
-            // Regrouper les participants par event_id et par niveau
+            // Regroupe les participants par event_id et par niveau
             acc[participant.event_id] = acc[participant.event_id] || { haut: [], bas: [], moyen: [] };
             if (participant.classement_double >= 1 && participant.classement_double <= 4) {
                 acc[participant.event_id].bas.push(participant);
@@ -97,19 +91,16 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
             const hautParticipants = levels.haut;
             const basParticipants = levels.bas;
             const moyenParticipants = levels.moyen;
-
-            // Formez des paires entre bas et haut
+            // Forme des paires entre bas et haut
             while (basParticipants.length > 0 && hautParticipants.length > 0) {
                 const userBas = basParticipants.pop();
                 const userHaut = hautParticipants.pop();
-
-                // Insérez la paire dans la table "paires"
+                // Insére la paire dans la table "paires"
                 await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, userBas.user_id, userHaut.user_id]);
                 formedPairs.push({ user1: userBas, user2: userHaut });
             }
-            // Ajouter les joueurs bas et haut restants dans la liste d'attente
+            // Ajoute les joueurs bas et haut restants dans la liste d'attente
             waitingList.push(...basParticipants, ...hautParticipants);
-            // console.log seulement s'il y a des joueurs du groupe bas
             if (basParticipants.length > 0) {
                 basParticipants.forEach(user => {
                     console.log(`Joueur du groupe bas ajouté à la liste d'attente: ${user.prenom} ${user.nom} (ID: ${user.user_id})`);
@@ -117,7 +108,6 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
             } else {
                 console.log("Aucun joueur du groupe bas à ajouter à la liste d'attente");
             }
-            //  console.log seulement s'il y a des joueurs du groupe haut
             if (hautParticipants.length > 0) {
                 hautParticipants.forEach(user => {
                     console.log(`Joueur du groupe haut ajouté à la liste d'attente: ${user.prenom} ${user.nom} (ID: ${user.user_id})`);
@@ -125,47 +115,39 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
             } else {
                 console.log("Aucun joueur du groupe haut à ajouter à la liste d'attente.");
             }
-
-            // Formez des paires entre joueurs moyens
+            // Forme des paires entre joueurs moyens
             while (moyenParticipants.length >= 2) {
                 const joueur1 = moyenParticipants.pop();
                 const joueur2 = moyenParticipants.pop();
-
-                // Insérez la paire dans la table "paires"
+                // Insére la paire dans la table "paires"
                 await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, joueur1.user_id, joueur2.user_id]);
                 formedPairs.push({ user1: joueur1, user2: joueur2 });
             }
-
             // Si le nombre de joueurs moyens est impair
             if (moyenParticipants.length === 1) {
                 const joueurMoyenRestant = moyenParticipants.pop();
-
-                // Vérifiez s'il y a un joueur en attente
+                // Vérifie s'il y a un joueur en attente
                 if (waitingList.length > 0) {
                     const joueurEnAttente = waitingList.pop();
-
-                    // Formez la paire entre joueurMoyenRestant et joueurEnAttente
+                    // Forme la paire entre joueurMoyenRestant et joueurEnAttente
                     formedPairs.push({ joueurMoyenRestant, joueurEnAttente });
-
-                    // Retirez le joueur en attente de la liste d'attente
+                    // Retire le joueur en attente de la liste d'attente
                     const index = waitingList.indexOf(joueurEnAttente);
                     if (index !== -1) {
                         waitingList.splice(index, 1);
                     }
-
-                    // Insérez la paire dans la table "paires"
+                    // Insére la paire dans la table "paires"
                     await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, joueurMoyenRestant.user_id, joueurEnAttente.user_id]);
                 } else {
                     // Aucun joueur en attente disponible
-                    // Ajoutez le joueur moyen restant à la liste d'attente
+                    // Ajoute le joueur moyen restant à la liste d'attente
                     waitingList.push(joueurMoyenRestant);
                     console.log(`Le joueur du groupe moyen ${joueurMoyenRestant.user_id} est ajouté à la liste d'attente car la liste d'attente est vide`);
                 }
             }
         }
-        // Ajoutez les joueurs restants de la liste d'attente à un message
+        // Ajoute les joueurs restants de la liste d'attente à un message
         const joueursRestants = waitingList.map(joueur => `${joueur.prenom} ${joueur.nom}`).join(', ');
-
         await client.query('COMMIT');
         if (!responseSent) {
             res.status(200).json({ message: "Paire formée", formedPairs, joueursRestants });
