@@ -644,6 +644,7 @@ function Calendrier({ route }) {
         {events[selectedDate].map((event) => (
 
           <View key={event.id} style={styles.eventItem}>
+
             <Text style={styles.eventTitle}>{event.status}</Text>
             <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
@@ -653,23 +654,28 @@ function Calendrier({ route }) {
             <TouchableOpacity onPress={() => fetchParticipantsParEvent(event.id)}>
               <Icon name="person" size={30} color="blue" />
             </TouchableOpacity>
+
             {isAdmin && (
               <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
                 <Icon name="edit" size={30} color="purple" />
               </TouchableOpacity>
             )}
 
-
-            <View style={styles.participationButtons}>
-              <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
-                <Icon name="check-circle" size={30} color="green" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
-                <Icon name="cancel" size={30} color="red" />
-              </TouchableOpacity>
-            </View>
+            {isRegistrationOpen(event.date) ? (
+              <View style={styles.participationButtons}>
+                <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
+                  <Icon name="check-circle" size={30} color="green" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
+                  <Icon name="cancel" size={30} color="red" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Text style={styles.closedRegistrationText}>Inscription fermée</Text>
+            )}
           </View>
         ))}
+
         <Modal
           visible={isModalVisible}
           onRequestClose={() => setIsModalVisible(false)}

@@ -23,18 +23,19 @@ const ModifierEvent = ({ route, navigation }) => {
     const { eventId } = route.params ?? {};
 
 
+
     useEffect(() => {
         if (!eventId) {
             Alert.alert(
                 "Événement manquant",
                 "Aucun identifiant d'événement spécifié. Veuillez sélectionner un événement.",
-                [{ text: "OK", onPress: () =>  navigation.navigate("Calendrier") }]
+                [{ text: "OK", onPress: () => navigation.navigate("Calendrier") }]
             );
             return;
         }
 
-        // Exécutez fetchEvent seulement si eventId est défini
-       // fetchEvent();
+  
+        // fetchEvent();
     }, [eventId, navigation]);
 
 
@@ -79,10 +80,10 @@ const ModifierEvent = ({ route, navigation }) => {
             );
         }
     };
-    
+
 
     const handleUpdateEvent = async () => {
-        
+
         try {
             await axios.put(`${BASE_URL}/event/modifier/${eventId}`, newEventData);
             Alert.alert('Succès', 'Événement mis à jour avec succès.');
@@ -90,6 +91,33 @@ const ModifierEvent = ({ route, navigation }) => {
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'événement", error);
             Alert.alert('Erreur', 'Une erreur s\'est produite lors de la mise à jour de l\'événement.');
+        }
+    };
+    const handleDeleteEvent = () => {
+        Alert.alert(
+            "Confirmer la suppression",
+            "Êtes-vous sûr de vouloir supprimer cet événement ? Cela entraînera la suppression des participations des joueurs.",
+            [
+                {
+                    text: "Annuler",
+                    style: "cancel"
+                },
+                {
+                    text: "Supprimer",
+                    onPress: () => deleteEvent()
+                }
+            ]
+        );
+    };
+
+    const deleteEvent = async () => {
+        try {
+            await axios.delete(`${BASE_URL}/event/supprimer/${eventId}`);
+            Alert.alert("Succès", "Événement supprimé avec succès.");
+            navigation.goBack();
+        } catch (error) {
+            console.error("Erreur lors de la suppression de l'événement", error);
+            Alert.alert("Erreur", "Une erreur s'est produite lors de la suppression de l'événement.");
         }
     };
 
@@ -150,7 +178,7 @@ const ModifierEvent = ({ route, navigation }) => {
                     <View style={styles.card}>
                         <Text style={styles.inputTitle}>Status :</Text>
                         <RNPickerSelect
-                            style={pickerSelectStyles} // Ajoutez le style du composant
+                            style={pickerSelectStyles} 
                             value={newEventData.status}
                             onValueChange={(value) =>
                                 setNewEventData({ ...newEventData, status: value })
@@ -167,6 +195,9 @@ const ModifierEvent = ({ route, navigation }) => {
 
                     <TouchableOpacity style={styles.button} onPress={handleUpdateEvent}>
                         <Text style={styles.buttonText}>Enregistrer les modifications</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={handleDeleteEvent}>
+                        <Text style={styles.buttonText}>Supprimer l'événement</Text>
                     </TouchableOpacity>
 
 
