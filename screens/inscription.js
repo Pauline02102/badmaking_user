@@ -36,6 +36,21 @@ export default function SignupScreen() {
   const [classementDouble, setClassementDouble] = useState(null);
   const [classementMixte, setClassementMixte] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [inputStates, setInputStates] = useState({
+    nom: false,
+    prenom: false,
+    email: false,
+    password: false,
+    role: false,
+    classementSimple: false,
+    classementDouble: false,
+    classementMixte: false,
+  });
+  const [classementSimpleError, setClassementSimpleError] = useState(false);
+  const [classementDoubleError, setClassementDoubleError] = useState(false);
+  const [classementMixteError, setClassementMixteError] = useState(false);
+
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -45,24 +60,59 @@ export default function SignupScreen() {
   ];
 
   const handleSignup = async () => {
-    if (!isConsentChecked) {
-      Alert.alert("Erreur", "Vous devez accepter les conditions générales d'utilisation et la politique de confidentialité pour vous inscrire.");
-      return;
+
+
+    const inputStateCopy = { ...inputStates };
+    let hasEmptyFields = false;
+
+    if (nom === "") {
+      inputStateCopy.nom = true;
+      hasEmptyFields = true;
+    }
+    if (prenom === "") {
+      inputStateCopy.prenom = true;
+      hasEmptyFields = true;
+    }
+    if (email === "") {
+      inputStateCopy.email = true;
+      hasEmptyFields = true;
+    }
+    if (password === "") {
+      inputStateCopy.password = true;
+      hasEmptyFields = true;
+    }
+    if (role === "") {
+      inputStateCopy.role = true;
+      hasEmptyFields = true;
+    }
+    if (classementSimple === null) {
+      setClassementSimpleError(true);
+      hasEmptyFields = true;
+    } else {
+      setClassementSimpleError(false);
     }
 
-    if (
-      nom === "" ||
-      prenom === "" ||
-      email === "" ||
-      password === "" ||
-      role === "" ||
-      classementSimple === null ||
-      classementDouble === null ||
-      classementMixte === null
-    ) {
+    if (classementDouble === null) {
+      setClassementDoubleError(true);
+      hasEmptyFields = true;
+    } else {
+      setClassementDoubleError(false);
+    }
+
+    if (classementMixte === null) {
+      setClassementMixteError(true);
+      hasEmptyFields = true;
+    } else {
+      setClassementMixteError(false);
+    }
+
+    setInputStates(inputStateCopy);
+
+    if (hasEmptyFields) {
       Alert.alert("Erreur", "Tous les champs sont obligatoires.");
       return;
     }
+
     // Vérifier que l'email contient "@" et "."
     if (!email.includes("@") || !email.includes(".")) {
       Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
@@ -78,8 +128,9 @@ export default function SignupScreen() {
       );
       return;
     }
+
     try {
-      console.log("Avant l'envoi de la requête au serveur"); 
+      console.log("Avant l'envoi de la requête au serveur");
 
       const response = await fetch(`${BASE_URL}/users/postusers`, {
         method: "POST",
@@ -125,6 +176,7 @@ export default function SignupScreen() {
     }
   };
 
+
   function generateClassementItems() {
     const classements = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
     return classements.map((classement) => ({
@@ -135,7 +187,7 @@ export default function SignupScreen() {
 
   return (
     <View style={styles.container}>
-  
+
 
       <Text style={styles.classementInfo}>
         * Classement 1 = le plus élevé , 12 = le plus bas
@@ -146,7 +198,7 @@ export default function SignupScreen() {
           <Text style={styles.classementTitle}>Classements :</Text>
           <View style={styles.classementInputs}>
             <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text>Simple:</Text>
+              <Text style={{ color: classementSimpleError ? 'red' : 'black' }}>Simple:</Text>
               <RNPickerSelect
                 onValueChange={(value) => setClassementSimple(value)}
                 items={generateClassementItems()}
@@ -158,7 +210,7 @@ export default function SignupScreen() {
               />
             </View>
             <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text>Double:</Text>
+              <Text style={{ color: classementDoubleError ? 'red' : 'black' }}>Double:</Text>
               <RNPickerSelect
                 onValueChange={(value) => setClassementDouble(value)}
                 items={generateClassementItems()}
@@ -170,7 +222,7 @@ export default function SignupScreen() {
               />
             </View>
             <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text>Mixte:</Text>
+              <Text style={{ color: classementMixteError ? 'red' : 'black' }}>Mixte:</Text>
               <RNPickerSelect
                 onValueChange={(value) => setClassementMixte(value)}
                 items={generateClassementItems()}
@@ -182,6 +234,7 @@ export default function SignupScreen() {
               />
             </View>
           </View>
+
         </View>
 
 
@@ -189,13 +242,19 @@ export default function SignupScreen() {
           placeholder="Nom"
           value={nom}
           onChangeText={(text) => setnom(text)}
-          style={styles.inputField}
+          style={[
+            styles.inputField,
+            inputStates.nom && { borderBottomColor: "red" },
+          ]}
         />
         <TextInput
           placeholder="Prenom"
           value={prenom}
           onChangeText={(text) => setprenom(text)}
-          style={styles.inputField}
+          style={[
+            styles.inputField,
+            inputStates.nom && { borderBottomColor: "red" },
+          ]}
         />
 
 
@@ -203,7 +262,10 @@ export default function SignupScreen() {
           placeholder="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
-          style={styles.inputField}
+          style={[
+            styles.inputField,
+            inputStates.nom && { borderBottomColor: "red" },
+          ]}
           keyboardType="email-address" // Utilise le clavier adapté aux adresses email
           autoCapitalize="none"
         />
@@ -214,7 +276,10 @@ export default function SignupScreen() {
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={(text) => setPassword(text)}
-            style={styles.inputField}
+            style={[
+              styles.inputField,
+              inputStates.nom && { borderBottomColor: "red" },
+            ]}
           />
           <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
             <Icon
@@ -249,7 +314,7 @@ export default function SignupScreen() {
           J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
           <Text
             style={styles.linkText}
-            onPress={() => navigation.navigate("PrivacyPolicy")} 
+            onPress={() => navigation.navigate("PrivacyPolicy")}
           >
             En savoir plus.
           </Text>
@@ -285,7 +350,7 @@ const styles = StyleSheet.create({
   },
   classementInfo: {
     position: "absolute",
-    bottom: 10, 
+    bottom: 10,
     left: 10,
     fontSize: 12,
     color: "#333",
@@ -295,12 +360,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: "#2e2e2e",
     fontWeight: "bold",
-    marginBottom: 40, 
+    marginBottom: 40,
   },
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 20, 
+    marginBottom: 20,
   },
   inputField: {
     width: "100%",
@@ -354,11 +419,11 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    marginTop: 20 
+    marginTop: 20
   },
   classementContainer: {
     marginTop: 7,
-    marginBottom: 10, 
+    marginBottom: 10,
   },
   classementTitle: {
     fontSize: 18,
@@ -371,16 +436,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   classementInput: {
-    flex: 1, 
-    marginHorizontal: 5, 
+    flex: 1,
+    marginHorizontal: 5,
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom:30,
-    paddingTop:2,
-    
-  
+    paddingBottom: 30,
+    paddingTop: 2,
+
+
   },
   consentText: {
     marginLeft: 10,
@@ -388,7 +453,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   linkText: {
-    color: "#007bff", 
+    color: "#007bff",
     textDecorationLine: "underline",
   },
 });

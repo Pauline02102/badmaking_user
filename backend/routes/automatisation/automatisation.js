@@ -1,6 +1,5 @@
 
-
-
+const BASE_URL =  'http://192.168.1.6:3030'
 const express = require("express");
 const db = require("../../db");
 
@@ -29,7 +28,7 @@ const cron = require('node-cron');
 
 // 30 secondes : */30 * * * * *
 if (process.env.NODE_ENV !== 'test') {
-cron.schedule('**/3 * * * *', async () => {
+cron.schedule('*/30 * * * * *', async () => {
     const client = await db.connect();
     console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
@@ -87,7 +86,7 @@ cron.schedule('**/3 * * * *', async () => {
 
 async function handleCreerPaires(participants) {
     try {
-        const url = 'http://192.168.1.6:3030/paires/formerPaires';
+        const url = `${BASE_URL}/paires/formerPaires`;
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -122,7 +121,7 @@ async function handleCreerPaires(participants) {
 
 async function handleCreerPairesParClassement(participants) {
     try {
-        const url = 'http://192.168.1.6:3030/paires/formerPaireParClassementDouble';
+        const url = `${BASE_URL}/paires/formerPaireParClassementDouble`;
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -156,7 +155,7 @@ async function handleCreerPairesParClassement(participants) {
 
 async function createPools(eventId) {
     try {
-        const url = 'http://192.168.1.6:3030/poule/creerPoules';
+        const url = `${BASE_URL}/poule/creerPoules`;
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -188,7 +187,7 @@ async function createPools(eventId) {
 
 async function createMatches(eventId) {
     try {
-        const url = 'http://192.168.1.6:3030/match/creerMatchs';
+        const url = `${BASE_URL}/match/creerMatchs`;
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

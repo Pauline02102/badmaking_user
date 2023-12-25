@@ -125,8 +125,6 @@ router.post("/logout", userAuthMiddleware, async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la déconnexion" });
   }
 });
-const hashedPassword = "$2b$10$lAo/2PH8PEFM.zMlRfA3Ke5HXBYpHRS1IwN8i4xIJf/RDjryn/IF6"; // La version hashée
-const plainPassword = "Leroy"; // Votre mot de passe en clair
 
 
 //nouvelle login securisé token opaque
