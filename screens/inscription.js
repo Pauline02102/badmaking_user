@@ -55,7 +55,7 @@ export default function SignupScreen() {
     setShowPassword(!showPassword);
   };
   const data = [
-    { key: "1", value: "admin" },
+   
     { key: "2", value: "joueur" },
   ];
 

@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     marginBottom: 30,
+    marginTop:20
   },
   inputField: {
     width: "100%",

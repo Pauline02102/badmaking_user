@@ -148,7 +148,9 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5
+    elevation: 5,
+    minHeight: 450,
+    maxHeight: '90%',
   },
   modalText: {
     marginBottom: 15,
@@ -340,6 +342,7 @@ const styles = StyleSheet.create({
     marginTop: 10, // Marge en haut
     marginBottom: 10, // Marge en bas
   },
+  
 });
 
 export default styles;
