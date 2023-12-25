@@ -20,11 +20,22 @@ const ModifierEvent = ({ route, navigation }) => {
 
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [isTimePickerVisible, setTimePickerVisible] = useState(false);
-    const { eventId } = route.params;
+    const { eventId } = route.params ?? {};
+
 
     useEffect(() => {
-        // fetchEvent();
-    }, []);
+        if (!eventId) {
+            Alert.alert(
+                "Événement manquant",
+                "Aucun identifiant d'événement spécifié. Veuillez sélectionner un événement.",
+                [{ text: "OK", onPress: () =>  navigation.navigate("Calendrier") }]
+            );
+            return;
+        }
+
+        // Exécutez fetchEvent seulement si eventId est défini
+       // fetchEvent();
+    }, [eventId, navigation]);
 
 
     const showDatePicker = () => {
@@ -61,11 +72,17 @@ const ModifierEvent = ({ route, navigation }) => {
             setEvent(response.data);
             setNewEventData(response.data);
         } catch (error) {
-            console.error("Erreur lors de la récupération de l'événement", error);
+            Alert.alert(
+                "Erreur de Chargement",
+                "Une erreur s'est produite lors de la récupération de l'événement. Veuillez réessayer.",
+                [{ text: "OK", onPress: () => navigation.goBack() }]
+            );
         }
     };
+    
 
     const handleUpdateEvent = async () => {
+        
         try {
             await axios.put(`${BASE_URL}/event/modifier/${eventId}`, newEventData);
             Alert.alert('Succès', 'Événement mis à jour avec succès.');

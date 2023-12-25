@@ -615,16 +615,17 @@ function Calendrier({ route }) {
 
   const handleEditEvent = (eventId) => {
     navigation.navigate("Gestion d'évenement", { eventId });
+    console.log(eventId)
   };
 
   // vérifie si l'inscription est encore possible pour un événement donné
-  /*const isRegistrationOpen = (eventDate) => {
+  const isRegistrationOpen = (eventDate) => {
     const now = moment();
     const eventMoment = moment(eventDate);
     return eventMoment.diff(now, 'hours') > 25;
 
-    commit 5677b1b
-  };*/
+    //commit 5677b1b
+  };
 
   const renderEventsForDate = () => {
 
