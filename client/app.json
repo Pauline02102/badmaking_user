@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "badmaking_joueurs",
+    "slug": "badmaking_joueurs",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "../assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "badmaking"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "../assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.pauline0210.badmaking_joueurs"
+    },
+    "web": {
+      "favicon": "../assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "afd23fd7-51f8-4c4a-bcc5-93479f325f56"
+      }
+    }
+  }
+}
