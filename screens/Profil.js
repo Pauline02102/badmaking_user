@@ -23,7 +23,7 @@ const Profil = () => {
 
   useEffect(() => {
     fetchLoggedInUserInfo()
-  }, [], 30); // Utilisation d'un tableau vide de dépendances
+  }, [], 300); // Utilisation d'un tableau vide de dépendances
 
 
 

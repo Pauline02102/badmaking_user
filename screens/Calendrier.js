@@ -619,12 +619,15 @@ function Calendrier({ route }) {
   };
 
   // vérifie si l'inscription est encore possible pour un événement donné
-  const isRegistrationOpen = (eventDate) => {
+  const isRegistrationOpen = (eventDateTime) => {
+    // Obtenir l'heure et la date actuelles
     const now = moment();
-    const eventMoment = moment(eventDate);
-    return eventMoment.diff(now, 'hours') > 25;
 
-    //commit 5677b1b
+    // Obtenir la date et l'heure de l'événement et soustraire 24 heures
+    const eventMoment = moment(eventDateTime).subtract(24, 'hours');
+
+    // Comparer si l'heure actuelle est avant le moment de l'événement moins 24 heures
+    return now.isBefore(eventMoment);
   };
 
   const renderEventsForDate = () => {
@@ -661,7 +664,7 @@ function Calendrier({ route }) {
               </TouchableOpacity>
             )}
 
-            {isRegistrationOpen(event.date) ? (
+            {isRegistrationOpen(`${event.date}T${event.heure}`) ? (
               <View style={styles.participationButtons}>
                 <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
                   <Icon name="check-circle" size={30} color="green" />
