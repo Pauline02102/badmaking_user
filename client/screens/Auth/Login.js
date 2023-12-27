@@ -12,7 +12,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 export default function LoginScreen () {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
-  const [prenom, setPrenom] = useState("");
+
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [nom, setnom] = useState("");
@@ -30,7 +30,7 @@ export default function LoginScreen () {
   const handleLogin = async () => {
     try {
       const loginData = {
-        prenom: prenom,
+      
         email: email,
         password: password,
       };
@@ -75,13 +75,7 @@ export default function LoginScreen () {
           onChangeText={(text) => setEmail(text)}
           style={styles.inputField}
         />
-        <TextInput
-          placeholder="Prenom"
-          value={prenom}
-          onChangeText={(text) => setPrenom(text)}
-          style={styles.inputField}
-        />
-
+-
         <TextInput
           placeholder="Mot de passe"
           secureTextEntry={!showPassword}
