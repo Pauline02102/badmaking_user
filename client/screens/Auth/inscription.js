@@ -30,7 +30,8 @@ export default function SignupScreen() {
   const [id, setId] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = React.useState("");
+  const [role, setRole] = useState("joueur");
+
   const [errorMessage, setErrorMessage] = useState("");
   const [classementSimple, setClassementSimple] = useState(null);
   const [classementDouble, setClassementDouble] = useState(null);
@@ -185,6 +186,8 @@ export default function SignupScreen() {
     }));
   }
 
+  
+
   return (
     <View style={styles.container}>
 
@@ -204,7 +207,7 @@ export default function SignupScreen() {
                 items={generateClassementItems()}
                 value={classementSimple}
                 placeholder={{
-                  label: "Simple",
+                  label: "A remplir",
                   value: null,
                 }}
               />
@@ -216,7 +219,7 @@ export default function SignupScreen() {
                 items={generateClassementItems()}
                 value={classementDouble}
                 placeholder={{
-                  label: "Double",
+                  label: "A remplir",
                   value: null,
                 }}
               />
@@ -228,7 +231,7 @@ export default function SignupScreen() {
                 items={generateClassementItems()}
                 value={classementMixte}
                 placeholder={{
-                  label: "Mixte",
+                  label: "A remplir",
                   value: null,
                 }}
               />
@@ -291,13 +294,14 @@ export default function SignupScreen() {
         </View>
 
 
-        <View style={styles.inputContainer}>
+        <View style={styles.inputContainerRole} >
           <SelectList
             placeholder="Rôle"
             setSelected={(val) => setRole(val)}
             data={data}
             save="value"
-            style={styles.choix}
+            
+            style={styles.choix }
           />
         </View>
       </View>
@@ -366,6 +370,12 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     marginBottom: 20,
+  },
+  inputContainerRole:{
+    width: "100%",
+    position: "relative",
+    marginBottom: 20,
+    display: 'none',
   },
   inputField: {
     width: "100%",

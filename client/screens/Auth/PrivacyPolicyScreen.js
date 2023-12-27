@@ -17,13 +17,13 @@ export default function PrivacyPolicyScreen( ) {
         informations suivantes :
       </Text>
       <Text>- Votre nom</Text>
+      <Text>- Votre Prenom</Text>
       <Text>- Votre adresse e-mail</Text>
      
       <Text style={styles.sectionHeading}>Utilisation des informations</Text>
       <Text>
         Nous utilisons les informations collectées pour améliorer notre service,
-        personnaliser votre expérience utilisateur et vous envoyer des
-        notifications importantes liées à l'application.
+        personnaliser votre expérience utilisateur.
       </Text>
       <Text style={styles.sectionHeading}>Partage des informations</Text>
       <Text>

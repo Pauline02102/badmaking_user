@@ -13,7 +13,7 @@ const ModifierEvent = ({ route, navigation }) => {
     const [event, setEvent] = useState({});
     const [newEventData, setNewEventData] = useState({
         title: '',
-        status: 'Random',
+        status: 'Tous niveau',
         date: '',
         heure: '',
     });
@@ -184,7 +184,7 @@ const ModifierEvent = ({ route, navigation }) => {
                                 setNewEventData({ ...newEventData, status: value })
                             }
                             items={[
-                                { label: 'Random', value: 'Random' },
+                                { label: 'Tous niveau', value: 'Tous niveau' },
                                 { label: 'Par niveau', value: 'Par niveau' },
                             ]}
                         />

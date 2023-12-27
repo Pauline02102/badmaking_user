@@ -264,7 +264,7 @@ const Match = () => {
     try {
       const response = await fetch(`${BASE_URL}/getEventStatus/${eventId}`);
       const status = await response.json()
-      if (status === 'Random') {
+      if (status === 'Tous niveau') {
         await handleCreerPaires();
         console.log("Événement créé aléatoirement");
       } else if (status === 'par niveau') {

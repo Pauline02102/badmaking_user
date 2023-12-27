@@ -62,7 +62,7 @@ function Calendrier({ route }) {
 
   const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
   const data = [
-    { key: "1", value: "Random" },
+    { key: "1", value: "Tous niveau" },
     { key: "2", value: "Par niveau" },
   ];
   const [time, setTime] = useState(new Date());

@@ -64,8 +64,8 @@ cron.schedule('0 */10 * * * *', async () => {
                 const participants = await client.query(participantsQuery, [event.id]);
                     console.log(participantsQuery);
                     console.log(participants);
-                if (event.status === 'Random') {
-                    console.log(`Paire random crée pour l'event : ${event.id}`);
+                if (event.status === 'Tous niveau') {
+                    console.log(`Paire Tous niveau crée pour l'event : ${event.id}`);
                     await handleCreerPaires(participants);
                 } else if (event.status === 'Par niveau') {
                     console.log(`Paire par classement crée pour l'event : ${event.id}`);
