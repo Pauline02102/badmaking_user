@@ -122,9 +122,10 @@ router.get("/getAllDateColors", async (req, res) => {
 
 const cron = require('node-cron');
 // Planifier la tâche pour s'exécuter tous les trois mois
+// trois mois '0 0 1 */3 *'
 cron.schedule('0 0 1 */3 *', async () => {
     await updateDayColors();
-  });
+});
 
 
 function getNextDayOfWeek(date, dayOfWeek) {
@@ -134,42 +135,42 @@ function getNextDayOfWeek(date, dayOfWeek) {
 }
 
 
-  async function updateDayColors() {
+async function updateDayColors() {
     const client = await db.connect();
     console.log("Mise à jour des couleurs des jours pour les trois prochains mois");
-  
+
     try {
-      const today = new Date();
-      const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
-      const dayColors = {
-        '1': 'green', // Lundi
-        '2': 'blue',  // Mardi
-        '4': 'blue',  // Jeudi
-        '0': 'blue'   // Dimanche
-      };
-  
-      while (today <= threeMonthsLater) {
-        for (const dayOfWeek in dayColors) {
-          const nextDate = getNextDayOfWeek(today, parseInt(dayOfWeek));
-          const color = dayColors[dayOfWeek];
-          const formattedDate = nextDate.toISOString().split('T')[0];
-  
-          // Insérez ou mettez à jour la couleur pour la date calculée
-          await client.query(`
+        const today = new Date();
+        const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+        const dayColors = {
+            '1': '#96dfa2', // Lundi
+            '2': '#9199ff',  // Mardi
+            '4': '#9199ff',  // Jeudi
+            '0': '#9199ff'   // Dimanche
+        };
+
+        while (today <= threeMonthsLater) {
+            for (const dayOfWeek in dayColors) {
+                const nextDate = getNextDayOfWeek(today, parseInt(dayOfWeek));
+                const color = dayColors[dayOfWeek];
+                const formattedDate = nextDate.toISOString().split('T')[0];
+
+                // Insérez ou mettez à jour la couleur pour la date calculée
+                await client.query(`
             INSERT INTO date_color (date, color) 
             VALUES ($1, $2) 
             ON CONFLICT (date) 
             DO UPDATE SET color = EXCLUDED.color`,
-            [formattedDate, color]);
+                    [formattedDate, color]);
+            }
+            today.setDate(today.getDate() + 7); // Avancer d'une semaine
         }
-        today.setDate(today.getDate() + 7); // Avancer d'une semaine
-      }
     } catch (error) {
-      console.error("Database Error in updateDayColors:", error);
+        console.error("Database Error in updateDayColors:", error);
     } finally {
-      client.release();
+        client.release();
     }
-  }
-  
+}
+
 
 module.exports = router;

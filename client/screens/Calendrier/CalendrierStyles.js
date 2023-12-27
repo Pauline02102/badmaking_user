@@ -196,6 +196,16 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 25,
   },  
+  colorOptionText: {
+    color: 'white', // Texte en blanc
+    fontWeight: 'bold', // Texte en gras
+  },
+  colorOptionContainer: {
+    
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10, // Espacement entre les options de couleur
+  },
   closeButtonCouleur: {
     marginTop: 20,
     padding: 10,

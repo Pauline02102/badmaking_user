@@ -60,7 +60,7 @@ function Calendrier({ route }) {
 
 
 
-  const COLORS = ['red', 'green', 'blue', 'orange', 'white'];
+
   const data = [
     { key: "1", value: "Tous niveau" },
     { key: "2", value: "Par niveau" },
@@ -549,10 +549,10 @@ function Calendrier({ route }) {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.legendTitle}>Légende des couleurs:</Text>
-          <Text style={styles.legendText}><Text style={{ color: 'green' }}>●</Text> Vert: jeu libre au Verseau</Text>
-          <Text style={styles.legendText}><Text style={{ color: 'blue' }}>●</Text> Bleu: jeu libre à Rixensart</Text>
-          <Text style={styles.legendText}><Text style={{ color: 'orange' }}>●</Text> Orange: soirée à thème</Text>
-          <Text style={styles.legendText}><Text style={{ color: 'red' }}>●</Text> Rouge: fermeture de la salle</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#96dfa2' }}>●</Text>  Jeu libre au Verseau</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#9199ff' }}>●</Text> Jeu libre à Rixensart</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#eac849' }}>●</Text>  Soirée à thème</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#e05642' }}>●</Text>  Fermeture de la salle</Text>
 
           <TouchableOpacity style={styles.buttonClose} onPress={toggleLegend}>
             <Text style={styles.textStyle}>Fermer</Text>
@@ -715,6 +715,13 @@ function Calendrier({ route }) {
     );
 
   };
+  const colorOptions = [
+    { color: '#e05642', text: 'Fermé' },
+    { color: '#96dfa2', text: 'Verseau' },
+    { color: '#9199ff', text: 'Rixensart' },
+    { color: '#eac849', text: 'Evènement' },
+    { color: 'white', text: 'Retirer' },
+  ];
 
   return (
     <KeyboardAvoidingView
@@ -836,15 +843,19 @@ function Calendrier({ route }) {
             >
               <View style={styles.modalContainer}>
                 <Text style={styles.colorselection}>Sélectionnez une couleur :</Text>
-                {COLORS.map((color, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.colorOption, { backgroundColor: color }]}
-                    onPress={() => {
-                      changeTerrainColor(color);
-                    }}
-                  />
+                {colorOptions.map((option, index) => (
+                  <View key={index} style={styles.colorOptionContainer}>
+                    <TouchableOpacity
+                      style={[styles.colorOption, { backgroundColor: option.color }]}
+                      onPress={() => {
+                        changeTerrainColor(option.color);
+                      }}
+                    />
+                    <Text style={styles.colorOptionText}>{option.text}</Text>
+                  </View>
                 ))}
+
+
                 <TouchableOpacity
                   style={styles.closeButtonCouleur}
                   onPress={() => setColorModalVisible(false)}
