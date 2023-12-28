@@ -9,6 +9,7 @@ import { BASE_URL } from '../config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { SelectList } from "react-native-dropdown-select-list";
 
+
 export default function LoginScreen () {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ export default function LoginScreen () {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  
 
   const data = [
     { key: "1", value: "admin" },
@@ -114,6 +116,7 @@ export default function LoginScreen () {
           <Text style={styles.signupLink}>Inscription</Text>
         </TouchableOpacity>
       </View>
+ 
     </View>
   );
 };

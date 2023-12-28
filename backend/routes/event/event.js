@@ -38,19 +38,21 @@ router.get("/calendar", async (req, res) => {
 
 
 // Créer un nouvel événement pour admin
-router.post("/postcalendar",  userAuthMiddleware, isAdminMiddleware, async (req, res) => {
+router.post("/postcalendar", userAuthMiddleware, isAdminMiddleware, async (req, res) => {
   try {
-      const { title, user_id, status, date, heure } = req.body;
+    const { title, user_id, status, date, heure } = req.body;
 
-      const insertEventQuery = 'CALL insert_event($1, $2, $3, $4, $5)';
-      await db.none(insertEventQuery, [title, user_id, status, date, heure]);
+    // Remplacez "INSERT INTO event" par la requête SQL appropriée 
+    const insertEventQuery = 'INSERT INTO event (title, user_id, status, date, heure) VALUES ($1, $2, $3, $4, $5)';
+    
+    await db.none(insertEventQuery, [title, user_id, status, date, heure]);
 
-      res.status(201).json({
-          message: 'Événement créé avec succès.'
-      });
+    res.status(201).json({
+      message: 'Événement créé avec succès.'
+    });
   } catch (error) {
-      console.error("Erreur lors de la création de l'événement :", error);
-      res.status(500).json({ message: 'Erreur lors de la création de l\'événement' });
+    console.error("Erreur lors de la création de l'événement :", error);
+    res.status(500).json({ message: 'Erreur lors de la création de l\'événement' });
   }
 });
 
