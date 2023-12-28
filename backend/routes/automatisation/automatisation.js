@@ -32,7 +32,7 @@ const cron = require('node-cron');
 // 24h : 0 0 */1 * * *
 
 if (process.env.NODE_ENV !== 'test') {
-    cron.schedule('*/30 * * * * *', async () => {
+    cron.schedule('0 */10 * * * *', async () => {
         const client = await db.connect();
         console.log("Travail Cron démarré - vérification des événements pour créer des paires");
 
