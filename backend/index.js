@@ -18,11 +18,16 @@ const users = require("./routes/users/users.js");
 console.log('DB Host:', process.env.DB_HOST);
 console.log('DB User:', process.env.DB_USER);
 console.log('DB User:', process.env.DB_NAME);
+process.env.TZ = 'Europe/Paris';
+console.log('fuseau', process.env.TZ);
 // ... et ainsi de suite pour les autres variables
 
 const app = express();
 
 const db = require('./db.js'); // Remplacez par le chemin vers votre fichier de configuration de base de données
+// Utilisation de Moment.js
+const moment = require('moment-timezone');
+console.log("Heure actuelle:", moment().tz("Europe/Paris").format());
 
 db.query('SELECT NOW()', [])
   .then(res => {

@@ -1,4 +1,4 @@
-const pgp = require('pg-promise')();
+/*const pgp = require('pg-promise')();
 
 let dbConfig;
 
@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'test') {
 const db = pgp(dbConfig);
 
 module.exports = db;
-/*
+*/
 const pgp = require('pg-promise')();
 
 let db;
@@ -42,8 +42,8 @@ if (process.env.NODE_ENV === 'test') {
 } else {
     // Configuration pour la base de données de production (Heroku)
     db = pgp(process.env.BASE_URL);
+   
 }
 
 module.exports = db;
 
-*/
