@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: "100%",
-    minHeight: 60, // Définissez la hauteur minimale souhaitée (par exemple, 40 pixels)
+    minHeight: 60, 
     borderBottomWidth: 2,
     borderBottomColor: "rgb(173, 173, 173)",
     backgroundColor: "transparent",
@@ -197,6 +197,6 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    marginTop: 78 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+    marginTop: 78
   },
 });

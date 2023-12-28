@@ -11,7 +11,7 @@ const router = express.Router();
 const cors = require("cors");
 
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -185,7 +185,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Envoyer le token au client
-    res.cookie('session_token', token, { httpOnly: true, secure: true }); // Utilisez secure: true en production
+    res.cookie('session_token', token, { httpOnly: true, secure: true }); 
     res.status(200).json({
       token,
       id: user.id,

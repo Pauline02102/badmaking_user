@@ -138,7 +138,7 @@ function Calendrier({ route }) {
       // Vérifier la valeur de combinedDateTime
       console.log("combinedDateTime:", combinedDateTime);
 
-      // Convertissez la date et l'heure en un format valide pour PostgreSQL
+      // Convertir la date et l'heure en un format valide pour PostgreSQL
       const dateTime = moment.tz(
         `${combinedDateTime}`,
         "YYYY-MM-DDTHH:mm:ss.SSSZ", // Format d'entrée
@@ -148,7 +148,7 @@ function Calendrier({ route }) {
       // Vérifier la valeur de dateTime
       console.log("dateTime:", dateTime);
 
-      // Utilisez la méthode format pour obtenir la date et l'heure au format ISO 8601
+      // Utilise la méthode format pour obtenir la date et l'heure au format ISO 8601
       const formattedDateTime = dateTime.format();
 
       // Vérifier la valeur de formattedDateTime
@@ -198,7 +198,7 @@ function Calendrier({ route }) {
       if (data.success) {
         setLoggedInUser(data.user);
         console.log("data user", data.user);
-        // Vérifiez si 'role' est défini avant d'appeler toLowerCase()
+        // Vérifie si 'role' est défini avant d'appeler toLowerCase()
         const isAdmin = data.user.role && data.user.role.toLowerCase() === 'admin';
         const isJoueur = data.user.role && data.user.role.toLowerCase() === 'joueur';
 
@@ -222,7 +222,7 @@ function Calendrier({ route }) {
   const changeTerrainColor = async (currentColor) => {
     try {
       console.log("Valeur de 'selectedColor' :", currentColor);
-      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); // Ajoutez cette ligne
+      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); 
 
       let body;
       if (currentColor === 'white') {
@@ -362,7 +362,7 @@ function Calendrier({ route }) {
 
       if (participation === "Oui") {
 
-        // Vérifiez si le prénom est correctement défini
+        // Vérifie si le prénom est correctement défini
         Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponnible 24h avant l'évenement", [
           {
             text: "OK",
@@ -404,7 +404,7 @@ function Calendrier({ route }) {
         {
           participation: participation === "Oui" ? "Oui" : "Non",
           date: moment(selectedDate).format("YYYY-MM-DD"),
-          heure: formattedTime, // Ajoutez l'heure formatée ici
+          heure: formattedTime, 
         }
       );
       await fetchEvents();
@@ -424,7 +424,7 @@ function Calendrier({ route }) {
       const response = await axios.get(`${BASE_URL}/date_color/getAllDateColors`);
       const dateColors = response.data || {};
 
-      // Vérifiez si les données sont correctement renvoyées depuis le backend
+      // Vérifie si les données sont correctement renvoyées depuis le backend
 
       const backendDates = response.data;
 
@@ -435,7 +435,7 @@ function Calendrier({ route }) {
         convertedDates[formattedDate] = backendDates[date];
       }
 
-      // Utilisez 'convertedDates' dans votre application pour afficher les dates dans le format 'YYYY-MM-DD'.
+     
 
       if (dateColors) {
         const updatedCustomDatesStyles = {};
@@ -743,7 +743,7 @@ function Calendrier({ route }) {
 
           {isJoueur && (
             <Calendar
-              onDayPress={handleDayPress} // Mettez à jour la date sélectionnée
+              onDayPress={handleDayPress} 
               markedDates={customDatesStyles}
               markingType="custom"
             />

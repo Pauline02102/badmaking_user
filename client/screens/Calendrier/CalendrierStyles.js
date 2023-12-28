@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'green', // Couleur de texte de confirmation
     marginVertical: 10, // Espacement vertical
-    textAlign: 'center', // Centrez le texte
+    textAlign: 'center', 
   },
   modalViewPlayers: {
     margin: 20,

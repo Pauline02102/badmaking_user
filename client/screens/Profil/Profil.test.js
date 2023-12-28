@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import Profil from './Profil'; // Assurez-vous que le chemin est correct
-import { UserProvider } from '../Auth/UserContext'; // Utilisez le chemin correct
+import Profil from './Profil';
+import { UserProvider } from '../Auth/UserContext'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({

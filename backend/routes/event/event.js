@@ -6,7 +6,7 @@ const db = require("../../db");
 const router = express.Router();
 const cors = require("cors");
 
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -42,7 +42,6 @@ router.post("/postcalendar", userAuthMiddleware, isAdminMiddleware, async (req, 
   try {
     const { title, user_id, status, date, heure } = req.body;
 
-    // Remplacez "INSERT INTO event" par la requête SQL appropriée 
     const insertEventQuery = 'INSERT INTO event (title, user_id, status, date, heure) VALUES ($1, $2, $3, $4, $5)';
     
     await db.none(insertEventQuery, [title, user_id, status, date, heure]);

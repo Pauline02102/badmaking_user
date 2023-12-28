@@ -7,7 +7,7 @@ const router = express.Router();
 const cors = require("cors");
 
 
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();

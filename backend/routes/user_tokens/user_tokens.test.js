@@ -19,7 +19,7 @@ describe('User Info Route Tests', () => {
         const token = '44a695441aba028a0bfad4baef91e6d7a53914d6064a481538437c18adedf60d6fd8c40816ad8580966f4d99af2fac82'; 
         const response = await request(app)
             .get('/user_tokens/get-user-info')
-            .set('Authorization', `Bearer ${token}`); // Remplacez par un token valide pour les tests
+            .set('Authorization', `Bearer ${token}`); // Remplace par un token valide pour les tests
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('success', true);
@@ -33,7 +33,7 @@ describe('Logout Route Tests', () => {
         const token = '44a695441aba028a0bfad4baef91e6d7a53914d6064a481538437c18adedf60d6fd8c40816ad8580966f4d99af2fac82'; 
         const response = await request(app)
             .post('/user_tokens/logout')
-            .set('Authorization', `Bearer ${token}`);  // Remplacez par un token valide pour les tests
+            .set('Authorization', `Bearer ${token}`);  // Remplace par un token valide pour les tests
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('message', 'Déconnexion réussie');

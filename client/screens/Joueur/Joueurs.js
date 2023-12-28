@@ -32,11 +32,11 @@ const Joueurs = () => {
   const handleDateChange = (value) => {
     setSelectedDate(value);
 
-    // Si "Toutes les dates confondues" est sélectionné, chargez tous les joueurs sans filtre de date.
+    // Si "Toutes les dates confondues" est sélectionné, charge tous les joueurs sans filtre de date.
     if (value === null) {
       fetchJoueurs();
     } else {
-      // Sinon, chargez les joueurs pour la date sélectionnée.
+      // Sinon, charge les joueurs pour la date sélectionnée.
       fetchJoueursByDate(value);
     }
   };
@@ -48,7 +48,7 @@ const Joueurs = () => {
       if (Array.isArray(data)) {
         setJoueurs(data);
       } else {
-        // Gérez l'erreur ou définissez l'état à un tableau vide
+        
         console.error('La réponse n\'est pas un tableau:', data);
         setJoueurs([]);
       }
@@ -70,7 +70,7 @@ const Joueurs = () => {
       if (Array.isArray(data)) {
         setJoueurs(data);
       } else {
-        // Gérez l'erreur ou définissez l'état à un tableau vide
+        
         
         setJoueurs([]);
       }

@@ -4,13 +4,13 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { UserProvider } from '../Auth/UserContext'; 
-import Calendrier from './Calendrier'; // Assurez-vous que le chemin est correct
+import Calendrier from './Calendrier'; 
 import { Platform ,  KeyboardAvoidingView} from 'react-native';
 
 // Mock pour Platform
 Platform.OS = 'ios'; // ou 'android' selon le besoin de votre test
 
-// Ensuite, importez vos composants et bibliothèques
+
 
 jest.mock('axios');
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -30,7 +30,7 @@ const mockRoute = {
     setprenom: jest.fn(),
     id: '1',
     setId: jest.fn(),
-    // Ajoutez d'autres paramètres nécessaires
+   
   },
 };
 
@@ -57,5 +57,5 @@ describe('Calendrier Component', () => {
   });
   });
 
-  // Ajoutez d'autres tests selon vos besoins
+  
 });

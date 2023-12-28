@@ -24,8 +24,7 @@ console.log('fuseau', process.env.TZ);
 
 const app = express();
 
-const db = require('./db.js'); // Remplacez par le chemin vers votre fichier de configuration de base de données
-// Utilisation de Moment.js
+const db = require('./db.js'); 
 const moment = require('moment-timezone');
 console.log("Heure actuelle:", moment().tz("Europe/Paris").format());
 
@@ -47,7 +46,7 @@ app.listen(port, () => {
 });}
 
 
-// Montez les routes sur les chemins appropriés
+
 app.use("/paires", paires);
 app.use("/automatisation", automatisation);
 app.use("/date_color", date_color);

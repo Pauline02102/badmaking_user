@@ -10,7 +10,7 @@ const router = express.Router();
 
 const cors = require("cors");
 
-const jwt = require("jsonwebtoken"); // Importez la bibliothèque JWT
+const jwt = require("jsonwebtoken"); 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -181,7 +181,7 @@ router.post('/report-match-result', async (req, res) => {
       return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
     }
 
-    // Vérifiez l'état actuel des résultats du match
+    // Vérifie l'état actuel des résultats du match
     const checkQuery = `
         SELECT SUM(victoire) as total_victories, SUM(defaite) as total_defeats
         FROM resultat

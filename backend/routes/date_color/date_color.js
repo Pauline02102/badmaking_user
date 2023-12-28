@@ -35,7 +35,7 @@ router.post("/associateColorToDate", async (req, res) => {
             DELETE FROM date_color WHERE date = $1;
             `;
 
-            // Exécutez la requête pour supprimer la couleur
+            // Exécute la requête pour supprimer la couleur
             await db.none(removeColorQuery, [date]);
             res.json({ message: "Couleur supprimée de la date avec succès" });
             console.log("Couleur supprimée de la date avec succès");
@@ -48,7 +48,7 @@ router.post("/associateColorToDate", async (req, res) => {
             SET color = EXCLUDED.color;
             `;
 
-            // Exécutez la requête pour associer la couleur à une date
+            // Exécute la requête pour associer la couleur à une date
             await db.none(associateColorQuery, [date, color]);
             res.json({ message: "Couleur associée à la date avec succès" });
             console.log("Couleur associée à la date avec succès");
@@ -155,7 +155,7 @@ async function updateDayColors() {
                 const color = dayColors[dayOfWeek];
                 const formattedDate = nextDate.toISOString().split('T')[0];
 
-                // Insérez ou mettez à jour la couleur pour la date calculée
+                // Insére ou mette à jour la couleur pour la date calculée
                 await client.query(`
             INSERT INTO date_color (date, color) 
             VALUES ($1, $2) 
