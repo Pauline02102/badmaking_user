@@ -13,7 +13,6 @@ describe("API Routes Event", () => {
             title: "Test Event",
             user_id: 1,
             status: "active",
-            terrain_id: 1,
             date: "2023-08-01",
             heure: "10:00:00"
         };

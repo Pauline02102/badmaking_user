@@ -41,10 +41,10 @@ router.get("/calendar", async (req, res) => {
 // Créer un nouvel événement pour admin
 router.post("/postcalendar",  userAuthMiddleware, isAdminMiddleware, async (req, res) => {
   try {
-      const { title, user_id, status, terrain_id, date, heure } = req.body;
+      const { title, user_id, status, date, heure } = req.body;
 
-      const insertEventQuery = 'CALL insert_event($1, $2, $3, $4, $5, $6)';
-      await db.none(insertEventQuery, [title, user_id, status, terrain_id, date, heure]);
+      const insertEventQuery = 'CALL insert_event($1, $2, $3, $4, $5)';
+      await db.none(insertEventQuery, [title, user_id, status, date, heure]);
 
       res.status(201).json({
           message: 'Événement créé avec succès.'

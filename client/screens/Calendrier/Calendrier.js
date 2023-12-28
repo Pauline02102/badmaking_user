@@ -160,7 +160,7 @@ function Calendrier({ route }) {
         date: formattedDateTime,
         heure: dateTime.format("HH:mm:ss"),
         user_id: loggedInUser.id,
-        terrain_id: 1,
+        
       });
 
       // Vérifier les données envoyées
@@ -170,7 +170,7 @@ function Calendrier({ route }) {
         date: formattedDateTime,
         heure: dateTime.format("HH:mm:ss"),
         user_id: loggedInUser.id,
-        terrain_id: 1,
+       
       });
 
       fetchEvents();
