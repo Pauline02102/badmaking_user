@@ -98,10 +98,10 @@ function Calendrier({ route }) {
 
   const initializeDayColors = () => {
     setDayColors({
-      'monday': 'green',
-      'tuesday': 'blue',
-      'thursday': 'blue',
-      'sunday': 'blue'
+      'monday': '#96dfa2',
+      'tuesday': '#9199ff',
+      'thursday': '#9199ff',
+      'sunday': '#9199ff'
     });
   };
 
@@ -485,7 +485,7 @@ function Calendrier({ route }) {
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       setSelectedDateColor(color);
-      if (color === "green" || color === "blue") {
+      if (color === "#96dfa2" || color === "#9199ff") {
         setShowTimePicker(true); // Afficher le sélecteur de temps
         setShowConfirmButton(true); // Afficher le bouton de confirmation
 
@@ -517,7 +517,7 @@ function Calendrier({ route }) {
           ]
         );
       }
-      if (color === 'red') {
+      if (color === '#e05642') {
         setShowTimePicker(false);
         setShowConfirmButton(false);
         // Affiche une alerte si la date sélectionnée est marquée en rouge
@@ -525,7 +525,7 @@ function Calendrier({ route }) {
           { text: "OK", onPress: () => console.log("Alerte fermée") }
         ]);
       }
-      if (color === "orange") {
+      if (color === "#eac849") {
         setShowTimePicker(false);
         setShowConfirmButton(false);
       }
@@ -830,7 +830,7 @@ function Calendrier({ route }) {
 
 
 
-          <Text style={styles.eventTitle2}>{selectedDateColor !== 'blue' && selectedDateColor !== 'green'
+          <Text style={styles.eventTitle2}>{selectedDateColor !== '#9199ff' && selectedDateColor !== '#96dfa2'
             ? ' Événements :'
             : ''}</Text>
 

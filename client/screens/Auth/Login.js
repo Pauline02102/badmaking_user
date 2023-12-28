@@ -30,7 +30,7 @@ export default function LoginScreen () {
   const handleLogin = async () => {
     try {
       const loginData = {
-      
+        
         email: email,
         password: password,
       };
@@ -75,7 +75,8 @@ export default function LoginScreen () {
           onChangeText={(text) => setEmail(text)}
           style={styles.inputField}
         />
--
+
+
         <TextInput
           placeholder="Mot de passe"
           secureTextEntry={!showPassword}
@@ -193,7 +194,6 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    marginTop: 140 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
+    marginTop: 78 // Ajustez la valeur pour définir la distance entre l'icône et le champ de mot de passe
   },
 });
-
