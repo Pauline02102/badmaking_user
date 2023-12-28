@@ -38,7 +38,7 @@ function Calendrier({ route }) {
   const { prenom, setprenom } = route.params || {};
   const { id, setId } = route.params || {};
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(new Date());
+
   const [legendVisible, setLegendVisible] = useState(false);
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -58,8 +58,11 @@ function Calendrier({ route }) {
   const [dayColors, setDayColors] = useState({});
   const [selectedDateColor, setSelectedDateColor] = useState('');
 
-
-
+  const startTime = new Date();
+  startTime.setHours(19, 30);
+  const endTime = new Date();
+  endTime.setHours(23, 0);
+  const [selectedTime, setSelectedTime] = useState(startTime);
 
   const data = [
     { key: "1", value: "Tous niveau" },
@@ -283,10 +286,14 @@ function Calendrier({ route }) {
   };
 
   const onTimeSelected = (event, selectedTime) => {
-    if (selectedTime) {
+    // Vérifier si l'heure sélectionnée est dans la plage autorisée
+    if (selectedTime >= startTime && selectedTime <= endTime) {
       setSelectedTime(selectedTime); // Sauvegarder l'heure sélectionnée
-      /*sendParticipation("Oui", selectedTime); // Envoyez la participation avec l'heure choisie.*/
       console.log("Heure sélectionnée:", selectedTime);
+    } else {
+      // Informer l'utilisateur ou ajuster automatiquement l'heure
+      Alert.alert("Heure non autorisée", "Veuillez sélectionner une heure entre 19:30 et 23:00.");
+      setSelectedTime(startTime); // Réinitialiser à l'heure de début ou la plus proche valide
     }
   };
 
@@ -817,6 +824,8 @@ function Calendrier({ route }) {
                 display="default"
                 onChange={onTimeSelected}
                 style={styles.dateTimePicker}
+                minimumDate={startTime} // Définir l'heure de début minimale
+                maximumDate={endTime} // Définir l'heure de fin maximale
               />
               {showConfirmButton && (
 
