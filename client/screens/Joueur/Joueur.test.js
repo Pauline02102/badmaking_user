@@ -30,8 +30,7 @@ describe('Joueurs Component', () => {
         );
     });
 
-    // Assuming fetchJoueurs function populates the joueurs state
-    it('fetches and displays joueur data', async () => {
+    it('recuperer et afficher les données', async () => {
         const { findByText } = render(
             <UserProvider>
                 <Joueurs />
@@ -42,8 +41,6 @@ describe('Joueurs Component', () => {
         expect(joueurName).toBeTruthy();
     });
 
-
-    // Cleanup mock
     afterEach(() => {
         jest.restoreAllMocks();
     });
