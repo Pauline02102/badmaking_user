@@ -5,6 +5,7 @@ import Joueurs from './Joueurs';
 import { UserProvider } from '../Auth/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+global.fetch = require('node-fetch');
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn(() => Promise.resolve('mocked-token')),
