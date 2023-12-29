@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PrivacyPolicyScreen from './screens/Auth/PrivacyPolicyScreen';
 import { UserProvider, useUser } from './screens/Auth/UserContext';
-
+import SignupScreen from './screens/Auth/inscription';
 import Calendrier from "./screens/Calendrier/Calendrier";
 
 import Login from "./screens/Auth/Login";
@@ -48,7 +48,7 @@ function AuthStackNavigator() {
       />
       <AuthStack.Screen
         name="Inscription"
-        component={inscription}
+        component={SignupScreen}
       />
       <AuthStack.Screen
         name="PrivacyPolicy"

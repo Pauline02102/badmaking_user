@@ -195,7 +195,7 @@ export default function SignupScreen() {
       <Text style={styles.classementInfo}>
         * Classement 1 = le plus élevé , 12 = le plus bas
       </Text>
-      <Text style={styles.heading}>Inscription</Text>
+      <Text style={styles.heading} testID="inscriptionText">Inscription</Text>
       <View style={styles.inputContainer}>
         <View style={styles.classementContainer}>
           <Text style={styles.classementTitle}>Classements :</Text>
@@ -313,6 +313,7 @@ export default function SignupScreen() {
           trackColor={{ false: "#767577", true: "#81b0ff" }}
           thumbColor={isConsentChecked ? "#f5dd4b" : "#f4f3f4"}
           ios_backgroundColor="#3e3e3e"
+          testID="consentCheckbox" 
         />
         <Text style={styles.consentText}>
           J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
@@ -325,7 +326,7 @@ export default function SignupScreen() {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+      <TouchableOpacity style={styles.button} onPress={handleSignup} testID="inscriptionButton">
         <Text style={styles.buttonText}>Inscription</Text>
       </TouchableOpacity>
 
