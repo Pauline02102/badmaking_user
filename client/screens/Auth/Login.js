@@ -68,7 +68,7 @@ export default function LoginScreen () {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Connexion</Text>
+      <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
@@ -85,8 +85,9 @@ export default function LoginScreen () {
           value={password}
           onChangeText={(text) => setPassword(text)}
           style={styles.inputField}
+          testID="passwordInput"
         />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon} testID="eyeIcon">
           <Icon
             name={showPassword ? 'eye-slash' : 'eye'}
             size={20}
@@ -101,11 +102,13 @@ export default function LoginScreen () {
             data={data}
             save="value"
             style={styles.choix}
+           
+            testID="roleSelect" 
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Connexion</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} testID="ButtonConnexion">
+        <Text style={styles.buttonText}  >Connexion</Text>
       </TouchableOpacity>
 
       <View style={styles.signupContainer}>
