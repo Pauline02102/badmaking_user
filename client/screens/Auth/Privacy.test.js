@@ -5,7 +5,6 @@ import { UserProvider } from './UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 
-
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn(() => Promise.resolve('mocked-token')),
 }));
