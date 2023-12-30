@@ -32,6 +32,7 @@
     "checkbox": "^0.0.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "detox": "^20.14.7",
     "expo": "^49.0.0",
     "expo-router": "^2.0.14",
     "expo-status-bar": "~1.6.0",

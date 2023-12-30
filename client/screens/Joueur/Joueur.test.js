@@ -24,7 +24,7 @@ describe('Joueurs Component', () => {
             Promise.resolve({
                 json: () => Promise.resolve([
                     { user_id: 1, prenom: 'Alice', nom: 'Smith', total_victoires: 3, total_defaites: 1, date: '2023-01-01' }
-                    // Add other mock joueur objects here
+                    
                 ]),
             })
         );

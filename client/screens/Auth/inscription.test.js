@@ -57,5 +57,5 @@ describe('SignupScreen Component', () => {
 
         expect(checkbox.props.value).toBe(false);
     });
-
+ 
 });
