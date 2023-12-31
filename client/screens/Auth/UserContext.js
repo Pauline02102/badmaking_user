@@ -12,6 +12,15 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [userRole, setUserRole] = useState(null); // pour le rôle
+  const signOut = async () => {
+    // Réinitialiser les états
+    setIsSignedIn(false);
+    setUser(null);
+    setUserRole(null);
+
+    // Effacer le token de AsyncStorage
+    await AsyncStorage.removeItem('userToken');
+  };
 
   const contextValue = {
     isSignedIn,
@@ -19,8 +28,12 @@ export const UserProvider = ({ children }) => {
     user,
     setUser,
     userRole,    
-    setUserRole
+    setUserRole,
+    signOut,
   };
+
+
+
 
   return (
     <UserContext.Provider  value={contextValue}>

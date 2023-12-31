@@ -151,7 +151,7 @@ const fetchUserRole = async (token) => {
 };
 
 function AppContent() {
-  const { isSignedIn, setIsSignedIn, setUserRole } = useUser();
+  const { isSignedIn, setIsSignedIn, setUserRole, userRole } = useUser();
 
   useEffect(() => {
     const checkToken = async () => {
@@ -164,7 +164,7 @@ function AppContent() {
     };
 
     checkToken();
-  }, [setIsSignedIn, setUserRole]);
+  }, [isSignedIn, setIsSignedIn, setUserRole, userRole]);
 
   return (
     <NavigationContainer>
