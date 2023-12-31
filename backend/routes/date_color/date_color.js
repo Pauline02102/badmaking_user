@@ -126,19 +126,14 @@ const cron = require('node-cron');
 cron.schedule('0 0 1 */3 *', async () => {
     await updateDayColors();
 });
-
-
 function getNextDayOfWeek(date, dayOfWeek) {
     const resultDate = new Date(date.getTime());
     resultDate.setDate(resultDate.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
     return resultDate;
 }
-
-
 async function updateDayColors() {
     const client = await db.connect();
     console.log("Mise à jour des couleurs des jours pour les trois prochains mois");
-
     try {
         const today = new Date();
         const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
@@ -154,7 +149,6 @@ async function updateDayColors() {
                 const nextDate = getNextDayOfWeek(today, parseInt(dayOfWeek));
                 const color = dayColors[dayOfWeek];
                 const formattedDate = nextDate.toISOString().split('T')[0];
-
                 // Insére ou mette à jour la couleur pour la date calculée
                 await client.query(`
             INSERT INTO date_color (date, color) 

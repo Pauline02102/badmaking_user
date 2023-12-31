@@ -11,7 +11,7 @@ const router = express.Router();
 const cors = require("cors");
 
 
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -35,7 +35,6 @@ if (process.env.NODE_ENV !== 'test') {
     cron.schedule('0 */10 * * * *', async () => {
         const client = await db.connect();
         console.log("Travail Cron démarré - vérification des événements pour créer des paires");
-
         try {
             const eventQuery = `
             SELECT id, status, 
@@ -43,7 +42,6 @@ if (process.env.NODE_ENV !== 'test') {
             TO_CHAR(heure, 'HH24:MI:SS') AS event_time
             FROM event 
             WHERE date BETWEEN NOW()::DATE AND NOW()::DATE + INTERVAL '1 DAY'
-            
             AND heure BETWEEN NOW()::TIME AND NOW()::TIME + INTERVAL '2 MINUTES'
             AND paire_creer = false`;
             const upcomingEvents = await client.query(eventQuery);
@@ -52,9 +50,6 @@ if (process.env.NODE_ENV !== 'test') {
                 for (const event of upcomingEvents) {
                     console.log(upcomingEvents);
                     console.log("Données reçues du serveur:", event);
-                    // Fetch participants for the event
-
-                    
                     const participantsQuery = `
               SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, 
                      u.classement_double, u.classement_mixte, 
@@ -64,12 +59,9 @@ if (process.env.NODE_ENV !== 'test') {
               JOIN users AS u ON p.user_id = u.id
               JOIN event AS e ON p.event_id = e.id
               WHERE p.participation = 'True' AND p.event_id = $1`;
-
-
                     const participants = await client.query(participantsQuery, [event.id]);
                     console.log(participantsQuery);
                     console.log(participants);
-
                     // Vérifier si le nombre de participations est inférieur à 6
                     if (!participants.rows || participants.rows.length < 6) {
                         console.log(`L'événement ${event.id} a moins de 6 participants ou aucun participant, il ne sera pas traité.`);
