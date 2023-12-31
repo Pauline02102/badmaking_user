@@ -73,20 +73,24 @@ function AppTabs() {
           headerShown: false,
 
         }} />
-      <Tabs.Screen name="Match" component={Match} options={{
-        tabBarLabel: "Match",
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="badminton" size={24} color="black" />
-        ),
-        headerShown: false,
-      }} />
-      <Tabs.Screen name="Joueurs" component={Joueurs} options={{
-        tabBarLabel: "Résultats",
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="format-list-bulleted" size={24} color="black" />
-        ),
-        headerShown: false,
-      }} />
+      {userRole === 'joueur' && (
+        <Tabs.Screen name="Match" component={Match} options={{
+          tabBarLabel: "Match",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="badminton" size={24} color="black" />
+          ),
+          headerShown: false,
+        }} />
+      )}
+      {userRole === 'joueur' && (
+        <Tabs.Screen name="Joueurs" component={Joueurs} options={{
+          tabBarLabel: "Résultats",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="format-list-bulleted" size={24} color="black" />
+          ),
+          headerShown: false,
+        }} />
+      )}
       <Tabs.Screen name="Profil" component={Profil} options={{
         tabBarLabel: "Profil",
         tabBarIcon: ({ color, size }) => (
