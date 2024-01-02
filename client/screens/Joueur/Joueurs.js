@@ -240,11 +240,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, // Opacité de l'ombre
     shadowRadius: 3, // Rayon de l'ombre
     shadowOffset: { width: 0, height: 2 }, // Décalage de l'ombre
+    paddingBottom:-10,
+    paddingTop:-10
   },
   picker: {
     color: '#333', // Couleur de la police
     fontSize: 16, // Taille de la police
-    marginTop: -80
+    marginTop: -10
   },
 });
 

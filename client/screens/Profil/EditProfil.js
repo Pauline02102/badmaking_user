@@ -53,7 +53,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
             const data = await response.json();
             if (data.message) {
                 onProfileUpdated({ ...user, ...updatedFields });
-                Alert.alert("Succès", "Profil mis à jour avec succès");
+                Alert.alert("Succès", "Profil mit à jour avec succès");
             }
         } catch (error) {
             console.error("Erreur lors de la mise à jour du profil:", error);
