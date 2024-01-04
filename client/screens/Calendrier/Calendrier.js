@@ -94,7 +94,7 @@ function Calendrier({ route }) {
     setDatePickerVisibility(false);
   };
   const handleConfirm = (date) => {
-    console.warn("A date has been picked: ", date);
+
     setTime(date);
     hideDatePicker();
   };
