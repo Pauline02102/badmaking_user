@@ -10,7 +10,7 @@ const router = express.Router();
 
 const cors = require("cors");
 
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -228,17 +228,16 @@ router.post('/report-match-result', async (req, res) => {
 
     // Vérifier les résultats de l'équipe adverse
     const opponentResultsQuery = `
-        SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
-        FROM resultat
-        WHERE match_id = $1 AND (user_id = ANY($2))
-      `;
-    const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
+    SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+    FROM resultat
+    WHERE match_id = $1 AND user_id != $2 AND user_id = ANY($3)
+`;
+    const opponentResults = await db.query(opponentResultsQuery, [match_id, user_id, opponentTeam]);
     const opponentData = opponentResults[0];
 
-    // Vérifier les conflits de résultat
+    // Vérification des conflits de résultat avec les adversaires
     if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
-      return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
-
+      return res.status(400).json({ message: "Les résultats du match sont contradictoires avec les adversaires." });
     }
 
     // Insérer le résultat
