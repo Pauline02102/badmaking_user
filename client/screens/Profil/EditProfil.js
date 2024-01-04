@@ -11,13 +11,19 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const [classement_mixte, setclassement_mixte] = useState(user ? user.classement_mixte : '');
 
     const handleSubmit = async () => {
-        // classement_simple, classement_double et classement_mixte contiennent uniquement des chiffres
-        if ((!classement_simple || /^\d+$/.test(classement_simple)) &&
-            (!classement_double || /^\d+$/.test(classement_double)) &&
-            (!classement_mixte || /^\d+$/.test(classement_mixte))) {
+        const isValidClassement = (classement) => {
+            const numericValue = parseInt(classement, 10);
+            return numericValue >= 1 && numericValue <= 12;
+        };
+
+        if (
+            (!classement_simple || isValidClassement(classement_simple)) &&
+            (!classement_double || isValidClassement(classement_double)) &&
+            (!classement_mixte || isValidClassement(classement_mixte))
+        ) {
             // OK, les champs sont soit vides, soit valides
         } else {
-            Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres.");
+            Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres entre 1 et 12.");
             return;
         }
         // Vérifier que l'email contient "@" et "."
