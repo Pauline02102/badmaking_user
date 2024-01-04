@@ -122,63 +122,67 @@ router.post('/report-match-result', async (req, res) => {
   try {
     const { match_id, user_id, victoire, defaite, event_id } = req.body;
 
-    // Recherche d'un résultat existant pour l'utilisateur et le match
+    // Vérifier si un résultat existe déjà pour le match
     const existingResultQuery = `
-      SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
-      FROM resultat
-      WHERE match_id = $1 AND user_id = $2
-      GROUP BY match_id
-    `;
-    const existingResult = await db.query(existingResultQuery, [match_id, user_id]);
-
-    if (existingResult.length > 0) {
-      const { total_victoires, total_defaites } = existingResult[0];
-
-      // Avant de mettre à jour, vérifier s'il y a un conflit avec les résultats des adversaires
-      if ((victoire == 1 && total_victoires > 0) || (defaite == 1 && total_defaites > 0)) {
-        return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
-      }
-
-      // Mettre à jour le résultat existant si aucune incohérence n'est détectée
-      const updateQuery = `
-        UPDATE resultat
-        SET victoire = $3, defaite = $4
-        WHERE match_id = $1 AND user_id = $2
-      `;
-      await db.query(updateQuery, [match_id, user_id, victoire, defaite]);
-      return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
-    }
-
-    // Vérifie l'état actuel des résultats du match
-    const checkQuery = `
-      SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+      SELECT user_id, victoire, defaite
       FROM resultat
       WHERE match_id = $1
-      GROUP BY match_id
     `;
-    const checkResult = await db.query(checkQuery, [match_id]);
+    const existingResults = await db.query(existingResultQuery, [match_id]);
 
-    if (checkResult.length > 0) {
-      const { total_victoires, total_defaites } = checkResult[0];
+    if (existingResults.length === 0) {
+      // Aucun résultat pour le match, enregistrer le résultat tel qu'il est
+      const insertQuery = `
+        INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
+      await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
+      return res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
+    }
 
-      // Logique pour éviter plus de 2 victoires ou défaites
-      if ((victoire == 1 && total_victoires >= 2) || (defaite == 1 && total_defaites >= 2)) {
-        return res.status(400).json({ message: "Le résultat de ce match est déjà complet." });
+    const opponentResults = existingResults.filter(result => result.user_id !== user_id);
+    const myResults = existingResults.find(result => result.user_id === user_id);
+
+    if (opponentResults.length > 0) {
+      // Des résultats pour les adversaires existent
+      const opponentResult = opponentResults[0];
+
+      if (
+        (victoire === 1 && opponentResult.defaite === 1) ||
+        (defaite === 1 && opponentResult.victoire === 1)
+      ) {
+        // Les résultats sont inversés par rapport à l'adversaire, renvoyer une erreur
+        return res.status(400).json({ message: "Les résultats ne peuvent pas être inversés par rapport à l'adversaire ou différent de celui de votre partenaire" });
       }
     }
 
-    // Insérer le résultat
-    const insertQuery = `
-      INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
-      VALUES ($1, $2, $3, $4, $5)
-    `;
-    await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
-
-    return res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
+    if (myResults) {
+      // Un résultat existe déjà pour l'utilisateur
+      const updateQuery = `
+        UPDATE resultat
+        SET victoire = $3, defaite = $4, event_id = $5
+        WHERE match_id = $1 AND user_id = $2
+      `;
+      await db.query(updateQuery, [match_id, user_id, victoire, defaite, event_id]);
+      return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
+    } else {
+      // Aucun résultat pour l'utilisateur, enregistrer le résultat tel qu'il est
+      const insertQuery = `
+        INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
+      await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
+      return res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
+    }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Erreur dans les résultats du match" });
+    return res.status(500).json({ message: "Erreur dans les résultats du match." });
   }
 });
+
+
+
+
+
 
 module.exports = router;

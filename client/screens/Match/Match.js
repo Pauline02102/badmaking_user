@@ -314,9 +314,11 @@ const Match = () => {
         // match succes
         console.log(data.message);
         console.log(body)
+        alert(data.message);
       } else {
         // erreur
         console.error(data.message);
+        alert(data.message);
       }
     } catch (error) {
       console.error("erreur lors de l'encodage des resultats du match ", error);
