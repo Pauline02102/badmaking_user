@@ -159,48 +159,17 @@ router.post('/report-match-result', async (req, res) => {
 
       // Vérifier les résultats de l'équipe adverse
       const opponentResultsQuery = `
-    SELECT user_id, victoire, defaite
-    FROM resultat
-    WHERE match_id = $1 AND user_id != $2 AND user_id = ANY($3)
-`;
-      const opponentResults = await db.query(opponentResultsQuery, [match_id, user_id, opponentTeam]);
-      const opponentData = opponentResults.rows;
+          SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+          FROM resultat
+          WHERE match_id = $1 AND (user_id = ANY($2))
+        `;
+      const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
+      const opponentData = opponentResults[0];
 
-      // Vérifier les conflits de résultat avec les adversaires
-      if (opponentData.length > 0) {
-        // Vérifier si le résultat de l'utilisateur est en conflit avec celui de son partenaire
-        const partnerResultQuery = `
-      SELECT victoire, defaite
-      FROM resultat
-      WHERE match_id = $1 AND user_id = $2
-  `;
-        const partnerResult = await db.query(partnerResultQuery, [match_id, myTeam[0]]);
-
-        if (partnerResult.rows.length > 0) {
-          const conflictingResult = partnerResult.rows[0];
-
-          if (
-            (victoire === 1 && conflictingResult.victoire !== 1) ||
-            (defaite === 1 && conflictingResult.defaite !== 1)
-          ) {
-            return res.status(400).json({ message: "Les résultats du match sont contradictoires avec les partenaires." });
-          }
-        }
-
-        // Vérifier si le résultat de l'utilisateur est opposé à celui de l'équipe adverse
-        const conflictingResult = opponentData.find(opponentResult => {
-          return (
-            (victoire === 1 && opponentResult.defaite === 1) ||
-            (defaite === 1 && opponentResult.victoire === 1)
-          );
-        });
-
-        if (conflictingResult) {
-          return res.status(400).json({ message: "Les résultats du match sont contradictoires avec les adversaires." });
-        }
+      // Vérifier les conflits de résultat
+      if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
+        return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
       }
-
-
 
       // Mettre à jour le résultat existant si aucune incohérence n'est détectée
       const updateQuery = `
@@ -259,48 +228,18 @@ router.post('/report-match-result', async (req, res) => {
 
     // Vérifier les résultats de l'équipe adverse
     const opponentResultsQuery = `
-    SELECT user_id, victoire, defaite
-    FROM resultat
-    WHERE match_id = $1 AND user_id != $2 AND user_id = ANY($3)
-`;
-    const opponentResults = await db.query(opponentResultsQuery, [match_id, user_id, opponentTeam]);
-    const opponentData = opponentResults.rows;
+        SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+        FROM resultat
+        WHERE match_id = $1 AND (user_id = ANY($2))
+      `;
+    const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
+    const opponentData = opponentResults[0];
 
-    // Vérifier les conflits de résultat avec les adversaires
-    if (opponentData.length > 0) {
-      // Vérifier si le résultat de l'utilisateur est en conflit avec celui de son partenaire
-      const partnerResultQuery = `
-      SELECT victoire, defaite
-      FROM resultat
-      WHERE match_id = $1 AND user_id = $2
-  `;
-      const partnerResult = await db.query(partnerResultQuery, [match_id, myTeam[0]]);
+    // Vérifier les conflits de résultat
+    if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
+      return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
 
-      if (partnerResult.rows.length > 0) {
-        const conflictingResult = partnerResult.rows[0];
-
-        if (
-          (victoire === 1 && conflictingResult.victoire !== 1) ||
-          (defaite === 1 && conflictingResult.defaite !== 1)
-        ) {
-          return res.status(400).json({ message: "Les résultats du match sont contradictoires avec les partenaires." });
-        }
-      }
-
-      // Vérifier si le résultat de l'utilisateur est opposé à celui de l'équipe adverse
-      const conflictingResult = opponentData.find(opponentResult => {
-        return (
-          (victoire === 1 && opponentResult.defaite === 1) ||
-          (defaite === 1 && opponentResult.victoire === 1)
-        );
-      });
-
-      if (conflictingResult) {
-        return res.status(400).json({ message: "Les résultats du match sont contradictoires avec les adversaires." });
-      }
     }
-
-
 
     // Insérer le résultat
 
