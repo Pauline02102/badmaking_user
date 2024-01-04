@@ -120,141 +120,65 @@ router.get('/check-match-result', async (req, res) => {
 //enregistrer les resultats d'un match
 router.post('/report-match-result', async (req, res) => {
   try {
-    console.log("Received report match result with body:", req.body);
     const { match_id, user_id, victoire, defaite, event_id } = req.body;
 
     // Recherche d'un résultat existant pour l'utilisateur et le match
-    const existingResultQuery = `SELECT * FROM resultat WHERE match_id = $1 AND user_id = $2`;
+    const existingResultQuery = `
+      SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+      FROM resultat
+      WHERE match_id = $1 AND user_id = $2
+      GROUP BY match_id
+    `;
     const existingResult = await db.query(existingResultQuery, [match_id, user_id]);
+
     if (existingResult.length > 0) {
+      const { total_victoires, total_defaites } = existingResult[0];
+
       // Avant de mettre à jour, vérifier s'il y a un conflit avec les résultats des adversaires
-
-      // Récupérer les identifiants des paires du match
-      const pairsQuery = `
-          SELECT paire1, paire2 FROM match
-          WHERE id = $1
-        `;
-      const pairsResult = await db.query(pairsQuery, [match_id]);
-      const { paire1, paire2 } = pairsResult[0];
-
-      // Récupérer les identifiants des joueurs pour chaque paire
-      const playersQuery = `
-          SELECT user1, user2 FROM paires WHERE id = $1
-          UNION
-          SELECT user1, user2 FROM paires WHERE id = $2
-        `;
-      const playersResult = await db.query(playersQuery, [paire1, paire2]);
-      const players = playersResult;
-
-      // Identifier l'équipe du joueur actuel et l'équipe adverse
-      let myTeam = [];
-      let opponentTeam = [];
-      players.forEach(pair => {
-        if (pair.user1 === user_id || pair.user2 === user_id) {
-          myTeam.push(pair.user1, pair.user2);
-        } else {
-          opponentTeam.push(pair.user1, pair.user2);
-        }
-      });
-
-      // Vérifier les résultats de l'équipe adverse
-      const opponentResultsQuery = `
-          SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
-          FROM resultat
-          WHERE match_id = $1 AND (user_id = ANY($2))
-        `;
-      const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
-      const opponentData = opponentResults[0];
-
-      // Vérifier les conflits de résultat
-      if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
+      if ((victoire == 1 && total_victoires > 0) || (defaite == 1 && total_defaites > 0)) {
         return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
       }
 
       // Mettre à jour le résultat existant si aucune incohérence n'est détectée
       const updateQuery = `
-          UPDATE resultat
-          SET victoire = $3, defaite = $4
-          WHERE match_id = $1 AND user_id = $2
-        `;
+        UPDATE resultat
+        SET victoire = $3, defaite = $4
+        WHERE match_id = $1 AND user_id = $2
+      `;
       await db.query(updateQuery, [match_id, user_id, victoire, defaite]);
       return res.status(200).json({ message: "Le résultat du match a été mis à jour avec succès." });
     }
 
     // Vérifie l'état actuel des résultats du match
     const checkQuery = `
-        SELECT SUM(victoire) as total_victories, SUM(defaite) as total_defeats
-        FROM resultat
-        WHERE match_id = $1
-        GROUP BY match_id
-      `;
+      SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
+      FROM resultat
+      WHERE match_id = $1
+      GROUP BY match_id
+    `;
     const checkResult = await db.query(checkQuery, [match_id]);
-    const matchResult = checkResult[0];
 
-    // Logique pour éviter plus de 2 victoires ou défaites
-    if (matchResult) {
-      if ((victoire == 1 && matchResult.total_victories >= 2) || (defaite == 1 && matchResult.total_defeats >= 2)) {
+    if (checkResult.length > 0) {
+      const { total_victoires, total_defaites } = checkResult[0];
+
+      // Logique pour éviter plus de 2 victoires ou défaites
+      if ((victoire == 1 && total_victoires >= 2) || (defaite == 1 && total_defaites >= 2)) {
         return res.status(400).json({ message: "Le résultat de ce match est déjà complet." });
       }
     }
 
-    // Récupérer les identifiants des paires du match
-    const pairsQuery = `
-        SELECT paire1, paire2 FROM match
-        WHERE id = $1
-      `;
-    const pairsResult = await db.query(pairsQuery, [match_id]);
-    const { paire1, paire2 } = pairsResult[0];
-
-    // Récupérer les identifiants des joueurs pour chaque paire
-    const playersQuery = `
-        SELECT user1, user2 FROM paires WHERE id = $1
-        UNION
-        SELECT user1, user2 FROM paires WHERE id = $2
-      `;
-    const playersResult = await db.query(playersQuery, [paire1, paire2]);
-    const players = playersResult;
-
-    // Identifier l'équipe du joueur actuel et l'équipe adverse
-    let myTeam = [];
-    let opponentTeam = [];
-    players.forEach(pair => {
-      if (pair.user1 === user_id || pair.user2 === user_id) {
-        myTeam.push(pair.user1, pair.user2);
-      } else {
-        opponentTeam.push(pair.user1, pair.user2);
-      }
-    });
-
-    // Vérifier les résultats de l'équipe adverse
-    const opponentResultsQuery = `
-        SELECT SUM(victoire) as total_victoires, SUM(defaite) as total_defaites
-        FROM resultat
-        WHERE match_id = $1 AND (user_id = ANY($2))
-      `;
-    const opponentResults = await db.query(opponentResultsQuery, [match_id, opponentTeam]);
-    const opponentData = opponentResults[0];
-
-    // Vérifier les conflits de résultat
-    if (opponentData && ((victoire == 1 && opponentData.total_victoires > 0) || (defaite == 1 && opponentData.total_defaites > 0))) {
-      return res.status(400).json({ message: "Les résultats du match sont contradictoires." });
-
-    }
-
     // Insérer le résultat
-
     const insertQuery = `
-    INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
-    VALUES ($1, $2, $3, $4, $5)
-`;
+      INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
+      VALUES ($1, $2, $3, $4, $5)
+    `;
     await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
 
-    res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
-    console.log({ message: "Le résultat du match a été signalé avec succès." });
+    return res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur dans les résultats du match" });
-    console.log({ message: "Erreur dans les résultats du match" });
+    return res.status(500).json({ message: "Erreur dans les résultats du match" });
   }
 });
+
 module.exports = router;
