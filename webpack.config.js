@@ -1,7 +1,7 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-    // ... Votre configuration existante
+  
     module: {
         rules: [
             {
@@ -11,7 +11,7 @@ module.exports = {
                     'css-loader', // ou 'sass-loader' pour SASS
                 ],
             },
-            // ... autres règles
+        
         ],
     },
     plugins: [
@@ -20,5 +20,5 @@ module.exports = {
             chunkFilename: '[id].css',
         }),
     ],
-    // ... Reste de votre configuration
+    
 };
