@@ -6,9 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { BASE_URL } from '../config';
 import RNPickerSelect from 'react-native-picker-select';
-import moment from "moment";
-import 'moment/locale/fr';
-moment.locale('fr');
+
 const ModifierEvent = ({ route, navigation }) => {
     const [event, setEvent] = useState({});
     const [newEventData, setNewEventData] = useState({
@@ -61,9 +59,13 @@ const ModifierEvent = ({ route, navigation }) => {
 
     const handleTimeConfirm = (time) => {
         hideTimePicker();
-        const formattedTime = moment(time).format('HH:mm'); // Format de l'heure locale
-        setNewEventData({ ...newEventData, heure: formattedTime });
-    };
+        import("moment").then(moment => {
+          moment.locale('fr');
+          const formattedTime = moment(time).format('HH:mm'); // Format de l'heure locale
+          setNewEventData({ ...newEventData, heure: formattedTime });
+        });
+      };
+      
 
 
 
