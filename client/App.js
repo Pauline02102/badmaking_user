@@ -7,7 +7,7 @@ import PrivacyPolicyScreen from './screens/Auth/PrivacyPolicyScreen';
 import { UserProvider, useUser } from './screens/Auth/UserContext';
 import SignupScreen from './screens/Auth/inscription';
 import Calendrier from "./screens/Calendrier/Calendrier";
-
+import { MaterialIcons } from '@expo/vector-icons';
 import Login from "./screens/Auth/Login";
 import Profil from "./screens/Profil/Profil";
 import Match from "./screens/Match/Match";
@@ -102,9 +102,9 @@ function AppTabs() {
 
       {userRole === 'admin' && (
         <Tabs.Screen name="Gestion d'évenement" component={gestionEvent} options={{
-          tabBarLabel: "Gestion d'évenement",
+          tabBarLabel: "Gestion d'évenements",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-edit" size={24} color="black" />
+            <MaterialIcons name="published-with-changes" size={24} color="black" />
 
           ),
           headerShown: false,
