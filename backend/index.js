@@ -29,7 +29,7 @@ const moment = require('moment-timezone');
 console.log("Heure actuelle:", moment().tz("Europe/Paris").format());
 
 const corsOptions = {
-  origin: 'http://51.77.230.223:3030', // Remplacez avec l'adresse IP de votre VPS
+  origin: '*', // Remplacez avec l'adresse IP de votre VPS
   optionsSuccessStatus: 200,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
