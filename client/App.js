@@ -165,6 +165,10 @@ function AppContent() {
         const role = await fetchUserRole(token);
         setUserRole(role);
       }
+      else {
+        // Si aucun token n'est trouvé, redirige vers la page de connexion
+        setIsSignedIn(false);
+      }
     };
 
     checkToken();

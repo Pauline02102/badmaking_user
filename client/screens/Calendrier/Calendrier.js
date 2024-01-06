@@ -176,7 +176,7 @@ function Calendrier({ route }) {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        console.error('page match : Token non trouvé');
+        console.error('page calendrier : Token non trouvé');
         return;
       }
       const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
