@@ -12,11 +12,11 @@ import {
   KeyboardAvoidingView
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import moment from "moment";
+
 import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-import 'moment/locale/fr'; // Importez le locale français
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from '../Auth/UserContext';
 import styles from './CalendrierStyles';
@@ -27,10 +27,13 @@ import { useUser } from "../Auth/UserContext";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SelectList } from "react-native-dropdown-select-list";
 
-moment.locale('fr'); // Définir la locale de moment en français
+
+import {  utcToZonedTime } from 'date-fns-tz';
+import { format, parseISO, isValid, parse, subHours, isBefore,setHours,setMinutes} from 'date-fns';
 
 function Calendrier({ route }) {
-  const moment = require("moment-timezone");
+
+
   const [customDatesStyles, setCustomDatesStyles] = useState({});
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
@@ -77,7 +80,7 @@ function Calendrier({ route }) {
     fetchEvents();
     fetchDateColors();
     initializeDayColors();
-    moment.locale('fr');
+
 
     const refreshInterval = setInterval(() => {
       fetchLoggedInUserInfo();
@@ -113,10 +116,13 @@ function Calendrier({ route }) {
     setDayColors({ ...dayColors, [day]: color });
   };
 
-  const combinedDateTime = moment(date).set({
-    hour: time.getHours(),
-    minute: time.getMinutes()
-  }).toISOString();
+
+  const combinedDateTime = () => {
+    const timeZone = 'Europe/Paris';
+    const zonedDate = utcToZonedTime(date, timeZone);
+    return format(zonedDate, 'yyyy-MM-dd HH:mm:ssX', { timeZone });
+  };
+
 
 
   const createEvent = async () => {
@@ -127,29 +133,18 @@ function Calendrier({ route }) {
       }
 
       // Afficher les valeurs initiales de date et time
-      console.log("Date initiale:", date);
-      console.log("Heure initiale:", time);
+      const dateObject = parseISO(date); // Assumes 'date' is in ISO format (YYYY-MM-DD)
+      const timeObject = new Date(time); // Assumes 'time' is a JavaScript Date object
 
-      const combinedDateTime = moment(date).set({
-        hour: time.getHours(),
-        minute: time.getMinutes()
-      }).toISOString();
+      // Combine date and time
+      let combinedDateTime = setMinutes(setHours(dateObject, timeObject.getHours()), timeObject.getMinutes());
 
-      // Vérifier la valeur de combinedDateTime
-      console.log("combinedDateTime:", combinedDateTime);
+      // Convert to the desired timezone and format
+      const timeZone = 'Europe/Paris';
+      const zonedDateTime = utcToZonedTime(combinedDateTime, timeZone);
+      const formattedDateTime = format(zonedDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { timeZone });
 
-      // Convertir la date et l'heure en un format valide pour PostgreSQL
-      const dateTime = moment.tz(
-        `${combinedDateTime}`,
-        "YYYY-MM-DDTHH:mm:ss.SSSZ", // Format d'entrée
-        "UTC" // Fuseau horaire source (UTC)
-      ).tz("Europe/Paris"); // Fuseau horaire cible (votre fuseau horaire)
-
-      // Vérifier la valeur de dateTime
-      console.log("dateTime:", dateTime);
-
-      // Utilise la méthode format pour obtenir la date et l'heure au format ISO 8601
-      const formattedDateTime = dateTime.format();
+      console.log("formattedDateTime:", formattedDateTime);
 
       // Vérifier la valeur de formattedDateTime
       console.log("formattedDateTime:", formattedDateTime);
@@ -157,20 +152,17 @@ function Calendrier({ route }) {
       await axios.post(`${BASE_URL}/event/postcalendar`, {
         title,
         status,
-        date: formattedDateTime,
-        heure: dateTime.format("HH:mm:ss"),
+        date: formattedDateTime, // use formattedDateTime here
+        heure: format(zonedDateTime, "HH:mm:ss"), // format the time part here
         user_id: loggedInUser.id,
-        
       });
-
       // Vérifier les données envoyées
       console.log("Données envoyées à l'API:", {
         title,
         status,
         date: formattedDateTime,
-        heure: dateTime.format("HH:mm:ss"),
+        heure: format(zonedDateTime, "HH:mm:ss"),
         user_id: loggedInUser.id,
-       
       });
 
       fetchEvents();
@@ -222,7 +214,7 @@ function Calendrier({ route }) {
   const changeTerrainColor = async (currentColor) => {
     try {
       console.log("Valeur de 'selectedColor' :", currentColor);
-      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate); 
+      console.log("Valeur de 'selectedDate' avant la mise à jour :", selectedDate);
 
       let body;
       if (currentColor === 'white') {
@@ -317,7 +309,7 @@ function Calendrier({ route }) {
       const eventsByDate = {};
       response.data.forEach((event) => {
         //const eventDate = event.date.split("T")[0];
-        const eventDate = moment.utc(event.date).local().format('YYYY-MM-DD');
+        const eventDate = format(utcToZonedTime(event.date, 'Europe/Paris'), 'yyyy-MM-dd');
         if (!eventsByDate[eventDate]) {
           eventsByDate[eventDate] = [];
         }
@@ -403,8 +395,8 @@ function Calendrier({ route }) {
         `${BASE_URL}/participation_jeu/participationJeuLibre/${loggedInUser.id}`,
         {
           participation: participation === "Oui" ? "Oui" : "Non",
-          date: moment(selectedDate).format("YYYY-MM-DD"),
-          heure: formattedTime, 
+          date: format(parseISO(selectedDate), 'yyyy-MM-dd'),
+          heure: formattedTime,
         }
       );
       await fetchEvents();
@@ -430,12 +422,18 @@ function Calendrier({ route }) {
 
       // Convertir les dates dans le format 'YYYY-MM-DD'
       const convertedDates = {};
+
       for (const date in backendDates) {
-        const formattedDate = moment(date).format("YYYY-MM-DD");
-        convertedDates[formattedDate] = backendDates[date];
+        try {
+          // Parse the date using JavaScript's Date constructor
+          const parsedDate = new Date(date);
+          const formattedDate = format(parsedDate, 'yyyy-MM-dd');
+          convertedDates[formattedDate] = backendDates[date];
+        } catch (parseError) {
+          console.error(`Error parsing date: ${date}`, parseError);
+        }
       }
 
-     
 
       if (dateColors) {
         const updatedCustomDatesStyles = {};
@@ -503,7 +501,7 @@ function Calendrier({ route }) {
         Alert.alert(
 
           "Viens- tu au jeu libre ? \n Voici les joueurs présents",
-          participants.map((participant) => `${participant.prenom} à ${moment(selectedTime).format("HH:mm")}`).join(", \n"),
+          participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
           [
             {
               text: "Non",
@@ -625,16 +623,10 @@ function Calendrier({ route }) {
     console.log(eventId)
   };
 
-  // vérifie si l'inscription est encore possible pour un événement donné
   const isRegistrationOpen = (eventDateTime) => {
-    // Obtenir l'heure et la date actuelles
-    const now = moment();
-
-    // Obtenir la date et l'heure de l'événement et soustraire 24 heures
-    const eventMoment = moment(eventDateTime).subtract(24, 'hours');
-
-    // Comparer si l'heure actuelle est avant le moment de l'événement moins 24 heures
-    return now.isBefore(eventMoment);
+    const now = new Date();
+    const eventMoment = subHours(parseISO(eventDateTime), 24);
+    return isBefore(now, eventMoment);
   };
 
   const renderEventsForDate = () => {
@@ -656,7 +648,7 @@ function Calendrier({ route }) {
           <View key={event.id} style={styles.eventItem}>
 
             <Text style={styles.eventTitle}>{event.status}</Text>
-            <Text style={styles.eventInfo}>Date : {moment(event.date).format('LL')}</Text>
+            <Text style={styles.eventInfo}>Date : {format(parseISO(event.date), 'PP')}</Text>
             <Text style={styles.eventInfo}>Heure : {event.heure}</Text>
 
             <ParticipantCount eventId={event.id} />
@@ -743,7 +735,7 @@ function Calendrier({ route }) {
 
           {isJoueur && (
             <Calendar
-              onDayPress={handleDayPress} 
+              onDayPress={handleDayPress}
               markedDates={customDatesStyles}
               markingType="custom"
             />
@@ -801,7 +793,7 @@ function Calendrier({ route }) {
 
                 <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
                   <Text style={styles.buttonTextHeure}>
-                    {time ? moment(time).format('HH:mm') : 'Choisir l\'heure'}
+                    {time ? format(time, 'HH:mm') : 'Choisir l\'heure'}
                   </Text>
                 </TouchableOpacity>
 
