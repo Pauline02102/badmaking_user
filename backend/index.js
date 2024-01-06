@@ -24,9 +24,19 @@ console.log('fuseau', process.env.TZ);
 
 const app = express();
 
-const db = require('./db.js'); 
+const db = require('./db.js');
 const moment = require('moment-timezone');
 console.log("Heure actuelle:", moment().tz("Europe/Paris").format());
+
+const corsOptions = {
+  origin: 'http://51.77.230.223', // Remplacez avec l'adresse IP de votre VPS
+  optionsSuccessStatus: 200,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  allowedHeaders: 'Authorization,Content-Type',
+};
+
+app.use(cors(corsOptions));
 
 db.query('SELECT NOW()', [])
   .then(res => {
@@ -36,14 +46,15 @@ db.query('SELECT NOW()', [])
     console.error("Erreur lors de la connexion à la base de données PostgreSQL :", err);
   });
 
-app.use(cors()); // Enable CORS for all origins
+
 app.use(express.json());
 if (process.env.NODE_ENV !== 'test') {
   const port = process.env.PORT || 3030;
 
-app.listen(port, () => {
-  console.log(`Serveur en cours d'exécution sur le port ${port}`);
-});}
+  app.listen(port, () => {
+    console.log(`Serveur en cours d'exécution sur le port ${port}`);
+  });
+}
 
 
 
