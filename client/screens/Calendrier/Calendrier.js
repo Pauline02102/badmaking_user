@@ -68,7 +68,7 @@ function Calendrier({ route }) {
   endTime.setHours(23, 0);
   const [selectedTime, setSelectedTime] = useState(startTime);
   const [selectedTimeWeb, setSelectedTimeWeb] = useState('18:00');
-
+  const [showButtons, setShowButtons] = useState(true);
   const data = [
     { key: "1", value: "Tous niveau" },
     { key: "2", value: "Par niveau" },
@@ -577,14 +577,18 @@ function Calendrier({ route }) {
           setIsModalVisible(true);
           setShowTimePicker(true); // Afficher le sélecteur de temps
           setShowConfirmButton(true); // Afficher le bouton de confirmation
+          setShowButtons(true);
         }
         if (color === '#e05642') {
           setModalContent("La salle est fermée pour cette date");
           setIsModalVisible(true);
+          setShowConfirmButton(false);
+          setShowButtons(false);
         }
         if (color === "#eac849") {
           setShowTimePicker(false);
           setShowConfirmButton(false);
+    
         }
       }
 
@@ -962,15 +966,18 @@ function Calendrier({ route }) {
               </View>
             </Modal>
           )}
+
           <CustomModal
             isOpen={isModalVisible}
             content={modalContent}
             onClose={() => setIsModalVisible(false)}
           >
-
-            <button onClick={() => handleModalResponseWeb("Oui")}>Oui</button>
-            <button onClick={() => handleModalResponseWeb("Non")}>Non</button>
-
+            {showButtons && (
+              <>
+                <button onClick={() => handleModalResponseWeb("Oui")}>Oui</button>
+                <button onClick={() => handleModalResponseWeb("Non")}>Non</button>
+              </>
+            )}
           </CustomModal>
         </View>
 
