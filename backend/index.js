@@ -2,7 +2,8 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
-
+const https = require('https');
+const fs = require('fs');
 const paires = require("./routes/paires/paires.js");
 const automatisation = require("./routes/automatisation/automatisation.js");
 const date_color = require("./routes/date_color/date_color.js");
@@ -38,6 +39,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+const httpsOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
+};
+
 db.query('SELECT NOW()', [])
   .then(res => {
     console.log("Connexion à la base de données PostgreSQL réussie, heure actuelle :", res[0].now);
@@ -48,11 +54,10 @@ db.query('SELECT NOW()', [])
 
 
 app.use(express.json());
+// Vérifier l'environnement avant de lancer le serveur HTTPS
 if (process.env.NODE_ENV !== 'test') {
-  const port = process.env.PORT || 3030;
-
-  app.listen(port, () => {
-    console.log(`Serveur en cours d'exécution sur le port ${port}`);
+  https.createServer(httpsOptions, app).listen(443, () => {
+    console.log('Serveur HTTPS en cours d\'exécution sur le port 443');
   });
 }
 
