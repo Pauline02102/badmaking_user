@@ -2,7 +2,8 @@
 require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
-
+const https = require('https');
+const fs = require('fs');
 const paires = require("./routes/paires/paires.js");
 const automatisation = require("./routes/automatisation/automatisation.js");
 const date_color = require("./routes/date_color/date_color.js");
@@ -29,7 +30,7 @@ const moment = require('moment-timezone');
 console.log("Heure actuelle:", moment().tz("Europe/Paris").format());
 
 const corsOptions = {
-  origin: '*', 
+  origin: '*',
   optionsSuccessStatus: 200,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
@@ -45,17 +46,20 @@ db.query('SELECT NOW()', [])
   .catch(err => {
     console.error("Erreur lors de la connexion à la base de données PostgreSQL :", err);
   });
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
+};
 
-
+const httpsServer = https.createServer(options, app);
 app.use(express.json());
 if (process.env.NODE_ENV !== 'test') {
   const port = process.env.PORT || 3030;
 
-  app.listen(port, () => {
-    console.log(`Serveur en cours d'exécution sur le port ${port}`);
+  httpsServer.listen(port, () => {
+    console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
   });
 }
-
 
 
 app.use("/paires", paires);
