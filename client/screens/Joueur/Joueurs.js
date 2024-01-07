@@ -30,19 +30,22 @@ const Joueurs = () => {
   };
 
   const handleDateChange = (value) => {
+    console.log("Date selected: ", value); // Log pour vérifier la valeur sélectionnée
     setSelectedDate(value);
-
-    // Si "Toutes les dates confondues" est sélectionné, charge tous les joueurs sans filtre de date.
-    if (value === null) {
+  
+    // Vérifie si la valeur est "Toutes les dates confondues"
+    if (value === "Toutes les dates confondues" || value === null) {
+      console.log("Fetching all joueurs...");
       fetchJoueurs();
     } else {
-      // Sinon, charge les joueurs pour la date sélectionnée.
+      console.log("Fetching joueurs for date: ", value);
       fetchJoueursByDate(value);
     }
   };
   
   const fetchJoueurs = async () => {
     try {
+      console.log('Fetching joueurs from:', `${BASE_URL}/resultat/joueurs_resultats`);
       const response = await fetch(`${BASE_URL}/resultat/joueurs_resultats`);
       const data = await response.json();
       if (Array.isArray(data)) {

@@ -26,6 +26,7 @@ const port = process.env.PORT || 3030;
 //récupérer tous les joueurs et leurs résultats de matchs
 router.get('/joueurs_resultats', async (req, res) => {
   try {
+    console.log('Executing /joueurs_resultats');
     const playersQuery = `
         SELECT  
           users.id as user_id, 
@@ -42,9 +43,11 @@ router.get('/joueurs_resultats', async (req, res) => {
         ORDER BY total_victoires DESC
       `;
     const players = await db.query(playersQuery);
+    console.log('Players fetched:', players);
     res.status(200).json(players);
   } catch (error) {
-    console.error(error);
+    
+    console.error('Error in /joueurs_resultats:', error);
     res.status(500).json({ message: "Erreur lors de la récupération des joueurs" });
   }
 });
