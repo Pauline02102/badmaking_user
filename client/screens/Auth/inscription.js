@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
     shadowColor: "rgba(0, 0, 0, 0.062)",
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 40,
+    marginBottom: 80,
   },
   classementInfo: {
     position: "absolute",
@@ -423,7 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     margin: 0,
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 80,
   },
   signupLink: {
     fontSize: 14,
