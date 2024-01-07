@@ -8,7 +8,9 @@ import {
   Text,
   Alert,
   TouchableOpacity,
-  Switch
+  Switch,
+  ScrollView, 
+  KeyboardAvoidingView, 
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
@@ -189,6 +191,11 @@ export default function SignupScreen() {
   
 
   return (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+    <ScrollView style={{ flex: 1 }}>
     <View style={styles.container}>
 
 
@@ -338,6 +345,8 @@ export default function SignupScreen() {
       </View>
 
     </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity,ScrollView, KeyboardAvoidingView,  } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
@@ -67,6 +67,11 @@ export default function LoginScreen () {
   
 
   return (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+    <ScrollView style={{ flex: 1 }}>
     <View style={styles.container}>
       <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
 
@@ -121,6 +126,8 @@ export default function LoginScreen () {
       </View>
  
     </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
