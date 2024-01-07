@@ -30,7 +30,7 @@ import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-
+import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -572,7 +572,7 @@ function Calendrier({ route }) {
 
         // Logique spécifique pour le web
         if (color === "#96dfa2" || color === "#9199ff") {
-          const modalMessage = `Viens-tu au jeu libre ? <br/> Voici les joueurs présents: <br/> ${participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
+          const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map(participant => `- ${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
           setModalContent(modalMessage);
           setIsModalVisible(true);
           setShowTimePicker(true); // Afficher le sélecteur de temps
@@ -580,7 +580,7 @@ function Calendrier({ route }) {
           setShowButtons(true);
         }
         if (color === '#e05642') {
-          setModalContent("La salle est fermée pour cette date");
+          setModalContent(" <strong> <br/> La salle est fermée pour cette date </strong>");
           setIsModalVisible(true);
           setShowConfirmButton(false);
           setShowButtons(false);
@@ -588,7 +588,7 @@ function Calendrier({ route }) {
         if (color === "#eac849") {
           setShowTimePicker(false);
           setShowConfirmButton(false);
-    
+
         }
       }
 
@@ -974,9 +974,10 @@ function Calendrier({ route }) {
           >
             {showButtons && (
               <>
-                <button onClick={() => handleModalResponseWeb("Oui")}>Oui</button>
-                <button onClick={() => handleModalResponseWeb("Non")}>Non</button>
+                <button onClick={() => handleModalResponseWeb("Oui")} className="button">Oui</button>
+                <button onClick={() => handleModalResponseWeb("Non")} className="button">Non</button>
               </>
+
             )}
           </CustomModal>
         </View>
