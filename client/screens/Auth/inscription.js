@@ -423,6 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     margin: 0,
     marginTop: 20,
+    marginBottom: 20,
   },
   signupLink: {
     fontSize: 14,
@@ -435,7 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   already: {
-    padding: 10,
+    padding: 5,
   },
   eyeIcon: {
     position: "absolute",
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingBottom: 30,
-    paddingTop: 2,
+    paddingTop: -10,
 
 
   },
