@@ -11,6 +11,7 @@ import {
   Switch,
   ScrollView, 
   KeyboardAvoidingView, 
+  Platform
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
