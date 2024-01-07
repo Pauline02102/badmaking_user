@@ -380,15 +380,20 @@ function Calendrier({ route }) {
       );
 
       if (participation === "Oui") {
-
-        // Vérifie si le prénom est correctement défini
-        Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponnible 24h avant l'évenement", [
-          {
-            text: "OK",
-            onPress: () => console.log("Confirmation de l'inscription"),
-          },
-        ]);
-      }
+        // Vérifie si l'application est en cours d'exécution dans un navigateur web
+        if (Platform.OS === 'web') {
+            // Utilisation de window.alert pour les utilisateurs web
+            window.alert("Vous êtes inscrit à l'événement! Les matchs seront disponibles 24h avant l'événement");
+        } else {
+            // Utilisation de Alert.alert pour les autres plateformes (comme iOS et Android)
+            Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponibles 24h avant l'événement", [
+                {
+                    text: "OK",
+                    onPress: () => console.log("Confirmation de l'inscription"),
+                },
+            ]);
+        }
+    }
 
       await fetchEvents();
       console.log("Participation validée");
@@ -792,7 +797,8 @@ function Calendrier({ route }) {
           showTimeSelectOnly
           dateFormat="HH:mm"
           timeCaption=""
-
+          className="hide-time-list"
+          
         />
       );
 
