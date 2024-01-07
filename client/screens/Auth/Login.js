@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity,ScrollView, KeyboardAvoidingView,  } from "react-native";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { SelectList } from "react-native-dropdown-select-list";
 
 
-export default function LoginScreen () {
+export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
 
@@ -22,7 +22,7 @@ export default function LoginScreen () {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
+
 
   const data = [
     { key: "1", value: "admin" },
@@ -32,11 +32,11 @@ export default function LoginScreen () {
   const handleLogin = async () => {
     try {
       const loginData = {
-        
+
         email: email,
         password: password,
       };
-  
+
       const response = await fetch(`${BASE_URL}/user_tokens/login`, {
         method: "POST",
         headers: {
@@ -44,18 +44,18 @@ export default function LoginScreen () {
         },
         body: JSON.stringify(loginData),
       });
-  
+
       const data = await response.json();
-  
-      
-  
+
+
+
       if (response.status === 200 && data.token) {
-      
+
         await AsyncStorage.setItem('userToken', data.token);
         console.log("Token stored successfully");
-  
+
         setIsSignedIn(true);
-  
+
         console.log("Connexion réussie");
       } else {
         console.error("Token manquant ou erreur de connexion");
@@ -64,69 +64,69 @@ export default function LoginScreen () {
       console.error("Erreur lors de la connexion :", error);
     }
   };
-  
+
 
   return (
     <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={{ flex: 1 }}
-  >
-    <ScrollView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          style={styles.inputField}
-        />
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Email"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              style={styles.inputField}
+            />
 
 
-        <TextInput
-          placeholder="Mot de passe"
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          style={styles.inputField}
-          testID="passwordInput"
-        />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon} testID="eyeIcon">
-          <Icon
-            name={showPassword ? 'eye-slash' : 'eye'}
-            size={20}
-            color="#000"
-          />
-        </TouchableOpacity>
-        
-        <View style={styles.inputContainer}>
-          <SelectList
-            placeholder="Rôle"
-            setSelected={(val) => setRole(val)}
-            data={data}
-            save="value"
-            style={styles.choix}
-           
-            testID="roleSelect" 
-          />
+            <TextInput
+              placeholder="Mot de passe"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+              style={styles.inputField}
+              testID="passwordInput"
+            />
+            <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon} testID="eyeIcon">
+              <Icon
+                name={showPassword ? 'eye-slash' : 'eye'}
+                size={20}
+                color="#000"
+              />
+            </TouchableOpacity>
+
+            <View style={styles.inputContainer}>
+              <SelectList
+                placeholder="Rôle"
+                setSelected={(val) => setRole(val)}
+                data={data}
+                save="value"
+                style={styles.choix}
+
+                testID="roleSelect"
+              />
+            </View>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleLogin} testID="ButtonConnexion">
+            <Text style={styles.buttonText}  >Connexion</Text>
+          </TouchableOpacity>
+
+          <View style={styles.signupContainer}>
+            <Text style={styles.already}>Tu n'as pas de compte ?</Text>
+            <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
+              name: 'Inscription',
+            }))}>
+              <Text style={styles.signupLink}>Inscription</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin} testID="ButtonConnexion">
-        <Text style={styles.buttonText}  >Connexion</Text>
-      </TouchableOpacity>
-
-      <View style={styles.signupContainer}>
-        <Text style={styles.already}>Tu n'as pas de compte ?</Text>
-        <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
-          name: 'Inscription',
-        }))}>
-          <Text style={styles.signupLink}>Inscription</Text>
-        </TouchableOpacity>
-      </View>
- 
-    </View>
-    </ScrollView>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -153,11 +153,11 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "relative",
     marginBottom: 30,
-    marginTop:20
+    marginTop: 20
   },
   inputField: {
     width: "100%",
-    minHeight: 60, 
+    minHeight: 60,
     borderBottomWidth: 2,
     borderBottomColor: "rgb(173, 173, 173)",
     backgroundColor: "transparent",
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   already: {
     padding: 15,
-  }, 
+  },
   eyeIcon: {
     position: "absolute",
     right: 12,
