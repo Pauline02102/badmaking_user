@@ -1,0 +1,29 @@
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+
+#DB_HOST=localhost
+#DB_USER=postgres
+#DB_PASS=Gribe123!
+#DB_NAME=badmaking
+#DB_PORT=5432
+
+
+
+#DB_HOST=localhost
+#DB_USER=postgres
+#DB_PASS=Gribe123!
+#DB_PORT=5432
+#TEST_DB_NAME=test_db
+
+
+
+
+#BASE_URL = postgres://grypfonmjdsfzq:5b500474f730e0c2c11f803b56273956bea5d5b8f2794c37a7bb7126a69dbcb0@ec2-34-242-154-118.eu-west-1.compute.amazonaws.com:5432/df6befku3bbggi
+
+BASE_URL=postgres://postgres:Gribe123!@51.77.230.223:5432/rixbad
+TZ=Europe/Paris
+
