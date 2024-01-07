@@ -32,7 +32,7 @@ const Profil = () => {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
         console.error('page match : Token non trouvé');
-  
+
         return;
       }
       const response = await fetch(`${BASE_URL}/user_tokens/get-user-info`, {
@@ -53,8 +53,9 @@ const Profil = () => {
       console.error('Erreur pour fetch les info des users:', error);
     }
   };
+
   const handleLogout = async () => {
-    // Fonction pour gérer la logique de déconnexion
+    console.log("test");
     const logout = async () => {
       try {
         await fetch(`${BASE_URL}/user_tokens/logout`, {
@@ -63,29 +64,35 @@ const Profil = () => {
             "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,
           },
         });
-        await AsyncStorage.removeItem('userToken');
+        // Utiliser AsyncStorage pour React Native et localStorage pour le web
+        if (Platform.OS === 'web') {
+          localStorage.removeItem('userToken');
+        } else {
+          await AsyncStorage.removeItem('userToken');
+        }
         setIsSignedIn(false);
       } catch (error) {
         console.error("Erreur lors de la déconnexion :", error);
       }
     };
 
-    // Affichage du pop-up de confirmation
-    Alert.alert(
-      "Déconnexion",
-      "Êtes-vous sûr de vouloir vous déconnecter ?",
-      [
-        {
-          text: "Non",
-          style: "cancel"
-        },
-        {
-          text: "Oui",
-          onPress: () => logout()
-        }
-      ]
-    );
+    // Utiliser window.confirm pour le web et Alert.alert pour React Native
+    if (Platform.OS === 'web') {
+      if (window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+        logout();
+      }
+    } else {
+      Alert.alert(
+        "Déconnexion",
+        "Êtes-vous sûr de vouloir vous déconnecter ?",
+        [
+          { text: "Non", style: "cancel" },
+          { text: "Oui", onPress: () => logout() }
+        ]
+      );
+    }
   };
+
 
   return (
     <KeyboardAvoidingView
@@ -94,7 +101,7 @@ const Profil = () => {
     >
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.container}>
-      
+
           <Text style={styles.title} accessibilityRole="header">Mon profil</Text>
 
 

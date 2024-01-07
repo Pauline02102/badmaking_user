@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert,Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../config';
 const EditProfileForm = ({ user, onProfileUpdated }) => {
@@ -11,6 +11,7 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const [classement_mixte, setclassement_mixte] = useState(user ? user.classement_mixte : '');
 
     const handleSubmit = async () => {
+        console.log("edit")
         const isValidClassement = (classement) => {
             const numericValue = parseInt(classement, 10);
             return numericValue >= 1 && numericValue <= 12;
@@ -23,14 +24,23 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
         ) {
             // OK, les champs sont soit vides, soit valides
         } else {
-            Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres entre 1 et 12.");
+            if (Platform.OS === 'web') {
+                window.alert("Erreur , Les classements doivent contenir uniquement des chiffres entre 1 et 12.");
+            } else {
+                Alert.alert("Erreur", "Les classements doivent contenir uniquement des chiffres entre 1 et 12.");
+            }
             return;
         }
         // Vérifier que l'email contient "@" et "."
         if (email && (!email.includes("@") || !email.includes("."))) {
-            Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+            if (Platform.OS === 'web') {
+                window.alert("Erreur , L'adresse email doit contenir '@' et '.'.");
+            } else {
+                Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+            }
             return;
         }
+
         const updatedFields = {};
         // Ajoute seulement les champs non vides et modifiés
         if (prenom && prenom !== user.prenom) updatedFields.prenom = prenom;
@@ -42,7 +52,11 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
 
 
         if (Object.keys(updatedFields).length === 0) {
-            Alert.alert("Aucune modification", "Vous n'avez modifié aucun champ.");
+            if (Platform.OS === 'web') {
+                window.alert("Aucune modification , Vous n'avez modifié aucun champ.");
+            } else {
+                Alert.alert("Aucune modification", "Vous n'avez modifié aucun champ.");
+            }
             return;
         }
 
@@ -59,7 +73,11 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
             const data = await response.json();
             if (data.message) {
                 onProfileUpdated({ ...user, ...updatedFields });
-                Alert.alert("Succès", "Profil mit à jour avec succès");
+                if (Platform.OS === 'web') {
+                    window.alert("Succès , Profil mis à jour avec succès");
+                } else {
+                    Alert.alert("Succès", "Profil mis à jour avec succès");
+                }
             }
         } catch (error) {
             console.error("Erreur lors de la mise à jour du profil:", error);

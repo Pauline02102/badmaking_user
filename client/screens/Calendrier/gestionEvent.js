@@ -1,12 +1,14 @@
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar } from 'react-native-calendars';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, SelectList, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, SelectList, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, TouchableOpacity, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { BASE_URL } from '../config';
 import RNPickerSelect from 'react-native-picker-select';
-
+import moment from "moment";
+import 'moment/locale/fr';
+moment.locale('fr');
 const ModifierEvent = ({ route, navigation }) => {
     const [event, setEvent] = useState({});
     const [newEventData, setNewEventData] = useState({
@@ -19,23 +21,37 @@ const ModifierEvent = ({ route, navigation }) => {
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [isTimePickerVisible, setTimePickerVisible] = useState(false);
     const { eventId } = route.params ?? {};
+    const [selectedDateWeb, setSelectedDateWeb] = useState('');
+    const [selectedTimeWeb, setSelectedTimeWeb] = useState('');
 
 
+    const handleWebDateChange = (event) => {
+        setSelectedDateWeb(event.target.value);
+        setNewEventData({ ...newEventData, date: event.target.value });
+    };
+
+    const handleWebTimeChange = (event) => {
+        setSelectedTimeWeb(event.target.value);
+        const formattedTime = moment(event.target.value, 'HH:mm').format('HH:mm');
+        setNewEventData({ ...newEventData, heure: formattedTime });
+    };
 
     useEffect(() => {
         if (!eventId) {
-            Alert.alert(
-                "Événement manquant",
-                "Aucun identifiant d'événement spécifié. Veuillez sélectionner un événement.",
-                [{ text: "OK", onPress: () => navigation.navigate("Calendrier") }]
-            );
+            if (Platform.OS === 'web') {
+                window.alert("Événement manquant : Aucun identifiant d'événement spécifié. Veuillez sélectionner un événement.");
+            } else {
+                Alert.alert(
+                    "Événement manquant",
+                    "Aucun identifiant d'événement spécifié. Veuillez sélectionner un événement.",
+                    [{ text: "OK", onPress: () => navigation.navigate("Calendrier") }]
+                );
+            }
             return;
         }
 
-  
         // fetchEvent();
     }, [eventId, navigation]);
-
 
     const showDatePicker = () => {
         setDatePickerVisible(true);
@@ -59,14 +75,9 @@ const ModifierEvent = ({ route, navigation }) => {
 
     const handleTimeConfirm = (time) => {
         hideTimePicker();
-        import("moment").then(moment => {
-          moment.locale('fr');
-          const formattedTime = moment(time).format('HH:mm'); // Format de l'heure locale
-          setNewEventData({ ...newEventData, heure: formattedTime });
-        });
-      };
-      
-
+        const formattedTime = moment(time).format('HH:mm'); // Format de l'heure locale
+        setNewEventData({ ...newEventData, heure: formattedTime });
+    };
 
 
     const fetchEvent = async () => {
@@ -75,51 +86,71 @@ const ModifierEvent = ({ route, navigation }) => {
             setEvent(response.data);
             setNewEventData(response.data);
         } catch (error) {
-            Alert.alert(
-                "Erreur de Chargement",
-                "Une erreur s'est produite lors de la récupération de l'événement. Veuillez réessayer.",
-                [{ text: "OK", onPress: () => navigation.goBack() }]
-            );
+            if (Platform.OS === 'web') {
+                window.alert("Erreur de Chargement : Une erreur s'est produite lors de la récupération de l'événement. Veuillez réessayer.");
+            } else {
+                Alert.alert(
+                    "Erreur de Chargement",
+                    "Une erreur s'est produite lors de la récupération de l'événement. Veuillez réessayer.",
+                    [{ text: "OK", onPress: () => navigation.goBack() }]
+                );
+            }
         }
     };
 
 
     const handleUpdateEvent = async () => {
-
         try {
             await axios.put(`${BASE_URL}/event/modifier/${eventId}`, newEventData);
-            Alert.alert('Succès', 'Événement mis à jour avec succès.');
+            if (Platform.OS === 'web') {
+                window.alert('Succès : Événement mis à jour avec succès.');
+            } else {
+                Alert.alert('Succès', 'Événement mis à jour avec succès.');
+            }
             navigation.goBack(); // Retour à la page de gestion des événements
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'événement", error);
-            Alert.alert('Erreur', 'Une erreur s\'est produite lors de la mise à jour de l\'événement.');
+            if (Platform.OS === 'web') {
+                window.alert('Erreur : Une erreur s\'est produite lors de la mise à jour de l\'événement.');
+            } else {
+                Alert.alert('Erreur', 'Une erreur s\'est produite lors de la mise à jour de l\'événement.');
+            }
         }
     };
+
     const handleDeleteEvent = () => {
-        Alert.alert(
-            "Confirmer la suppression",
-            "Êtes-vous sûr de vouloir supprimer cet événement ? Cela entraînera la suppression des participations des joueurs.",
-            [
-                {
-                    text: "Annuler",
-                    style: "cancel"
-                },
-                {
-                    text: "Supprimer",
-                    onPress: () => deleteEvent()
-                }
-            ]
-        );
+        if (Platform.OS === 'web') {
+            if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement ? Cela entraînera la suppression des participations des joueurs.")) {
+                deleteEvent();
+            }
+        } else {
+            Alert.alert(
+                "Confirmer la suppression",
+                "Êtes-vous sûr de vouloir supprimer cet événement ? Cela entraînera la suppression des participations des joueurs.",
+                [
+                    { text: "Annuler", style: "cancel" },
+                    { text: "Supprimer", onPress: () => deleteEvent() }
+                ]
+            );
+        }
     };
 
     const deleteEvent = async () => {
         try {
             await axios.delete(`${BASE_URL}/event/supprimer/${eventId}`);
-            Alert.alert("Succès", "Événement supprimé avec succès.");
+            if (Platform.OS === 'web') {
+                window.alert("Succès : Événement supprimé avec succès.");
+            } else {
+                Alert.alert("Succès", "Événement supprimé avec succès.");
+            }
             navigation.goBack();
         } catch (error) {
             console.error("Erreur lors de la suppression de l'événement", error);
-            Alert.alert("Erreur", "Une erreur s'est produite lors de la suppression de l'événement.");
+            if (Platform.OS === 'web') {
+                window.alert("Erreur : Une erreur s'est produite lors de la suppression de l'événement.");
+            } else {
+                Alert.alert("Erreur", "Une erreur s'est produite lors de la suppression de l'événement.");
+            }
         }
     };
 
@@ -127,27 +158,7 @@ const ModifierEvent = ({ route, navigation }) => {
         <KeyboardAvoidingView>
             <ScrollView>
                 <View style={styles.container}>
-                    <Text style={styles.header}>Modifier l'événement :  {eventId} </Text>
-
-                    <View style={styles.card}>
-                        <Text style={styles.inputTitle}>Date :</Text>
-
-                        <TextInput
-                            style={styles.input}
-                            value={newEventData.date}
-                            onFocus={showDatePicker}
-                        />
-
-
-                        <DateTimePickerModal
-                            isVisible={isDatePickerVisible}
-                            mode="date"
-                            onConfirm={handleDateConfirm}
-                            onCancel={hideDatePicker}
-                            textColor="black"
-                        />
-
-                    </View>
+                    <Text style={styles.header}>Modifier l'événement : {eventId} </Text>
 
                     <View style={styles.card}>
                         <Text style={styles.inputTitle}>Titre :</Text>
@@ -159,28 +170,65 @@ const ModifierEvent = ({ route, navigation }) => {
                     </View>
 
                     <View style={styles.card}>
-                        <Text style={styles.inputTitle}>Heure :</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={newEventData.heure}
-                            onFocus={showTimePicker}
-                            textColor="black"
-                        />
-
-
-                        <DateTimePickerModal
-                            isVisible={isTimePickerVisible}
-                            mode="time"
-                            onConfirm={handleTimeConfirm}
-                            onCancel={hideTimePicker}
-                            textColor="black"
-                            locale="fr-FR"
-                        />
+                        <Text style={styles.inputTitle}>Date :</Text>
+                        {Platform.OS === 'web' ? (
+                            <input
+                                type="date"
+                                value={selectedDateWeb}
+                                onChange={handleWebDateChange}
+                                style={styles.input} // Assurez-vous d'avoir un style correspondant pour les éléments input
+                            />
+                        ) : (
+                            <>
+                                <TextInput
+                                    style={styles.input}
+                                    value={newEventData.date}
+                                    onFocus={showDatePicker}
+                                />
+                                <DateTimePickerModal
+                                    isVisible={isDatePickerVisible}
+                                    mode="date"
+                                    onConfirm={handleDateConfirm}
+                                    onCancel={hideDatePicker}
+                                    textColor="black"
+                                />
+                            </>
+                        )}
                     </View>
+
+                    <View style={styles.card}>
+                        <Text style={styles.inputTitle}>Heure :</Text>
+                        {Platform.OS === 'web' ? (
+                            <input
+                                type="time"
+                                value={selectedTimeWeb}
+                                onChange={handleWebTimeChange}
+                                style={styles.input} 
+                            />
+                        ) : (
+                            <>
+                                <TextInput
+                                    style={styles.input}
+                                    value={newEventData.heure}
+                                    onFocus={showTimePicker}
+                                    textColor="black"
+                                />
+                                <DateTimePickerModal
+                                    isVisible={isTimePickerVisible}
+                                    mode="time"
+                                    onConfirm={handleTimeConfirm}
+                                    onCancel={hideTimePicker}
+                                    textColor="black"
+                                    locale="fr-FR"
+                                />
+                            </>
+                        )}
+                    </View>
+
                     <View style={styles.card}>
                         <Text style={styles.inputTitle}>Status :</Text>
                         <RNPickerSelect
-                            style={pickerSelectStyles} 
+                            style={pickerSelectStyles}
                             value={newEventData.status}
                             onValueChange={(value) =>
                                 setNewEventData({ ...newEventData, status: value })
@@ -190,10 +238,7 @@ const ModifierEvent = ({ route, navigation }) => {
                                 { label: 'Par niveau', value: 'Par niveau' },
                             ]}
                         />
-
                     </View>
-
-
 
                     <TouchableOpacity style={styles.button} onPress={handleUpdateEvent}>
                         <Text style={styles.buttonText}>Enregistrer les modifications</Text>
@@ -202,11 +247,11 @@ const ModifierEvent = ({ route, navigation }) => {
                         <Text style={styles.buttonText}>Supprimer l'événement</Text>
                     </TouchableOpacity>
 
-
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
+
 };
 
 

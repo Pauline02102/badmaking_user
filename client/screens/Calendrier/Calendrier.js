@@ -9,14 +9,15 @@ import {
   Modal,
   Button,
   TextInput,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { Calendar } from "react-native-calendars";
+import CustomModal from './CustomModal';
 
 import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from '../Auth/UserContext';
 import styles from './CalendrierStyles';
@@ -25,14 +26,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../config';
 import { useUser } from "../Auth/UserContext";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
-
-
-import {  utcToZonedTime } from 'date-fns-tz';
-import { format, parseISO, isValid, parse, subHours, isBefore,setHours,setMinutes} from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
+import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
 
 function Calendrier({ route }) {
-
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
   const [events, setEvents] = useState({});
@@ -60,12 +59,15 @@ function Calendrier({ route }) {
   const [isColorModalVisible, setColorModalVisible] = useState(false);
   const [dayColors, setDayColors] = useState({});
   const [selectedDateColor, setSelectedDateColor] = useState('');
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+  const [modalContent, setModalContent] = useState("");
 
   const startTime = new Date();
   startTime.setHours(19, 30);
   const endTime = new Date();
   endTime.setHours(23, 0);
   const [selectedTime, setSelectedTime] = useState(startTime);
+  const [selectedTimeWeb, setSelectedTimeWeb] = useState('18:00');
 
   const data = [
     { key: "1", value: "Tous niveau" },
@@ -96,6 +98,12 @@ function Calendrier({ route }) {
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
+
+  const handleTimeChange = (event) => {
+    console.log("Nouvelle heure sélectionnée:", event.target.value); // Log pour le débogage
+    setSelectedTimeWeb(event.target.value);
+  };
+
   const handleConfirm = (date) => {
 
     setTime(date);
@@ -131,32 +139,36 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
-
-      // Afficher les valeurs initiales de date et time
-      const dateObject = parseISO(date); // Assumes 'date' is in ISO format (YYYY-MM-DD)
-      const timeObject = new Date(time); // Assumes 'time' is a JavaScript Date object
-
-      // Combine date and time
-      let combinedDateTime = setMinutes(setHours(dateObject, timeObject.getHours()), timeObject.getMinutes());
-
+  
+      let combinedDateTime;
+  
+      if (Platform.OS === 'web') {
+        // Pour le web,  selectedTimeWeb
+        const [hours, minutes] = selectedTimeWeb.split(':');
+        const dateObject = parseISO(date); 
+        combinedDateTime = setMinutes(setHours(dateObject, parseInt(hours, 10)), parseInt(minutes, 10));
+      } else {
+        // Pour le mobile,  time
+        const dateObject = parseISO(date); 
+        const timeObject = new Date(time); 
+        combinedDateTime = setMinutes(setHours(dateObject, timeObject.getHours()), timeObject.getMinutes());
+      }
+  
       // Convert to the desired timezone and format
       const timeZone = 'Europe/Paris';
       const zonedDateTime = utcToZonedTime(combinedDateTime, timeZone);
       const formattedDateTime = format(zonedDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { timeZone });
-
+  
       console.log("formattedDateTime:", formattedDateTime);
-
-      // Vérifier la valeur de formattedDateTime
-      console.log("formattedDateTime:", formattedDateTime);
-
+  
       await axios.post(`${BASE_URL}/event/postcalendar`, {
         title,
         status,
-        date: formattedDateTime, // use formattedDateTime here
-        heure: format(zonedDateTime, "HH:mm:ss"), // format the time part here
+        date: formattedDateTime,
+        heure: format(zonedDateTime, "HH:mm:ss"),
         user_id: loggedInUser.id,
       });
-      // Vérifier les données envoyées
+  
       console.log("Données envoyées à l'API:", {
         title,
         status,
@@ -164,12 +176,13 @@ function Calendrier({ route }) {
         heure: format(zonedDateTime, "HH:mm:ss"),
         user_id: loggedInUser.id,
       });
-
+  
       fetchEvents();
     } catch (error) {
       console.error("Erreur lors de la création de l'événement", error);
     }
   };
+  
 
 
   const fetchLoggedInUserInfo = async () => {
@@ -289,6 +302,13 @@ function Calendrier({ route }) {
     }
   };
 
+  const onTimeSelectedWeb = (date) => {
+    setSelectedTime(date); // Sauvegarder directement l'heure sélectionnée
+    console.log("Heure sélectionnée:", date);
+  };
+
+
+
   // fonction de confirmation
   const confirmTime = () => {
     setShowTimePicker(false); // Fermer le sélecteur de temps
@@ -301,7 +321,14 @@ function Calendrier({ route }) {
   const confirmParticipationWithTime = () => {
     setShowTimePicker(true); // Afficher le TimePicker
   };
-
+  const handleModalResponseWeb = (response) => {
+    if (response === "Oui") {
+      confirmParticipationWithTime();
+    } else {
+      sendParticipation("Non");
+    }
+    setIsModalVisible(false); // Fermer le modal
+  };
 
   const fetchEvents = async () => {
     try {
@@ -474,6 +501,8 @@ function Calendrier({ route }) {
     }
   };
 
+
+
   const handleDayPress = async (day) => {
     console.log("Date sélectionnée :", day.dateString);
     //const color = customDatesStyles[day.dateString]?.customStyles?.container?.backgroundColor;
@@ -490,50 +519,75 @@ function Calendrier({ route }) {
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       setSelectedDateColor(color);
-      if (color === "#96dfa2" || color === "#9199ff") {
-        setShowTimePicker(true); // Afficher le sélecteur de temps
-        setShowConfirmButton(true); // Afficher le bouton de confirmation
 
-        // Afficher la liste des participants
-        console.log("Participants présents :", participants);
+      if (Platform.OS !== 'web') {
 
-        // Afficher la boîte de dialogue
-        Alert.alert(
+        if (color === "#96dfa2" || color === "#9199ff") {
+          setShowTimePicker(true); // Afficher le sélecteur de temps
+          setShowConfirmButton(true); // Afficher le bouton de confirmation
 
-          "Viens- tu au jeu libre ? \n Voici les joueurs présents",
-          participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
-          [
-            {
-              text: "Non",
-              onPress: () => sendParticipation("Non"),
-              style: "cancel",
-            },
-            {
-              text: "Oui",
-              //onPress: () => sendParticipation("Oui"),
-              onPress: () => confirmParticipationWithTime()
-            },
-            {
-              text: "Fermer",
-              onPress: () => console.log("Boîte de dialogue fermée"),
-              style: "cancel",
-              cancelable: true, // Permet à l'utilisateur de fermer la boîte de dialogue sans y répondre
-            },
-          ]
-        );
+          // Afficher la liste des participants
+          console.log("Participants présents :", participants);
+
+          // Afficher la boîte de dialogue
+          Alert.alert(
+
+            "Viens- tu au jeu libre ? \n Voici les joueurs présents",
+            participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
+            [
+              {
+                text: "Non",
+                onPress: () => sendParticipation("Non"),
+                style: "cancel",
+              },
+              {
+                text: "Oui",
+                //onPress: () => sendParticipation("Oui"),
+                onPress: () => confirmParticipationWithTime()
+              },
+              {
+                text: "Fermer",
+                onPress: () => console.log("Boîte de dialogue fermée"),
+                style: "cancel",
+                cancelable: true, // Permet à l'utilisateur de fermer la boîte de dialogue sans y répondre
+              },
+            ]
+          );
+        }
+        if (color === '#e05642') {
+          setShowTimePicker(false);
+          setShowConfirmButton(false);
+          // Affiche une alerte si la date sélectionnée est marquée en rouge
+          Alert.alert("Information", "Salle fermée", [
+            { text: "OK", onPress: () => console.log("Alerte fermée") }
+          ]);
+        }
+        if (color === "#eac849") {
+          setShowTimePicker(false);
+          setShowConfirmButton(false);
+        }
+
+      } else {
+
+
+        // Logique spécifique pour le web
+        if (color === "#96dfa2" || color === "#9199ff") {
+          const modalMessage = `Viens-tu au jeu libre ? <br/> Voici les joueurs présents: <br/> ${participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
+          setModalContent(modalMessage);
+          setIsModalVisible(true);
+          setShowTimePicker(true); // Afficher le sélecteur de temps
+          setShowConfirmButton(true); // Afficher le bouton de confirmation
+        }
+        if (color === '#e05642') {
+          setModalContent("La salle est fermée pour cette date");
+          setIsModalVisible(true);
+        }
+        if (color === "#eac849") {
+          setShowTimePicker(false);
+          setShowConfirmButton(false);
+        }
       }
-      if (color === '#e05642') {
-        setShowTimePicker(false);
-        setShowConfirmButton(false);
-        // Affiche une alerte si la date sélectionnée est marquée en rouge
-        Alert.alert("Information", "Salle fermée", [
-          { text: "OK", onPress: () => console.log("Alerte fermée") }
-        ]);
-      }
-      if (color === "#eac849") {
-        setShowTimePicker(false);
-        setShowConfirmButton(false);
-      }
+
     } else {
       // Gérer le cas où la date sélectionnée n'est pas correctement définie
       console.error("La date sélectionnée n'est pas correctement définie.");
@@ -722,6 +776,65 @@ function Calendrier({ route }) {
     { color: 'white', text: 'Retirer' },
   ];
 
+  const CustomTimePicker = () => {
+
+    if (Platform.OS === 'web') {
+      // Sur le web,  react-datepicker
+      return (
+        <DatePicker
+          selected={selectedTime}
+          onChange={date => onTimeSelectedWeb(date)}
+          showTimeSelect
+          showTimeSelectOnly
+          dateFormat="HH:mm"
+          timeCaption=""
+
+        />
+      );
+
+    } else {
+      // Sur le mobile,  DateTimePicker
+      return (
+
+        <DateTimePicker
+          value={selectedTime}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onTimeSelected}
+          style={styles.dateTimePicker}
+          minimumDate={startTime} // Définir l'heure de début minimale
+          maximumDate={endTime} // Définir l'heure de fin maximale
+        />
+      );
+    }
+  };
+
+  const CustomDateTimePicker = () => {
+    if (Platform.OS === 'web') {
+      // Sur le web,  un DatePicker HTML5
+      return (
+        <input
+          type="time"
+          onChange={handleTimeChange}// Gérer le changement de temps
+          value={selectedTimeWeb}        // La valeur sélectionnée (heure)
+          style={{ /* Styles optionnels pour le sélecteur d'heure */ }}
+        />
+      );
+    } else {
+      // Sur le mobile,  DateTimePickerModal
+      return (
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="time"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          textColor="black"
+        />
+      );
+    }
+  };
+
   return (
     <KeyboardAvoidingView
 
@@ -739,7 +852,9 @@ function Calendrier({ route }) {
               markedDates={customDatesStyles}
               markingType="custom"
             />
+
           )}
+
 
           {isAdmin && (
             <Calendar
@@ -780,22 +895,16 @@ function Calendrier({ route }) {
                   value={date}
                   onChangeText={(text) => setDate(text)}
                 />
-
-                <DateTimePickerModal
-                  isVisible={isDatePickerVisible}
-                  mode="time"
-                  onConfirm={handleConfirm}
-                  onCancel={hideDatePicker}
-                  textColor="black"
-
-                />
+                {CustomDateTimePicker()}
 
 
-                <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
-                  <Text style={styles.buttonTextHeure}>
-                    {time ? format(time, 'HH:mm') : 'Choisir l\'heure'}
-                  </Text>
-                </TouchableOpacity>
+                {Platform.OS !== 'web' && (
+                  <TouchableOpacity style={styles.input} onPress={() => setDatePickerVisibility(true)}>
+                    <Text style={styles.buttonTextHeure}>
+                      {time ? format(time, 'HH:mm') : 'Choisir l\'heure'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
 
                 <TouchableOpacity style={styles.button} onPress={createEvent}>
@@ -809,16 +918,7 @@ function Calendrier({ route }) {
           {showTimePicker && (
             <View style={styles.dateTimePickerContainer}>
               <Text style={styles.instructions}>Choisissez l'heure avant de confirmer</Text>
-              <DateTimePicker
-                value={selectedTime}
-                mode="time"
-                is24Hour={true}
-                display="default"
-                onChange={onTimeSelected}
-                style={styles.dateTimePicker}
-                minimumDate={startTime} // Définir l'heure de début minimale
-                maximumDate={endTime} // Définir l'heure de fin maximale
-              />
+              {CustomTimePicker()}
               {showConfirmButton && (
 
                 <TouchableOpacity style={styles.confirmButton} onPress={confirmTime}>
@@ -827,9 +927,6 @@ function Calendrier({ route }) {
               )}
             </View>
           )}
-
-
-
 
           <Text style={styles.eventTitle2}>{selectedDateColor !== '#9199ff' && selectedDateColor !== '#96dfa2'
             ? ' Événements :'
@@ -866,6 +963,16 @@ function Calendrier({ route }) {
               </View>
             </Modal>
           )}
+          <CustomModal
+            isOpen={isModalVisible}
+            content={modalContent}
+            onClose={() => setIsModalVisible(false)}
+          >
+
+            <button onClick={() => handleModalResponseWeb("Oui")}>Oui</button>
+            <button onClick={() => handleModalResponseWeb("Non")}>Non</button>
+
+          </CustomModal>
         </View>
 
       </ScrollView>

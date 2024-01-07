@@ -352,6 +352,8 @@ const styles = StyleSheet.create({
     marginTop: 10, // Marge en haut
     marginBottom: 10, // Marge en bas
   },
+
+
   
 });
 

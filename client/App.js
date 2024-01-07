@@ -19,6 +19,7 @@ import Edits from './assets/icons/Edits.js';
 import ProfilEdit from './assets/icons/ProfilEdit.js';
 import Resultat from './assets/icons/Resulats.js';
 import Badminton from './assets/icons/Badminton.js';
+import Stat from './assets/icons/Stat.js';
 
 const AuthStack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -28,7 +29,7 @@ function AuthStackNavigator() {
     <AuthStack.Navigator
       screenOptions={{
         // Animation et transition
-        ...TransitionPresets.ModalPresentationIOS, // Choisir l'animation que vous préférez
+        ...TransitionPresets.ModalPresentationIOS, 
 
         // Style de l'en-tête
         headerStyle: {
@@ -87,7 +88,7 @@ function AppTabs() {
         <Tabs.Screen name="Joueurs" component={Joueurs} options={{
           tabBarLabel: "Résultats",
           tabBarIcon: ({ color, size }) => (
-            <Resultat name="format-list-bulleted" size={24} color="black" />
+            <Stat name="format-list-bulleted" size={24} color="black" />
           ),
           headerShown: false,
         }} />
