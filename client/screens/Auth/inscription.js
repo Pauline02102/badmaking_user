@@ -154,7 +154,7 @@ export default function SignupScreen() {
 
       const data = await response.json(); // Extraction des données JSON de la réponse
 
-      console.log("Réponse du serveur:", data, prenom); // Afficher la réponse du serveur
+      
 
       if (response.status === 201) {
         console.log("Inscription réussie");

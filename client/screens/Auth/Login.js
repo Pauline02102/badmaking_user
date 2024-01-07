@@ -47,10 +47,10 @@ export default function LoginScreen () {
   
       const data = await response.json();
   
-      console.log("Réponse du serveur:", data);
+      
   
       if (response.status === 200 && data.token) {
-        console.log("Storing token:", data.token);
+      
         await AsyncStorage.setItem('userToken', data.token);
         console.log("Token stored successfully");
   
