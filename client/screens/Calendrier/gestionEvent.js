@@ -155,7 +155,8 @@ const ModifierEvent = ({ route, navigation }) => {
     };
 
     return (
-        <KeyboardAvoidingView>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}>
             <ScrollView>
                 <View style={styles.container}>
                     <Text style={styles.header}>Modifier l'événement : {eventId} </Text>
@@ -203,7 +204,7 @@ const ModifierEvent = ({ route, navigation }) => {
                                 type="time"
                                 value={selectedTimeWeb}
                                 onChange={handleWebTimeChange}
-                                style={styles.input} 
+                                style={styles.input}
                             />
                         ) : (
                             <>

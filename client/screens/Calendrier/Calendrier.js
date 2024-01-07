@@ -139,28 +139,28 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
-  
+
       let combinedDateTime;
-  
+
       if (Platform.OS === 'web') {
         // Pour le web,  selectedTimeWeb
         const [hours, minutes] = selectedTimeWeb.split(':');
-        const dateObject = parseISO(date); 
+        const dateObject = parseISO(date);
         combinedDateTime = setMinutes(setHours(dateObject, parseInt(hours, 10)), parseInt(minutes, 10));
       } else {
         // Pour le mobile,  time
-        const dateObject = parseISO(date); 
-        const timeObject = new Date(time); 
+        const dateObject = parseISO(date);
+        const timeObject = new Date(time);
         combinedDateTime = setMinutes(setHours(dateObject, timeObject.getHours()), timeObject.getMinutes());
       }
-  
+
       // Convert to the desired timezone and format
       const timeZone = 'Europe/Paris';
       const zonedDateTime = utcToZonedTime(combinedDateTime, timeZone);
       const formattedDateTime = format(zonedDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { timeZone });
-  
+
       console.log("formattedDateTime:", formattedDateTime);
-  
+
       await axios.post(`${BASE_URL}/event/postcalendar`, {
         title,
         status,
@@ -168,7 +168,7 @@ function Calendrier({ route }) {
         heure: format(zonedDateTime, "HH:mm:ss"),
         user_id: loggedInUser.id,
       });
-  
+
       console.log("Données envoyées à l'API:", {
         title,
         status,
@@ -176,13 +176,13 @@ function Calendrier({ route }) {
         heure: format(zonedDateTime, "HH:mm:ss"),
         user_id: loggedInUser.id,
       });
-  
+
       fetchEvents();
     } catch (error) {
       console.error("Erreur lors de la création de l'événement", error);
     }
   };
-  
+
 
 
   const fetchLoggedInUserInfo = async () => {
@@ -836,9 +836,8 @@ function Calendrier({ route }) {
   };
 
   return (
-    <KeyboardAvoidingView
-
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}>
       <ScrollView>
         <View style={styles.container}>
           <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
