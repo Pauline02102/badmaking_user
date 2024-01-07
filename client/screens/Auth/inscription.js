@@ -9,9 +9,10 @@ import {
   Alert,
   TouchableOpacity,
   Switch,
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
@@ -59,7 +60,7 @@ export default function SignupScreen() {
     setShowPassword(!showPassword);
   };
   const data = [
-   
+
     { key: "2", value: "joueur" },
   ];
 
@@ -157,7 +158,7 @@ export default function SignupScreen() {
 
       const data = await response.json(); // Extraction des données JSON de la réponse
 
-      
+
 
       if (response.status === 201) {
         console.log("Inscription réussie");
@@ -189,165 +190,164 @@ export default function SignupScreen() {
     }));
   }
 
-  
+
 
   return (
-    <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={{ flex: 1 }}
-  >
-    <ScrollView style={{ flex: 1 }}>
-    <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={styles.container}>
 
 
-      <Text style={styles.classementInfo}>
-        * Classement 1 = le plus élevé , 12 = le plus bas
-      </Text>
-      <Text style={styles.heading} testID="inscriptionText">Inscription</Text>
-      <View style={styles.inputContainer}>
-        <View style={styles.classementContainer}>
-          <Text style={styles.classementTitle}>Classements :</Text>
-          <View style={styles.classementInputs}>
-            <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text style={{ color: classementSimpleError ? 'red' : 'black' }}>Simple:</Text>
-              <RNPickerSelect
-                onValueChange={(value) => setClassementSimple(value)}
-                items={generateClassementItems()}
-                value={classementSimple}
-                placeholder={{
-                  label: "A remplir",
-                  value: null,
-                }}
+            <Text style={styles.classementInfo}>
+              * Classement 1 = le plus élevé , 12 = le plus bas
+            </Text>
+            <Text style={styles.heading} testID="inscriptionText">Inscription</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.classementContainer}>
+                <Text style={styles.classementTitle}>Classements :</Text>
+                <View style={styles.classementInputs}>
+                  <View style={[styles.classementInput, { flex: 1 }]}>
+                    <Text style={{ color: classementSimpleError ? 'red' : 'black' }}>Simple:</Text>
+                    <RNPickerSelect
+                      onValueChange={(value) => setClassementSimple(value)}
+                      items={generateClassementItems()}
+                      value={classementSimple}
+                      placeholder={{
+                        label: "A remplir",
+                        value: null,
+                      }}
+                    />
+                  </View>
+                  <View style={[styles.classementInput, { flex: 1 }]}>
+                    <Text style={{ color: classementDoubleError ? 'red' : 'black' }}>Double:</Text>
+                    <RNPickerSelect
+                      onValueChange={(value) => setClassementDouble(value)}
+                      items={generateClassementItems()}
+                      value={classementDouble}
+                      placeholder={{
+                        label: "A remplir",
+                        value: null,
+                      }}
+                    />
+                  </View>
+                  <View style={[styles.classementInput, { flex: 1 }]}>
+                    <Text style={{ color: classementMixteError ? 'red' : 'black' }}>Mixte:</Text>
+                    <RNPickerSelect
+                      onValueChange={(value) => setClassementMixte(value)}
+                      items={generateClassementItems()}
+                      value={classementMixte}
+                      placeholder={{
+                        label: "A remplir",
+                        value: null,
+                      }}
+                    />
+                  </View>
+                </View>
+
+              </View>
+
+
+              <TextInput
+                placeholder="Nom"
+                value={nom}
+                onChangeText={(text) => setnom(text)}
+                style={[
+                  styles.inputField,
+                  inputStates.nom && { borderBottomColor: "red" },
+                ]}
               />
-            </View>
-            <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text style={{ color: classementDoubleError ? 'red' : 'black' }}>Double:</Text>
-              <RNPickerSelect
-                onValueChange={(value) => setClassementDouble(value)}
-                items={generateClassementItems()}
-                value={classementDouble}
-                placeholder={{
-                  label: "A remplir",
-                  value: null,
-                }}
+              <TextInput
+                placeholder="Prenom"
+                value={prenom}
+                onChangeText={(text) => setprenom(text)}
+                style={[
+                  styles.inputField,
+                  inputStates.nom && { borderBottomColor: "red" },
+                ]}
               />
-            </View>
-            <View style={[styles.classementInput, { flex: 1 }]}>
-              <Text style={{ color: classementMixteError ? 'red' : 'black' }}>Mixte:</Text>
-              <RNPickerSelect
-                onValueChange={(value) => setClassementMixte(value)}
-                items={generateClassementItems()}
-                value={classementMixte}
-                placeholder={{
-                  label: "A remplir",
-                  value: null,
-                }}
+
+
+              <TextInput
+                placeholder="Email"
+                value={email}
+                onChangeText={(text) => setEmail(text)}
+                style={[
+                  styles.inputField,
+                  inputStates.nom && { borderBottomColor: "red" },
+                ]}
+                keyboardType="email-address" // Utilise le clavier adapté aux adresses email
+                autoCapitalize="none"
               />
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Mot de passe"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={(text) => setPassword(text)}
+                  style={[
+                    styles.inputField,
+                    inputStates.nom && { borderBottomColor: "red" },
+                  ]}
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                  <Icon
+                    name={showPassword ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="#000"
+                  />
+                </TouchableOpacity>
+              </View>
+
+
+              <View style={styles.inputContainerRole} >
+                <SelectList
+                  placeholder="Rôle"
+                  setSelected={(val) => setRole(val)}
+                  data={data}
+                  save="value"
+
+                  style={styles.choix}
+                />
+              </View>
             </View>
+
+            <View style={styles.switchContainer}>
+              <Switch
+                value={isConsentChecked}
+                onValueChange={handleCheckboxChange}
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={isConsentChecked ? "#f5dd4b" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                testID="consentCheckbox"
+              />
+              <Text style={styles.consentText}>
+                J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
+                <Text
+                  style={styles.linkText}
+                  onPress={() => navigation.navigate("PrivacyPolicy")}
+                >
+                  En savoir plus.
+                </Text>
+              </Text>
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={handleSignup} testID="inscriptionButton">
+              <Text style={styles.buttonText}>Inscription</Text>
+            </TouchableOpacity>
+
+            <View style={styles.signupContainer}>
+              <Text style={styles.already}>Tu as deja un compte ?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.signupLink}>Connecte-toi</Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
-
-        </View>
-
-
-        <TextInput
-          placeholder="Nom"
-          value={nom}
-          onChangeText={(text) => setnom(text)}
-          style={[
-            styles.inputField,
-            inputStates.nom && { borderBottomColor: "red" },
-          ]}
-        />
-        <TextInput
-          placeholder="Prenom"
-          value={prenom}
-          onChangeText={(text) => setprenom(text)}
-          style={[
-            styles.inputField,
-            inputStates.nom && { borderBottomColor: "red" },
-          ]}
-        />
-
-
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          style={[
-            styles.inputField,
-            inputStates.nom && { borderBottomColor: "red" },
-          ]}
-          keyboardType="email-address" // Utilise le clavier adapté aux adresses email
-          autoCapitalize="none"
-        />
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Mot de passe"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            style={[
-              styles.inputField,
-              inputStates.nom && { borderBottomColor: "red" },
-            ]}
-          />
-          <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-            <Icon
-              name={showPassword ? 'eye-slash' : 'eye'}
-              size={20}
-              color="#000"
-            />
-          </TouchableOpacity>
-        </View>
-
-
-        <View style={styles.inputContainerRole} >
-          <SelectList
-            placeholder="Rôle"
-            setSelected={(val) => setRole(val)}
-            data={data}
-            save="value"
-            
-            style={styles.choix }
-          />
-        </View>
-      </View>
-
-      <View style={styles.switchContainer}>
-        <Switch
-          value={isConsentChecked}
-          onValueChange={handleCheckboxChange}
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={isConsentChecked ? "#f5dd4b" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          testID="consentCheckbox" 
-        />
-        <Text style={styles.consentText}>
-          J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
-          <Text
-            style={styles.linkText}
-            onPress={() => navigation.navigate("PrivacyPolicy")}
-          >
-            En savoir plus.
-          </Text>
-        </Text>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleSignup} testID="inscriptionButton">
-        <Text style={styles.buttonText}>Inscription</Text>
-      </TouchableOpacity>
-
-      <View style={styles.signupContainer}>
-        <Text style={styles.already}>Tu as deja un compte ?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.signupLink}>Connecte-toi</Text>
-        </TouchableOpacity>
-      </View>
-
-    </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     position: "relative",
     marginBottom: 20,
   },
-  inputContainerRole:{
+  inputContainerRole: {
     width: "100%",
     position: "relative",
     marginBottom: 20,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   already: {
-    padding: 15,
+    padding: 10,
   },
   eyeIcon: {
     position: "absolute",

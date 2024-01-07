@@ -67,11 +67,7 @@ export default function LoginScreen() {
 
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView style={{ flex: 1 }}>
+  
         <View style={styles.container}>
           <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
 
@@ -126,8 +122,7 @@ export default function LoginScreen() {
           </View>
 
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
   );
 };
 
