@@ -6,7 +6,7 @@ backend/node_modules
 # Expo
 .expo/
 dist/
-web-build/
+
 
 # Native
 *.orig.*
