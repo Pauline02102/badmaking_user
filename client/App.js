@@ -28,8 +28,7 @@ function AuthStackNavigator() {
   return (
     <AuthStack.Navigator
       screenOptions={{
-        // Animation et transition
-        ...TransitionPresets.ModalPresentationIOS, 
+        
 
         // Style de l'en-tête
         headerStyle: {
