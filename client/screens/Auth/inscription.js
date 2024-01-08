@@ -24,6 +24,7 @@ import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 
 export default function SignupScreen() {
   const [isConsentChecked, setConsentChecked] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const handleCheckboxChange = () => {
     setConsentChecked(!isConsentChecked);
@@ -65,7 +66,7 @@ export default function SignupScreen() {
   ];
 
   const handleSignup = async () => {
-
+    setIsButtonDisabled(true);
 
     const inputStateCopy = { ...inputStates };
     let hasEmptyFields = false;
@@ -168,7 +169,13 @@ export default function SignupScreen() {
 
       const data = await response.json(); // Extraction des données JSON de la réponse
       if (response.status === 201) {
+        console.log(response.status)
         console.log("Inscription réussie");
+        if (Platform.OS === 'web') {
+          window.alert("Inscription réussie.");
+        } else {
+          Alert.alert("Succès", "Inscription réussie.");
+        }
         navigation.navigate("Login");
       } else if (response.status === 400) {
         const errorMessage = data.message;
@@ -190,6 +197,7 @@ export default function SignupScreen() {
       console.error("Erreur lors de l'inscription", error);
       setErrorMessage("Erreur lors de l'inscription");
     }
+    setIsButtonDisabled(false); 
   };
 
 

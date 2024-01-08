@@ -382,18 +382,18 @@ function Calendrier({ route }) {
       if (participation === "Oui") {
         // Vérifie si l'application est en cours d'exécution dans un navigateur web
         if (Platform.OS === 'web') {
-            // Utilisation de window.alert pour les utilisateurs web
-            window.alert("Vous êtes inscrit à l'événement! Les matchs seront disponibles 24h avant l'événement");
+          // Utilisation de window.alert pour les utilisateurs web
+          window.alert("Vous êtes inscrit à l'événement! Les matchs seront disponibles 24h avant l'événement");
         } else {
-            // Utilisation de Alert.alert pour les autres plateformes (comme iOS et Android)
-            Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponibles 24h avant l'événement", [
-                {
-                    text: "OK",
-                    onPress: () => console.log("Confirmation de l'inscription"),
-                },
-            ]);
+          // Utilisation de Alert.alert pour les autres plateformes (comme iOS et Android)
+          Alert.alert("Confirmation", "Vous êtes inscrit à l'événement! \n Les matchs seront disponibles 24h avant l'événement", [
+            {
+              text: "OK",
+              onPress: () => console.log("Confirmation de l'inscription"),
+            },
+          ]);
         }
-    }
+      }
 
       await fetchEvents();
       console.log("Participation validée");
@@ -519,6 +519,12 @@ function Calendrier({ route }) {
       // Récupérer la liste des participants avant d'afficher la boîte de dialogue
       const participants = await fetchParticipantsJeuLibre(selectedDateString);
 
+      // Vérifier si la date est passée
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Réinitialiser l'heure à minuit pour la comparaison
+      const selectedDate = new Date(selectedDateString);
+      selectedDate.setHours(0, 0, 0, 0); // Réinitialiser l'heure à minuit pour la comparaison
+      const isDatePassed = selectedDate < today;
       // Vérifier si la couleur de la date est verte ou bleue
       const color =
         customDatesStyles[selectedDateString]?.customStyles?.container
@@ -527,7 +533,7 @@ function Calendrier({ route }) {
 
       if (Platform.OS !== 'web') {
 
-        if (color === "#96dfa2" || color === "#9199ff") {
+        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
           setShowTimePicker(true); // Afficher le sélecteur de temps
           setShowConfirmButton(true); // Afficher le bouton de confirmation
 
@@ -558,6 +564,9 @@ function Calendrier({ route }) {
               },
             ]
           );
+        } else if (isDatePassed) {
+          // Affiche une alerte si la date est passée
+          Alert.alert("Information", "Impossible de s'inscrire au jeu libre pour une date antérieure");
         }
         if (color === '#e05642') {
           setShowTimePicker(false);
@@ -576,13 +585,16 @@ function Calendrier({ route }) {
 
 
         // Logique spécifique pour le web
-        if (color === "#96dfa2" || color === "#9199ff") {
+        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
           const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map(participant => `- ${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
           setModalContent(modalMessage);
           setIsModalVisible(true);
           setShowTimePicker(true); // Afficher le sélecteur de temps
           setShowConfirmButton(true); // Afficher le bouton de confirmation
           setShowButtons(true);
+        } else if (isDatePassed) {
+          // Affiche une alerte si la date est passée
+          window.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
         }
         if (color === '#e05642') {
           setModalContent(" <strong> <br/> La salle est fermée pour cette date </strong>");
@@ -798,7 +810,7 @@ function Calendrier({ route }) {
           dateFormat="HH:mm"
           timeCaption=""
           className="hide-time-list"
-          
+
         />
       );
 
