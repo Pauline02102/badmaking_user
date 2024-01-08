@@ -12,7 +12,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView
+  SafeAreaView,
+  ActivityIndicator
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
@@ -25,7 +26,7 @@ import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 export default function SignupScreen() {
   const [isConsentChecked, setConsentChecked] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleCheckboxChange = () => {
     setConsentChecked(!isConsentChecked);
   };
@@ -66,7 +67,9 @@ export default function SignupScreen() {
   ];
 
   const handleSignup = async () => {
-    setIsButtonDisabled(true);
+    setIsLoading(true); // Démarre le chargement
+    setIsButtonDisabled(true); // Désactive le bouton
+
 
     const inputStateCopy = { ...inputStates };
     let hasEmptyFields = false;
@@ -197,7 +200,8 @@ export default function SignupScreen() {
       console.error("Erreur lors de l'inscription", error);
       setErrorMessage("Erreur lors de l'inscription");
     }
-    setIsButtonDisabled(false); 
+    setIsLoading(false); // Arrête le chargement
+    setIsButtonDisabled(false); // Réactive le bouton
   };
 
 
@@ -209,6 +213,22 @@ export default function SignupScreen() {
     }));
   }
 
+  // Fonction pour afficher l'indicateur de chargement
+  const renderButtonOrLoadingIndicator = () => {
+    if (isLoading) {
+      // Affichage de l'indicateur de chargement
+      return Platform.OS === 'ios' || Platform.OS === 'android' ?
+        <ActivityIndicator size="large" color="#0000ff" /> :
+        <Text>Chargement...</Text>;
+    } else {
+      // Affichage du bouton d'inscription
+      return (
+        <TouchableOpacity style={styles.button} onPress={handleSignup} testID="inscriptionButton" disabled={isButtonDisabled}>
+          <Text style={styles.buttonText}>Inscription</Text>
+        </TouchableOpacity>
+      );
+    }
+  };
 
 
   return (
@@ -217,7 +237,7 @@ export default function SignupScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}>
           <View style={styles.container}>
-
+          
 
             <Text style={styles.classementInfo}>
               * Classement 1 = le plus élevé , 12 = le plus bas
@@ -353,9 +373,7 @@ export default function SignupScreen() {
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleSignup} testID="inscriptionButton">
-              <Text style={styles.buttonText}>Inscription</Text>
-            </TouchableOpacity>
+            {renderButtonOrLoadingIndicator()}
 
             <View style={styles.signupContainer}>
               <Text style={styles.already}>Tu as deja un compte ?</Text>

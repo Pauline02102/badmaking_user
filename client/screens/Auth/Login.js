@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform} from "react-native";
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
@@ -13,7 +13,8 @@ import { SelectList } from "react-native-dropdown-select-list";
 export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
-
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [nom, setnom] = useState("");
@@ -30,6 +31,8 @@ export default function LoginScreen() {
   ];
 
   const handleLogin = async () => {
+    setIsLoading(true); // Démarre le chargement
+    setIsButtonDisabled(true); // Désactive le bouton
     try {
       const loginData = {
 
@@ -63,65 +66,80 @@ export default function LoginScreen() {
     } catch (error) {
       console.error("Erreur lors de la connexion :", error);
     }
+    setIsLoading(false); // Arrête le chargement
+    setIsButtonDisabled(false); // Réactive le bouton
+  };
+  // Fonction pour afficher l'indicateur de chargement
+  const renderButtonOrLoadingIndicator = () => {
+    if (isLoading) {
+      // Affichage de l'indicateur de chargement
+      return Platform.OS === 'ios' || Platform.OS === 'android' ?
+        <ActivityIndicator size="large" color="#0000ff" /> :
+        <Text>Chargement...</Text>;
+    } else {
+      // Affichage du bouton d'inscription
+      return (
+        <TouchableOpacity style={styles.button} onPress={handleLogin} testID="ButtonConnexion">
+          <Text style={styles.buttonText}  >Connexion</Text>
+        </TouchableOpacity>
+      );
+    }
   };
 
-
   return (
-  
-        <View style={styles.container}>
-          <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={(text) => setEmail(text)}
-              style={styles.inputField}
-            />
+    <View style={styles.container}>
+      <Text style={styles.heading} testID="ConnexionText">Connexion</Text>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          style={styles.inputField}
+        />
 
 
-            <TextInput
-              placeholder="Mot de passe"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-              style={styles.inputField}
-              testID="passwordInput"
-            />
-            <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon} testID="eyeIcon">
-              <Icon
-                name={showPassword ? 'eye-slash' : 'eye'}
-                size={20}
-                color="#000"
-              />
-            </TouchableOpacity>
+        <TextInput
+          placeholder="Mot de passe"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          style={styles.inputField}
+          testID="passwordInput"
+        />
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon} testID="eyeIcon">
+          <Icon
+            name={showPassword ? 'eye-slash' : 'eye'}
+            size={20}
+            color="#000"
+          />
+        </TouchableOpacity>
 
-            <View style={styles.inputContainer}>
-              <SelectList
-                placeholder="Rôle"
-                setSelected={(val) => setRole(val)}
-                data={data}
-                save="value"
-                style={styles.choix}
+        <View style={styles.inputContainer}>
+          <SelectList
+            placeholder="Rôle"
+            setSelected={(val) => setRole(val)}
+            data={data}
+            save="value"
+            style={styles.choix}
 
-                testID="roleSelect"
-              />
-            </View>
-          </View>
-          <TouchableOpacity style={styles.button} onPress={handleLogin} testID="ButtonConnexion">
-            <Text style={styles.buttonText}  >Connexion</Text>
-          </TouchableOpacity>
-
-          <View style={styles.signupContainer}>
-            <Text style={styles.already}>Tu n'as pas de compte ?</Text>
-            <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
-              name: 'Inscription',
-            }))}>
-              <Text style={styles.signupLink}>Inscription</Text>
-            </TouchableOpacity>
-          </View>
-
+            testID="roleSelect"
+          />
         </View>
+      </View>
+      {renderButtonOrLoadingIndicator()}
+
+      <View style={styles.signupContainer}>
+        <Text style={styles.already}>Tu n'as pas de compte ?</Text>
+        <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
+          name: 'Inscription',
+        }))}>
+          <Text style={styles.signupLink}>Inscription</Text>
+        </TouchableOpacity>
+      </View>
+
+    </View>
 
   );
 };
