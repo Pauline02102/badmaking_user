@@ -733,14 +733,21 @@ function Calendrier({ route }) {
             )}
 
             {isRegistrationOpen(`${event.date}T${event.heure}`) ? (
-              <View style={styles.participationButtons}>
-                <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")}>
-                  <Icon name="check-circle" size={30} color="green" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")}>
-                  <Icon name="cancel" size={30} color="red" />
-                </TouchableOpacity>
+
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles.eventTitle2}>Valider l'inscription</Text>
+
+                <View style={styles.participationButtons}>
+                  <TouchableOpacity onPress={() => handleParticipation(event.id, "Oui")} style={{ marginRight: 5 }}>
+                    <Icon name="check-circle" size={30} color="green" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleParticipation(event.id, "Non")} style={{ marginLeft: 5 }}>
+                    <Icon name="cancel" size={30} color="red" />
+                  </TouchableOpacity>
+
+                </View>
               </View>
+
             ) : (
               <Text style={styles.closedRegistrationText}>Inscription fermée</Text>
             )}
