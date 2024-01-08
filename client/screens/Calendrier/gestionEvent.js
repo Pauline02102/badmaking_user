@@ -177,7 +177,7 @@ const ModifierEvent = ({ route, navigation }) => {
                                 type="date"
                                 value={selectedDateWeb}
                                 onChange={handleWebDateChange}
-                                style={styles.input} // Assurez-vous d'avoir un style correspondant pour les éléments input
+                                style={styles.input} 
                             />
                         ) : (
                             <>

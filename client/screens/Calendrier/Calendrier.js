@@ -518,6 +518,7 @@ function Calendrier({ route }) {
 
       // Récupérer la liste des participants avant d'afficher la boîte de dialogue
       const participants = await fetchParticipantsJeuLibre(selectedDateString);
+      console.log(participants);
 
       // Vérifier si la date est passée
       const today = new Date();
@@ -532,43 +533,44 @@ function Calendrier({ route }) {
       setSelectedDateColor(color);
 
       if (Platform.OS !== 'web') {
-        if ((color === "#96dfa2" || color === "#9199ff")) {
-          if (!isDatePassed) {
-            setShowTimePicker(true); // Afficher le sélecteur de temps
-            setShowConfirmButton(true); // Afficher le bouton de confirmation
+        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
+          setShowTimePicker(true);
+          setShowConfirmButton(true);
+          console.log("Participants présents :", participants);
 
-            // Afficher la liste des participants
-            console.log("Participants présents :", participants);
-
-            // Afficher la boîte de dialogue
+          // Mise à jour de l'état selectedTime avec l'heure de la base de données
+          if (participants.length > 0) {
             Alert.alert(
               "Viens-tu au jeu libre ?",
-              "Voici les joueurs présents:\n" + participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
+              "Voici les joueurs présents:\n" + participants.map((participant) => {
+                // Extracting hours and minutes from the 'heure' property
+                const [hours, minutes] = participant.heure.split(':');
+                return `${participant.prenom} à ${hours}:${minutes}`;
+              }).join(", \n"),
               [
                 { text: "Non", onPress: () => sendParticipation("Non"), style: "cancel" },
                 { text: "Oui", onPress: () => confirmParticipationWithTime() },
                 { text: "Fermer", onPress: () => console.log("Boîte de dialogue fermée"), style: "cancel" }
               ]
             );
-          } else {
-            // Affiche une alerte si la date est passée
-            Alert.alert("Information", "Impossible de s'inscrire au jeu libre pour une date antérieure");
+
           }
         } else if (color === '#e05642') {
           setShowTimePicker(false);
           setShowConfirmButton(false);
-          // Affiche une alerte si la date sélectionnée est marquée en rouge
           Alert.alert("Information", "Salle fermée");
         } else if (color === "#eac849") {
           setShowTimePicker(false);
           setShowConfirmButton(false);
         }
-      }else {
-
-
+      } else {
         if ((color === "#96dfa2" || color === "#9199ff")) {
           if (!isDatePassed) {
-            const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map(participant => `- ${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
+            const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map((participant) => {
+              // Extracting hours and minutes from the 'heure' property
+              const [hours, minutes] = participant.heure.split(':');
+              return `${participant.prenom} à ${hours}:${minutes}`;
+            }).join("<br/>")}`;
             setModalContent(modalMessage);
             setIsModalVisible(true);
             setShowTimePicker(true); // Afficher le sélecteur de temps
