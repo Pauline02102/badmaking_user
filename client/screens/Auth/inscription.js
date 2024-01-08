@@ -358,13 +358,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
     padding: 30,
-    paddingTop: Platform.OS === 'ios' ? 60 : 30, // Ajoutez un padding supplémentaire en haut pour iOS
-    paddingBottom: 30, // Ajoutez un padding en bas
     borderRadius: 30,
     shadowColor: "rgba(0, 0, 0, 0.062)",
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 40,
-    // marginBottom: 80, // Vous pourriez vouloir enlever ou ajuster cette valeur
   },
   classementInfo: {
     position: "absolute",
@@ -426,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     margin: 0,
     marginTop: 20,
-    marginBottom: 80,
+
   },
   signupLink: {
     fontSize: 14,
