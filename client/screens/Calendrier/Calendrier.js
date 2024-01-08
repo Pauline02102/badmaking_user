@@ -30,7 +30,7 @@ import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-//import './styles.css'
+import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
