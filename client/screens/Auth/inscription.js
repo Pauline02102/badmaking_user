@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
-    padding: 30,
+    //padding: 30,
     borderRadius: 30,
     shadowColor: "rgba(0, 0, 0, 0.062)",
     shadowOffset: { width: 0, height: 0 },
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     margin: 0,
     marginTop: 20,
-
+    marginBottom: 20,
   },
   signupLink: {
     fontSize: 14,
