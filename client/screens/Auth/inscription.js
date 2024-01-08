@@ -219,7 +219,9 @@ export default function SignupScreen() {
       // Affichage de l'indicateur de chargement
       return Platform.OS === 'ios' || Platform.OS === 'android' ?
         <ActivityIndicator size="large" color="#0000ff" /> :
-        <Text>Chargement...</Text>;
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Chargement...</Text>
+        </View>
     } else {
       // Affichage du bouton d'inscription
       return (
@@ -237,7 +239,7 @@ export default function SignupScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}>
           <View style={styles.container}>
-          
+
 
             <Text style={styles.classementInfo}>
               * Classement 1 = le plus élevé , 12 = le plus bas
@@ -519,5 +521,18 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#007bff",
     textDecorationLine: "underline",
+  },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50, 
+    marginVertical: 10,
+  },
+  loadingText: {
+    color: '#4d8194', 
+    fontSize: 18, 
+    fontWeight: 'bold',
+  
   },
 });

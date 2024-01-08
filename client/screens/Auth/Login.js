@@ -75,7 +75,9 @@ export default function LoginScreen() {
       // Affichage de l'indicateur de chargement
       return Platform.OS === 'ios' || Platform.OS === 'android' ?
         <ActivityIndicator size="large" color="#0000ff" /> :
-        <Text>Chargement...</Text>;
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Chargement...</Text>
+        </View>
     } else {
       // Affichage du bouton d'inscription
       return (
@@ -221,5 +223,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     marginTop: 78
+  },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50, 
+    marginVertical: 10,
+  },
+  loadingText: {
+    color: '#4d8194', 
+    fontSize: 18, 
+    fontWeight: 'bold',
+    
   },
 });
