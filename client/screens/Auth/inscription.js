@@ -193,9 +193,9 @@ export default function SignupScreen() {
 
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView >
           <View style={styles.container}>
 
 
@@ -347,7 +347,7 @@ export default function SignupScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    
   );
 }
 
