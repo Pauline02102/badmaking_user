@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c3c6b8f1.css",
-    "main.js": "/static/js/main.eb576548.js",
+    "main.js": "/static/js/main.0ea4d581.js",
     "static/js/699.a4b44153.js": "/static/js/699.a4b44153.js",
     "static/media/MaterialIcons.ttf": "/static/media/MaterialIcons.120b4c7bbd155bd0a04d.ttf",
     "static/media/FontAwesome.ttf": "/static/media/FontAwesome.1e59d2330b4c6deb84b3.ttf",
@@ -12,12 +12,12 @@
     "manifest.json": "/manifest.json",
     "serve.json": "/serve.json",
     "main.c3c6b8f1.css.map": "/static/css/main.c3c6b8f1.css.map",
-    "main.eb576548.js.map": "/static/js/main.eb576548.js.map",
+    "main.0ea4d581.js.map": "/static/js/main.0ea4d581.js.map",
     "699.a4b44153.js.map": "/static/js/699.a4b44153.js.map"
   },
   "entrypoints": [
     "static/js/699.a4b44153.js",
     "static/css/main.c3c6b8f1.css",
-    "static/js/main.eb576548.js"
+    "static/js/main.0ea4d581.js"
   ]
 }

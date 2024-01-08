@@ -114,23 +114,33 @@ export default function SignupScreen() {
     setInputStates(inputStateCopy);
 
     if (hasEmptyFields) {
-      Alert.alert("Erreur", "Tous les champs sont obligatoires.");
+      if (Platform.OS === 'web') {
+        window.alert("Erreur: Tous les champs sont obligatoires.");
+      } else {
+        Alert.alert("Erreur", "Tous les champs sont obligatoires.");
+      }
       return;
     }
 
-    // Vérifier que l'email contient "@" et "."
     if (!email.includes("@") || !email.includes(".")) {
-      Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+      if (Platform.OS === 'web') {
+        window.alert("Erreur: L'adresse email doit contenir '@' et '.'.");
+      } else {
+        Alert.alert("Erreur", "L'adresse email doit contenir '@' et '.'.");
+      }
       return;
     }
 
-    // Vérifier que le mot de passe satisfait les critères
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!])/;
     if (!passwordRegex.test(password)) {
-      Alert.alert(
-        "Erreur",
-        "Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre."
-      );
+      if (Platform.OS === 'web') {
+        window.alert("Erreur: Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre.");
+      } else {
+        Alert.alert(
+          "Erreur",
+          "Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre."
+        );
+      }
       return;
     }
 
@@ -157,16 +167,17 @@ export default function SignupScreen() {
       console.log("Après la réponse du serveur"); // Après la réponse du serveur
 
       const data = await response.json(); // Extraction des données JSON de la réponse
-
-
-
       if (response.status === 201) {
         console.log("Inscription réussie");
         navigation.navigate("Login");
       } else if (response.status === 400) {
         const errorMessage = data.message;
         if (errorMessage === "L'utilisateur avec cet e-mail existe déjà.") {
-          Alert.alert("Erreur", "L'utilisateur avec cet e-mail existe déjà.");
+          if (Platform.OS === 'web') {
+            window.alert("Erreur: L'utilisateur avec cet e-mail existe déjà.");
+          } else {
+            Alert.alert("Erreur", "L'utilisateur avec cet e-mail existe déjà.");
+          }
         } else {
           console.error("Erreur lors de l'inscription: Réponse inattendue du serveur");
           setErrorMessage("Erreur lors de l'inscription");
