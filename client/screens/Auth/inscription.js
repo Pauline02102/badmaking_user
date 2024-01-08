@@ -137,15 +137,18 @@ export default function SignupScreen() {
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!])/;
     const isPasswordValid = passwordRegex.test(password) && password.length >= 8;
     // Si des champs sont vides ou le mot de passe est invalide, affiche une alerte et ne procéde pas plus loin
-    if (hasEmptyFields || !isPasswordValid) {
+    if (hasEmptyFields || !isPasswordValid || !isConsentChecked) {
       const errorMessage = hasEmptyFields
         ? " Tous les champs sont obligatoires."
-        : " Le mot de passe doit respecter les critères suivants :\n" +
-          "• Contenir au moins une majuscule\n" +
-          "• Contenir au moins un caractère spécial (@#$%^&+=!)\n" +
-          "• Contenir au moins un chiffre\n" +
-          "• Avoir une longueur minimale de 8 caractères.";
-  
+        : !isPasswordValid 
+        ?
+        " Le mot de passe doit respecter les critères suivants :\n" +
+        "• Contenir au moins une majuscule\n" +
+        "• Contenir au moins un caractère spécial (@#$%^&+=!)\n" +
+        "• Contenir au moins un chiffre\n" +
+        "• Avoir une longueur minimale de 8 caractères."
+        : "Vous devez accepter les conditions générales d'utilisation et la politique de confidentialité.";
+
       if (Platform.OS === 'web') {
         window.alert(errorMessage);
       } else {
@@ -153,6 +156,7 @@ export default function SignupScreen() {
       }
       return;
     }
+
     setIsLoading(true); // Démarre le chargement
     setIsButtonDisabled(true); // Désactive le bouton
 
