@@ -30,7 +30,7 @@ import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-import './styles.css'
+//import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -532,81 +532,62 @@ function Calendrier({ route }) {
       setSelectedDateColor(color);
 
       if (Platform.OS !== 'web') {
+        if ((color === "#96dfa2" || color === "#9199ff")) {
+          if (!isDatePassed) {
+            setShowTimePicker(true); // Afficher le sélecteur de temps
+            setShowConfirmButton(true); // Afficher le bouton de confirmation
 
-        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
-          setShowTimePicker(true); // Afficher le sélecteur de temps
-          setShowConfirmButton(true); // Afficher le bouton de confirmation
+            // Afficher la liste des participants
+            console.log("Participants présents :", participants);
 
-          // Afficher la liste des participants
-          console.log("Participants présents :", participants);
-
-          // Afficher la boîte de dialogue
-          Alert.alert(
-
-            "Viens- tu au jeu libre ? \n Voici les joueurs présents",
-            participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
-            [
-              {
-                text: "Non",
-                onPress: () => sendParticipation("Non"),
-                style: "cancel",
-              },
-              {
-                text: "Oui",
-                //onPress: () => sendParticipation("Oui"),
-                onPress: () => confirmParticipationWithTime()
-              },
-              {
-                text: "Fermer",
-                onPress: () => console.log("Boîte de dialogue fermée"),
-                style: "cancel",
-                cancelable: true, // Permet à l'utilisateur de fermer la boîte de dialogue sans y répondre
-              },
-            ]
-          );
-        } else if (isDatePassed) {
-          // Affiche une alerte si la date est passée
-          Alert.alert("Information", "Impossible de s'inscrire au jeu libre pour une date antérieure");
-        }
-        if (color === '#e05642') {
+            // Afficher la boîte de dialogue
+            Alert.alert(
+              "Viens-tu au jeu libre ?",
+              "Voici les joueurs présents:\n" + participants.map((participant) => `${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join(", \n"),
+              [
+                { text: "Non", onPress: () => sendParticipation("Non"), style: "cancel" },
+                { text: "Oui", onPress: () => confirmParticipationWithTime() },
+                { text: "Fermer", onPress: () => console.log("Boîte de dialogue fermée"), style: "cancel" }
+              ]
+            );
+          } else {
+            // Affiche une alerte si la date est passée
+            Alert.alert("Information", "Impossible de s'inscrire au jeu libre pour une date antérieure");
+          }
+        } else if (color === '#e05642') {
           setShowTimePicker(false);
           setShowConfirmButton(false);
           // Affiche une alerte si la date sélectionnée est marquée en rouge
-          Alert.alert("Information", "Salle fermée", [
-            { text: "OK", onPress: () => console.log("Alerte fermée") }
-          ]);
-        }
-        if (color === "#eac849") {
+          Alert.alert("Information", "Salle fermée");
+        } else if (color === "#eac849") {
           setShowTimePicker(false);
           setShowConfirmButton(false);
         }
+      }else {
 
-      } else {
 
-
-        // Logique spécifique pour le web
-        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
-          const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map(participant => `- ${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
-          setModalContent(modalMessage);
-          setIsModalVisible(true);
-          setShowTimePicker(true); // Afficher le sélecteur de temps
-          setShowConfirmButton(true); // Afficher le bouton de confirmation
-          setShowButtons(true);
-        } else if (isDatePassed) {
-          // Affiche une alerte si la date est passée
-          window.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
-        }
-        if (color === '#e05642') {
+        if ((color === "#96dfa2" || color === "#9199ff")) {
+          if (!isDatePassed) {
+            const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map(participant => `- ${participant.prenom} à ${format(selectedTime, 'HH:mm')}`).join("<br/>")}`;
+            setModalContent(modalMessage);
+            setIsModalVisible(true);
+            setShowTimePicker(true); // Afficher le sélecteur de temps
+            setShowConfirmButton(true); // Afficher le bouton de confirmation
+            setShowButtons(true);
+          } else {
+            // Affiche une alerte si la date est passée
+            window.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
+          }
+        } else if (color === '#e05642') {
           setModalContent(" <strong> <br/> La salle est fermée pour cette date </strong>");
           setIsModalVisible(true);
           setShowConfirmButton(false);
           setShowButtons(false);
-        }
-        if (color === "#eac849") {
+        } else if (color === "#eac849") {
           setShowTimePicker(false);
           setShowConfirmButton(false);
-
         }
+
       }
 
     } else {
@@ -813,6 +794,7 @@ function Calendrier({ route }) {
 
         />
       );
+
 
     } else {
       // Sur le mobile,  DateTimePicker
