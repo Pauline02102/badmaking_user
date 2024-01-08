@@ -357,12 +357,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
-    //padding: 30,
+    padding: 30,
     borderRadius: 30,
     shadowColor: "rgba(0, 0, 0, 0.062)",
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 40,
   },
+  
   classementInfo: {
     position: "absolute",
     bottom: 10,
@@ -380,8 +381,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 20,
+    marginBottom: 30,
+    marginTop: 20
   },
+  
   inputContainerRole: {
     width: "100%",
     position: "relative",
