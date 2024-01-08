@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     marginTop: 40,
+
   },
   eventContainer: {
     borderWidth: 1,

@@ -30,7 +30,7 @@ import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-//import './styles.css'
+import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -531,9 +531,11 @@ function Calendrier({ route }) {
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       setSelectedDateColor(color);
+      
 
       if (Platform.OS !== 'web') {
         if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
+          const readableDate = format(parseISO(selectedDateString), 'dd/MM/yyyy');
           setShowTimePicker(true);
           setShowConfirmButton(true);
           console.log("Participants présents :", participants);
@@ -541,11 +543,11 @@ function Calendrier({ route }) {
           // Mise à jour de l'état selectedTime avec l'heure de la base de données
           if (participants.length > 0) {
             Alert.alert(
-              "Viens-tu au jeu libre ?",
+              `Viens-tu au jeu libre le ${readableDate}?`, 
               "Voici les joueurs présents:\n" + participants.map((participant) => {
                 // Extracting hours and minutes from the 'heure' property
                 const [hours, minutes] = participant.heure.split(':');
-                return `${participant.prenom} à ${hours}:${minutes}`;
+                return `${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
               }).join(", \n"),
               [
                 { text: "Non", onPress: () => sendParticipation("Non"), style: "cancel" },
@@ -566,10 +568,11 @@ function Calendrier({ route }) {
       } else {
         if ((color === "#96dfa2" || color === "#9199ff")) {
           if (!isDatePassed) {
-            const modalMessage = `<strong> Viens-tu au jeu libre ? <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map((participant) => {
+            const readableDate = format(parseISO(selectedDateString), 'dd/MM/yyyy');
+            const modalMessage = `<strong> Viens-tu au jeu libre le ${readableDate}?, <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map((participant) => {
               // Extracting hours and minutes from the 'heure' property
               const [hours, minutes] = participant.heure.split(':');
-              return `${participant.prenom} à ${hours}:${minutes}`;
+              return `${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
             }).join("<br/>")}`;
             setModalContent(modalMessage);
             setIsModalVisible(true);
