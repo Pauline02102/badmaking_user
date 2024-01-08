@@ -10,13 +10,15 @@ import {
   Button,
   TextInput,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import CustomModal from './CustomModal';
 
 import axios from "axios";
 import Icon from "react-native-vector-icons/MaterialIcons";
+
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from '../Auth/UserContext';
@@ -73,6 +75,12 @@ function Calendrier({ route }) {
     { key: "1", value: "Tous niveau" },
     { key: "2", value: "Par niveau" },
   ];
+
+
+  const Arrow = ({ direction }) => {
+    return <Icon name={direction === 'left' ? 'chevron-left' : 'chevron-right'} />;
+  };
+
   const [time, setTime] = useState(new Date());
   const openColorModal = () => {
     setColorModalVisible(true);
@@ -531,7 +539,7 @@ function Calendrier({ route }) {
         customDatesStyles[selectedDateString]?.customStyles?.container
           ?.backgroundColor;
       setSelectedDateColor(color);
-      
+
 
       if (Platform.OS !== 'web') {
         if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
@@ -543,7 +551,7 @@ function Calendrier({ route }) {
           // Mise à jour de l'état selectedTime avec l'heure de la base de données
           if (participants.length > 0) {
             Alert.alert(
-              `Viens-tu au jeu libre le ${readableDate}?`, 
+              `Viens-tu au jeu libre le ${readableDate}?`,
               "Voici les joueurs présents:\n" + participants.map((participant) => {
                 // Extracting hours and minutes from the 'heure' property
                 const [hours, minutes] = participant.heure.split(':');
@@ -859,6 +867,7 @@ function Calendrier({ route }) {
               onDayPress={handleDayPress}
               markedDates={customDatesStyles}
               markingType="custom"
+              renderArrow={(direction) => <Arrow direction={direction} />}
             />
 
           )}
@@ -873,6 +882,7 @@ function Calendrier({ route }) {
               }}
               markedDates={customDatesStyles}
               markingType="custom"
+              renderArrow={(direction) => <Arrow direction={direction} />}
             />
           )}
           {/* Condition pour afficher le formulaire de création uniquement pour les administrateurs */}
