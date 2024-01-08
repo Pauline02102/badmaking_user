@@ -16,9 +16,9 @@ export default function PrivacyPolicyScreen( ) {
         Lorsque vous utilisez notre application, nous pouvons collecter les
         informations suivantes :
       </Text>
-      <Text>- Votre nom</Text>
+      <Text>- Votre Nom</Text>
       <Text>- Votre Prenom</Text>
-      <Text>- Votre adresse e-mail</Text>
+      <Text>- Votre Adresse e-mail</Text>
      
       <Text style={styles.sectionHeading}>Utilisation des informations</Text>
       <Text>

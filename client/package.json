@@ -9,7 +9,6 @@
     "web": "expo start --web",
     "test": "jest",
     "build": "expo build:web"
-
   },
   "dependencies": {
     "@babel/plugin-proposal-export-namespace-from": "^7.18.9",

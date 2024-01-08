@@ -67,8 +67,7 @@ export default function SignupScreen() {
   ];
 
   const handleSignup = async () => {
-    setIsLoading(true); // Démarre le chargement
-    setIsButtonDisabled(true); // Désactive le bouton
+
 
 
     const inputStateCopy = { ...inputStates };
@@ -136,17 +135,26 @@ export default function SignupScreen() {
     }
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!])/;
-    if (!passwordRegex.test(password)) {
+    const isPasswordValid = passwordRegex.test(password) && password.length >= 8;
+    // Si des champs sont vides ou le mot de passe est invalide, affiche une alerte et ne procéde pas plus loin
+    if (hasEmptyFields || !isPasswordValid) {
+      const errorMessage = hasEmptyFields
+        ? " Tous les champs sont obligatoires."
+        : " Le mot de passe doit respecter les critères suivants :\n" +
+          "• Contenir au moins une majuscule\n" +
+          "• Contenir au moins un caractère spécial (@#$%^&+=!)\n" +
+          "• Contenir au moins un chiffre\n" +
+          "• Avoir une longueur minimale de 8 caractères.";
+  
       if (Platform.OS === 'web') {
-        window.alert("Erreur: Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre.");
+        window.alert(errorMessage);
       } else {
-        Alert.alert(
-          "Erreur",
-          "Le mot de passe doit contenir au moins une majuscule, un caractère spécial (@#$%^&+=!) et au moins un chiffre."
-        );
+        Alert.alert("Erreur", errorMessage);
       }
       return;
     }
+    setIsLoading(true); // Démarre le chargement
+    setIsButtonDisabled(true); // Désactive le bouton
 
     try {
       console.log("Avant l'envoi de la requête au serveur");
@@ -526,13 +534,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50, 
+    height: 50,
     marginVertical: 10,
   },
   loadingText: {
-    color: '#4d8194', 
-    fontSize: 18, 
+    color: '#4d8194',
+    fontSize: 18,
     fontWeight: 'bold',
-  
+
   },
 });
