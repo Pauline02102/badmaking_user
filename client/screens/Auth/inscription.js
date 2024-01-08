@@ -193,9 +193,10 @@ export default function SignupScreen() {
 
 
   return (
-    
-      <KeyboardAvoidingView>
-        <ScrollView >
+
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}>
           <View style={styles.container}>
 
 
@@ -347,7 +348,8 @@ export default function SignupScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    
+    </SafeAreaView >
+
   );
 }
 
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 40,
   },
-  
+
   classementInfo: {
     position: "absolute",
     bottom: 10,
@@ -384,7 +386,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginTop: 20
   },
-  
+
   inputContainerRole: {
     width: "100%",
     position: "relative",
