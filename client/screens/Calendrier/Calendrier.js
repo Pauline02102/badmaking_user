@@ -69,7 +69,7 @@ function Calendrier({ route }) {
   const endTime = new Date();
   endTime.setHours(23, 0);
   const [selectedTime, setSelectedTime] = useState(startTime);
-  const [selectedTimeWeb, setSelectedTimeWeb] = useState('18:00');
+  const [selectedTimeWeb, setSelectedTimeWeb] = useState('19:30');
   const [showButtons, setShowButtons] = useState(true);
   const data = [
     { key: "1", value: "Tous niveau" },
@@ -425,8 +425,14 @@ function Calendrier({ route }) {
 
       let formattedTime;
       if (Platform.OS === 'web') {
-        // For web, use selectedTimeWeb which is expected to be a string in 'HH:mm' format
         formattedTime = selectedTimeWeb;
+
+        // Time validation for web
+        const [hours, minutes] = formattedTime.split(':').map(Number);
+        if (hours < 19 || (hours === 23 && minutes > 0) || hours > 23) {
+          window.alert("L'heure doit être entre 19h30 et 23h00");
+          return; // Stop the function if the time is not within the valid range
+        }
       } else {
         // For mobile, convert Date object to 'HH:mm' format
         const newTime = new Date(selectedTime);
