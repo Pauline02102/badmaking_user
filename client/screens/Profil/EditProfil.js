@@ -13,9 +13,12 @@ const EditProfileForm = ({ user, onProfileUpdated }) => {
     const handleSubmit = async () => {
         console.log("edit")
         const isValidClassement = (classement) => {
-            const numericValue = parseInt(classement, 10);
-            return numericValue >= 1 && numericValue <= 12;
+            const formattedClassement = classement.replace(',', '.');
+            const numericValue = parseFloat(formattedClassement);
+            return numericValue >= 1 && numericValue <= 12 && Math.floor(numericValue) === numericValue;
         };
+        
+        
 
         if (
             (!classement_simple || isValidClassement(classement_simple)) &&
