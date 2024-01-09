@@ -1,5 +1,6 @@
 
 const BASE_URL = 'https://rixbad.ovh:3030'
+
 const express = require("express");
 const db = require("../../db");
 
@@ -61,7 +62,8 @@ if (process.env.NODE_ENV !== 'test') {
               WHERE p.participation = 'True' AND p.event_id = $1`;
                     const participants = await client.query(participantsQuery, [event.id]);
                     console.log(participantsQuery);
-                    console.log(participants);
+                    console.log("participants",participants);
+                    console.log("participants.rows",participants.rows);
                     // Vérifier si le nombre de participations est inférieur à 6
                     if (!participants.rows || participants.rows.length < 6) {
                         console.log(`L'événement ${event.id} a moins de 6 participants ou aucun participant, il ne sera pas traité.`);
