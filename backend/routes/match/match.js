@@ -5,7 +5,7 @@ const db = require("../../db");
 const router = express.Router();
 
 
-  
+
 
 
 const cors = require("cors");
@@ -77,7 +77,7 @@ router.post("/creerMatchs", async (req, res) => {
         await client.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la création des matchs" });
-    } 
+    }
 });
 
 //get recuperer les matchs crée

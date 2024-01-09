@@ -23,22 +23,11 @@ const Match = () => {
   const [resultModalMessage, setResultModalMessage] = useState('');
 
   const { setIsSignedIn } = useUser();
-  useEffect(() => {
-    console.log("Updated matches state:", matches);
-    // Définition de l'intervalle pour exécuter les fetch toutes les 30 secondes
-    const intervalId = setInterval(() => {
-      console.log("Updated matches state:", matches);
-      fetchLoggedInUserInfo();
-      fetchParticipations();
-      fetchPaires();
-      fetchPoules();
-      fetchMatches();
-    }, 2000);
 
-    // Nettoyage de l'intervalle lorsque le composant est démonté
-    return () => clearInterval(intervalId);
-  }, []); // Utilisation d'un tableau vide de dépendances
 
+  const refreshMatches = () => {
+    fetchMatches();
+  };
   const CustomModal = ({ isVisible, message, onConfirm, onCancel, confirmText, cancelText, onClose }) => {
     return (
       <Modal isVisible={isVisible}>
@@ -252,13 +241,17 @@ const Match = () => {
       const url = `${BASE_URL}/match/recupererMatchs`;
       const response = await fetch(url);
       const data = await response.json();
-      console.log("Fetched matches data:", data);
-      setMatches(data); // Stocke les données des matchs dans l'état
-
+      if (!data || data.length === 0) {
+        setMatches([]); // Assigne un tableau vide si aucun match
+      } else {
+        setMatches(data);
+      }
     } catch (error) {
       console.error('Erreur lors de la récupération des matchs:', error);
+      setMatches([]); // Assigne un tableau vide en cas d'erreur
     }
   };
+
 
   const handleToutCreer = async (eventId) => {
     try {
@@ -441,6 +434,9 @@ const Match = () => {
       {renderPoulePicker()}
       <View>
         <Text style={styles.subtitle}>Matchs</Text>
+
+
+
         {matches.length > 0 && (
           <>
             {matches.map((match, index) => (
@@ -458,7 +454,24 @@ const Match = () => {
 
       <View >
 
-        {renderMatchTable()}
+        {/*
+
+        <ScrollView style={styles.container}>
+
+          <View style={styles.buttonContainerFresh}>
+            <Button title="Rafraîchir les Matchs" onPress={refreshMatches} color="#467c86" />
+          </View>
+          {matches.length > 0 ? renderMatchTable() : <Text style={styles.noMatchText}>Matchs disponnibles seulement 24h à l'avance du prochain événement.</Text>}
+
+        </ScrollView>*/}
+        <View style={styles.refreshContainer}>
+          {matches.length === 0 ? (
+            <Text style={styles.noMatchText}>Matchs disponnibles seulement 24h à l'avance du prochain événement.</Text>
+          ) : renderMatchTable()}
+          <Button title="Rafraîchir les Matchs" onPress={refreshMatches} color="#467c86" />
+        </View>
+
+
 
 
       </View>
@@ -529,7 +542,7 @@ const styles = StyleSheet.create({
     padding: 10,
     color: '#FFFFFF', // White text color for the header
     fontWeight: 'bold',
-    marginLeft:40
+    marginLeft: 40
   },
   vsHeader: {
     flex: 0.3,
@@ -736,6 +749,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between', // Espacement égal entre les boutons
     marginTop: 20,
+  },
+  buttonContainerFresh: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Espacement égal entre les boutons
+    marginTop: 20,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  refreshContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20, // Ajoute de l'espace autour du contenu
+  },
+  noMatchText: {
+    textAlign: 'center',
+    marginBottom: 10, // Espace entre le texte et le bouton
+    fontSize: 16,
   },
   buttonText: {
     color: '#124a50',
