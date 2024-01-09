@@ -1,5 +1,5 @@
 
-const BASE_URL = 'http://192.168.1.6:3030'
+const BASE_URL = 'https://rixbad.ovh:3030'
 const express = require("express");
 const db = require("../../db");
 
