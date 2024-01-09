@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3, // Rayon de l'ombre
     shadowOffset: { width: 0, height: 2 }, // Décalage de l'ombre
     paddingBottom:-10,
-    paddingTop:-10
+    paddingTop:-1
   },
   picker: {
     color: '#333', // Couleur de la police

@@ -28,11 +28,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../config';
 import { useUser } from "../Auth/UserContext";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import DatePicker from 'react-datepicker';
+import CheckBox from '@react-native-community/checkbox';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-//import './styles.css'
+import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -63,6 +63,16 @@ function Calendrier({ route }) {
   const [selectedDateColor, setSelectedDateColor] = useState('');
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  const [selectedColors, setSelectedColors] = useState([]);
+
+  const handleSelection = (color) => {
+    if (selectedColors.includes(color)) {
+      setSelectedColors(selectedColors.filter(c => c !== color));
+    } else {
+      setSelectedColors([...selectedColors, color]);
+    }
+  };
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const startTime = new Date();
   startTime.setHours(19, 30);
@@ -102,7 +112,14 @@ function Calendrier({ route }) {
     return () => {
       clearInterval(refreshInterval);
     };
-  }, []);
+  }, [selectedColors]);
+
+  useEffect(() => {
+    if (colorOptionsChoix) {
+      setSelectedColors(colorOptionsChoix.map(option => option.color));
+    }
+  }, [colorOptionsChoix]);
+
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
@@ -493,18 +510,19 @@ function Calendrier({ route }) {
         const updatedCustomDatesStyles = {};
         for (const date in convertedDates) {
           const color = convertedDates[date];
-          updatedCustomDatesStyles[date] = {
-            customStyles: {
-              container: {
-                backgroundColor: color,
+          if (selectedColors.includes(color)) { // Filtre les couleurs
+            updatedCustomDatesStyles[date] = {
+              customStyles: {
+                container: {
+                  backgroundColor: color,
+                },
+                text: {
+                  color: "white",
+                },
               },
-              text: {
-                color: "white",
-              },
-            },
-          };
+            };
+          }
         }
-
         setCustomDatesStyles(updatedCustomDatesStyles);
       } else {
         // Gérer le cas où aucune couleur de date n'est trouvée
@@ -816,7 +834,13 @@ function Calendrier({ route }) {
     { color: '#eac849', text: 'Evènement' },
     { color: 'white', text: 'Retirer' },
   ];
+  const colorOptionsChoix = [
+    { color: '#e05642' },
+    { color: '#96dfa2' },
+    { color: '#9199ff' },
+    { color: '#eac849' },
 
+  ]
   const CustomTimePicker = () => {
 
     if (Platform.OS === 'web') {
@@ -875,6 +899,7 @@ function Calendrier({ route }) {
   };
 
   return (
+
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}>
       <ScrollView>
@@ -882,8 +907,27 @@ function Calendrier({ route }) {
           <TouchableOpacity style={styles.legendButton} onPress={toggleLegend}>
             <Text style={styles.legendButtonText}>Voir la légende des couleurs</Text>
           </TouchableOpacity>
-          {legendVisible && <Legend />}
 
+
+          {dropdownVisible && (
+            <View style={styles.dropdownOverlay}>
+              {colorOptionsChoix.map((option, index) => (
+                <View key={index} style={{ alignItems: 'center', margin: 6 }}>
+                  <View style={{ backgroundColor: option.color, width: 20, height: 20, marginBottom: 10 }} />
+
+                  <TouchableOpacity
+                    style={selectedColors.includes(option.color) ? styles.checkedBox : styles.uncheckedBox}
+                    onPress={() => handleSelection(option.color)}
+                  >
+                    {selectedColors.includes(option.color) && <Text>✓</Text>}
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+
+          )}
+          {legendVisible && <Legend />}
+          <Button title="Filtrer" onPress={() => setDropdownVisible(!dropdownVisible)} />
           {isJoueur && (
             <Calendar
               onDayPress={handleDayPress}

@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'green', // Couleur de texte de confirmation
     marginVertical: 10, // Espacement vertical
-    textAlign: 'center', 
+    textAlign: 'center',
   },
   modalViewPlayers: {
     margin: 20,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     margin: 10,
     color: '#000'
   },
-  
+
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -196,13 +196,13 @@ const styles = StyleSheet.create({
     height: 50,
     margin: 10,
     borderRadius: 25,
-  },  
+  },
   colorOptionText: {
     color: 'white', // Texte en blanc
     fontWeight: 'bold', // Texte en gras
   },
   colorOptionContainer: {
-    
+
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10, // Espacement entre les options de couleur
@@ -213,11 +213,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
     borderRadius: 10
   },
-  closeButtonTextColor:{
+  closeButtonTextColor: {
     color: "black",
     textAlign: "center",
 
-  },  
+  },
   button: {
     alignItems: "center",
     backgroundColor: "#467c86",
@@ -262,9 +262,9 @@ const styles = StyleSheet.create({
     textAlign: "center", // Alignement centré
     marginTop: 20, // Espace en dessous du titre
     marginBottom: 20,
-    fontWeight:'bold'
+    fontWeight: 'bold'
   },
-  buttonHeure:{
+  buttonHeure: {
     alignItems: "Left",
     height: 50,
     backgroundColor: "#F8F8FF",
@@ -283,24 +283,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  buttonTextHeure:{
-    paddingTop:15,
+  buttonTextHeure: {
+    paddingTop: 15,
     fontSize: 15,
     color: "#141607",
   },
   formContainer: {
-    borderWidth: 1, 
+    borderWidth: 1,
     borderColor: 'gray',
-    borderRadius: 10, 
+    borderRadius: 10,
     padding: 10,
-    backgroundColor: 'white', 
-    shadowColor: 'black', 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.5, 
+    backgroundColor: 'white',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
     shadowRadius: 4,
-    elevation: 4, 
-    marginBottom: 17, 
-    marginTop : 20
+    elevation: 4,
+    marginBottom: 17,
+    marginTop: 20
   },
   editButton: {
     color: 'blue',
@@ -320,17 +320,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-        marginTop : 20,
+    marginTop: 20,
   },
   dateTimePicker: {
     // Vos styles spécifiques au DateTimePicker ici
   },
   instructions: {
     marginTop: 8,
-    marginBottom : 20,
+    marginBottom: 20,
     fontSize: 16,
     color: '#333',
-    fontWeight:'bold'
+    fontWeight: 'bold'
   },
   confirmButton: {
     backgroundColor: '#467c86',
@@ -354,8 +354,43 @@ const styles = StyleSheet.create({
     marginBottom: 10, // Marge en bas
   },
 
+  checkedBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    backgroundColor: '#4CAF50', // Vert pour indiquer cochée
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 0, 
+    marginTop: 7,
+    
+  },
+  uncheckedBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    backgroundColor: '#FFF', // Blanc pour indiquer non cochée
+    borderColor: '#E0E0E0', // Bordure grise
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
 
-  
+    marginRight: 0,
+    marginTop: 7,
+  },
+  dropdownOverlay: {
+    position: 'relative', 
+    zIndex: 1, 
+    backgroundColor: 'white',
+    padding: 10,
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    top: '0%', // Positionne le dropdown juste en dessous du bouton
+    alignItems:"center",
+    justifyContent: 'center', 
+    
+  },
+
 });
 
 export default styles;
