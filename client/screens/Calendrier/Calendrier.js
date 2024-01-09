@@ -32,7 +32,7 @@ import DatePicker from 'react-datepicker';
 import { SelectList } from "react-native-dropdown-select-list";
 import { utcToZonedTime } from 'date-fns-tz';
 import { format, parseISO, isValid, parse, subHours, isBefore, setHours, setMinutes } from 'date-fns';
-import './styles.css'
+//import './styles.css'
 function Calendrier({ route }) {
 
   const [customDatesStyles, setCustomDatesStyles] = useState({});
@@ -422,11 +422,19 @@ function Calendrier({ route }) {
       if (participation !== "Oui" && participation !== "Non") {
         throw new Error("La participation doit être soit 'Oui' soit 'Non'");
       }
-      const newTime = new Date(selectedTime);
-      newTime.setHours(newTime.getHours());
 
-      const formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
+      let formattedTime;
+      if (Platform.OS === 'web') {
+        // For web, use selectedTimeWeb which is expected to be a string in 'HH:mm' format
+        formattedTime = selectedTimeWeb;
+      } else {
+        // For mobile, convert Date object to 'HH:mm' format
+        const newTime = new Date(selectedTime);
+        formattedTime = `${newTime.getHours().toString().padStart(2, '0')}:${newTime.getMinutes().toString().padStart(2, '0')}`;
+      }
+
       console.log("heure " + formattedTime);
+
       if (!loggedInUser || !loggedInUser.id) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
@@ -542,28 +550,33 @@ function Calendrier({ route }) {
 
 
       if (Platform.OS !== 'web') {
-        if ((color === "#96dfa2" || color === "#9199ff") && !isDatePassed) {
-          const readableDate = format(parseISO(selectedDateString), 'dd/MM/yyyy');
-          setShowTimePicker(true);
-          setShowConfirmButton(true);
-          console.log("Participants présents :", participants);
+        if ((color === "#96dfa2" || color === "#9199ff")) {
+          if (!isDatePassed) {
+            const readableDate = format(parseISO(selectedDateString), 'dd/MM/yyyy');
 
-          // Mise à jour de l'état selectedTime avec l'heure de la base de données
-          if (participants.length > 0) {
-            Alert.alert(
-              `Viens-tu au jeu libre le ${readableDate}?`,
-              "Voici les joueurs présents:\n" + participants.map((participant) => {
-                // Extracting hours and minutes from the 'heure' property
-                const [hours, minutes] = participant.heure.split(':');
-                return `${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
-              }).join(", \n"),
-              [
-                { text: "Non", onPress: () => sendParticipation("Non"), style: "cancel" },
-                { text: "Oui", onPress: () => confirmParticipationWithTime() },
-                { text: "Fermer", onPress: () => console.log("Boîte de dialogue fermée"), style: "cancel" }
-              ]
-            );
+            console.log("Participants présents :", participants);
+            setShowTimePicker(true);
+            setShowConfirmButton(true);
+            // Mise à jour de l'état selectedTime avec l'heure de la base de données
+            if (participants.length > 0) {
+              Alert.alert(
+                `Viens-tu au jeu libre le ${readableDate}?`,
+                "Voici les joueurs présents:\n" + participants.map((participant) => {
+                  // Extracting hours and minutes from the 'heure' property
+                  const [hours, minutes] = participant.heure.split(':');
+                  return `${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
+                }).join(", \n"),
+                [
+                  { text: "Non", onPress: () => sendParticipation("Non"), style: "cancel" },
+                  { text: "Oui", onPress: () => confirmParticipationWithTime() },
+                  { text: "Fermer", onPress: () => console.log("Boîte de dialogue fermée"), style: "cancel" }
+                ]
+              );
 
+            }
+
+          } else {
+            Alert.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
           }
         } else if (color === '#e05642') {
           setShowTimePicker(false);
@@ -803,15 +816,11 @@ function Calendrier({ route }) {
     if (Platform.OS === 'web') {
       // Sur le web,  react-datepicker
       return (
-        <DatePicker
-          selected={selectedTime}
-          onChange={date => onTimeSelectedWeb(date)}
-          showTimeSelect
-          showTimeSelectOnly
-          dateFormat="HH:mm"
-          timeCaption=""
-          className="hide-time-list"
-
+        <input
+          type="time"
+          onChange={handleTimeChange}// Gérer le changement de temps
+          value={selectedTimeWeb}        // La valeur sélectionnée (heure)
+          style={{ /* Styles optionnels pour le sélecteur d'heure */ }}
         />
       );
 
