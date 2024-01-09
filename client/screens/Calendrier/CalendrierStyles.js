@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     margin: 10,
-    color: '#000'
+    color: '#000',
+    textAlign: 'center',
   },
 
   modalContainer: {

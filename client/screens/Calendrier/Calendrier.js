@@ -48,6 +48,7 @@ function Calendrier({ route }) {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const { setIsSignedIn } = useUser();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isParticipantsModalVisible, setIsParticipantsModalVisible] = useState(false);
   const [participantsList, setParticipantsList] = useState([]);
   const [participantsCounts, setParticipantsCounts] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
@@ -379,7 +380,7 @@ function Calendrier({ route }) {
     try {
       const response = await axios.get(`${BASE_URL}/participation_event/ouiparticipation/${eventId}`);
       setParticipantsList(response.data);
-      setIsModalVisible(true);
+      setIsParticipantsModalVisible(true);
     } catch (error) {
       console.error("Erreur lors de la récupération des participants", error);
     }
@@ -792,14 +793,17 @@ function Calendrier({ route }) {
         ))}
 
         <Modal
-          visible={isModalVisible}
-          onRequestClose={() => setIsModalVisible(false)}
+          visible={isParticipantsModalVisible}
+          onRequestClose={() => setIsParticipantsModalVisible(false)}
           animationType="slide"
           transparent={true}
         >
           <View style={styles.centeredView}>
             <View style={[styles.modalViewPlayers, { height: calculateModalHeight(participantsList.length) }]}>
-              <Text style={styles.modalTitle}>Participants de l'Événement</Text>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles.modalTitle}>Participants de l'événement</Text>
+              </View>
+
 
               {participantsList.length === 0 ? (
                 <Text style={styles.modalText}>Pas encore de participants inscrits.</Text>
@@ -815,7 +819,7 @@ function Calendrier({ route }) {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => setIsModalVisible(false)}
+                onPress={() => setIsParticipantsModalVisible(false)}
               >
                 <Text style={styles.closeButtonText}>Fermer</Text>
               </TouchableOpacity>
@@ -927,7 +931,7 @@ function Calendrier({ route }) {
 
           )}
           {legendVisible && <Legend />}
-          <Button title="Filtrer" onPress={() => setDropdownVisible(!dropdownVisible)} />
+          <Button title="Filtre" onPress={() => setDropdownVisible(!dropdownVisible)} />
           {isJoueur && (
             <Calendar
               onDayPress={handleDayPress}
