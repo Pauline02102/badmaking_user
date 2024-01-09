@@ -63,10 +63,11 @@ if (process.env.NODE_ENV !== 'test') {
                     const participants = await client.query(participantsQuery, [event.id]);
                     console.log(participantsQuery);
                     console.log("participants",participants);
+                    console.log("participants.length",participants.length);
                     console.log("participants.rows",participants.rows);
                
                     // Vérifier si le nombre de participations est inférieur à 6
-                    if (!participants || participants.length < 6) {
+                    if (Array.isArray(participants) && participants.length < 6) {
                         console.log(`L'événement ${event.id} a moins de 6 participants ou aucun participant, il ne sera pas traité.`);
                         continue; // Passer à l'événement suivant
                     } 
