@@ -25,6 +25,19 @@ const Match = () => {
   const { setIsSignedIn } = useUser();
 
 
+  useEffect(() => {
+   
+    // Définition de l'intervalle pour exécuter les fetch toutes les 30 secondes
+    const intervalId = setInterval(() => {
+  
+      fetchLoggedInUserInfo();
+  
+    }, 2000);
+
+    // Nettoyage de l'intervalle lorsque le composant est démonté
+    return () => clearInterval(intervalId);
+  }, []); 
+
   const refreshMatches = () => {
     fetchMatches();
   };
