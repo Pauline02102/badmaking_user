@@ -64,11 +64,12 @@ if (process.env.NODE_ENV !== 'test') {
                     console.log(participantsQuery);
                     console.log("participants",participants);
                     console.log("participants.rows",participants.rows);
+                    console.log("participants.rows.length",participants.rows.length);
                     // Vérifier si le nombre de participations est inférieur à 6
-                    if (!participants.rows || participants.rows.length < 6) {
+                    if (!participants || participants.length < 6) {
                         console.log(`L'événement ${event.id} a moins de 6 participants ou aucun participant, il ne sera pas traité.`);
                         continue; // Passer à l'événement suivant
-                    }
+                    } 
 
                     if (event.status === 'Tous niveau') {
                         console.log(`Paire Tous niveau créée pour l'événement : ${event.id}`);
