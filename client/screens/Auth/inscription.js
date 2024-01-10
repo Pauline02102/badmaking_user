@@ -16,6 +16,7 @@ import {
   ActivityIndicator
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { WebView } from 'react-native-webview';
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from '../config';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -140,14 +141,14 @@ export default function SignupScreen() {
     if (hasEmptyFields || !isPasswordValid || !isConsentChecked) {
       const errorMessage = hasEmptyFields
         ? " Tous les champs sont obligatoires."
-        : !isPasswordValid 
-        ?
-        " Le mot de passe doit respecter les critères suivants :\n" +
-        "• Contenir au moins une majuscule\n" +
-        "• Contenir au moins un caractère spécial (@#$%^&+=!)\n" +
-        "• Contenir au moins un chiffre\n" +
-        "• Avoir une longueur minimale de 8 caractères."
-        : "Vous devez accepter les conditions générales d'utilisation et la politique de confidentialité.";
+        : !isPasswordValid
+          ?
+          " Le mot de passe doit respecter les critères suivants :\n" +
+          "• Contenir au moins une majuscule\n" +
+          "• Contenir au moins un caractère spécial (@#$%^&+=!)\n" +
+          "• Contenir au moins un chiffre\n" +
+          "• Avoir une longueur minimale de 8 caractères."
+          : "Vous devez accepter les conditions générales d'utilisation et la politique de confidentialité.";
 
       if (Platform.OS === 'web') {
         window.alert(errorMessage);
@@ -224,6 +225,22 @@ export default function SignupScreen() {
       value: classement,
     }));
   }
+  const captcha = () => {
+    if (Platform.OS === 'web') {
+      // Pour la plateforme web, utiliser une iframe ou un élément similaire pour afficher le HTML
+      return (
+        <iframe srcDoc={htmlContent} style={{ width: '100%', height: '100%' }} />
+      );
+    } else {
+      // Pour React Native,  WebView pour afficher le HTML
+      return (
+        <WebView
+          source={{ html: htmlContent }}
+          style={{ flex: 1 }}
+        />
+      );
+    }
+  }
 
   // Fonction pour afficher l'indicateur de chargement
   const renderButtonOrLoadingIndicator = () => {
@@ -244,6 +261,21 @@ export default function SignupScreen() {
     }
   };
 
+  const htmlContent = `
+  <html>
+  <head>
+    <title>reCAPTCHA demo: Simple page</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </head>
+  <body>
+    <form action="?" method="POST">
+      <div class="g-recaptcha" data-sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"></div>
+      <br/>
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>
+  `;
 
   return (
 
@@ -388,7 +420,7 @@ export default function SignupScreen() {
             </View>
 
             {renderButtonOrLoadingIndicator()}
-
+            {captcha()}
             <View style={styles.signupContainer}>
               <Text style={styles.already}>Tu as deja un compte ?</Text>
               <TouchableOpacity onPress={() => navigation.navigate("Login")}>

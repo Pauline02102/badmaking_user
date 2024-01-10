@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.43",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.8",
     "pg-promise": "^11.5.4"
   },
   "devDependencies": {
