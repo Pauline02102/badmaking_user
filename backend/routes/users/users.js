@@ -26,7 +26,16 @@ const port = process.env.PORT || 3030;
 //creer nouvel user
 router.post("/postusers", async (req, res) => {
     try {
-        const { nom, prenom, role, email, password, classementSimple, classementDouble, classementMixte } = req.body;
+        const { nom, prenom, role, email, password, classementSimple, classementDouble, classementMixte,recaptchaToken  } = req.body;
+        // Vérification du CAPTCHA
+        const secretKey = '6Lck5EwpAAAAANXQWq0FzEDMpOtf-CFBYFf5O58a';
+        const verifyCaptchaUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+
+        const captchaResponse = await axios.post(verifyCaptchaUrl);
+        console.log("verifycaptachaurl", verifyCaptchaUrl);
+        if (!captchaResponse.data.success) {
+            return res.status(400).json({ message: "Échec de la validation du CAPTCHA." });
+        }
 
         // Vérifie d'abord si l'utilisateur avec cet e-mail existe déjà dans la base de données
         const checkUserQuery = 'SELECT * FROM users WHERE email = $1';

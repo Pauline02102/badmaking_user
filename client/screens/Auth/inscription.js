@@ -57,7 +57,11 @@ export default function SignupScreen() {
   const [classementSimpleError, setClassementSimpleError] = useState(false);
   const [classementDoubleError, setClassementDoubleError] = useState(false);
   const [classementMixteError, setClassementMixteError] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
 
+  const onRecaptcha = (event) => {
+    setRecaptchaToken(event.nativeEvent.data);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -69,7 +73,15 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
 
-
+    if (!recaptchaToken) {
+      if (Platform.OS === 'web') {
+        window.alert("Merci de compléter le captcha");
+        return;
+      } else {
+        Alert.alert("Merci de compléter le captcha");
+        return;
+      }
+    }
 
     const inputStateCopy = { ...inputStates };
     let hasEmptyFields = false;
@@ -178,6 +190,7 @@ export default function SignupScreen() {
           classementSimple: classementSimple,
           classementDouble: classementDouble,
           classementMixte: classementMixte,
+          recaptchaToken: recaptchaToken
         }),
       });
 
@@ -237,6 +250,7 @@ export default function SignupScreen() {
         <WebView
           source={{ html: htmlContent }}
           style={{ flex: 1 }}
+          onMessage={onRecaptcha} 
         />
       );
     }
