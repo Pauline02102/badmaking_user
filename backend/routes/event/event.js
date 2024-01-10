@@ -100,15 +100,18 @@ router.get("/checkDate", async (req, res) => {
     const { date } = req.query;
 
     const checkDateQuery = 'SELECT COUNT(*) FROM event WHERE date = $1';
-    const count = await db.one(checkDateQuery, [date]);
+    const result = await db.one(checkDateQuery, [date]);
     console.log(date);
     console.log(checkDateQuery);
-    console.log(count);
-    res.json({ exists: count > 0 });
+    console.log(result);
+
+    const exists = parseInt(result.count, 10) > 0;
+    res.json({ exists });
   } catch (error) {
     console.error("Erreur lors de la vérification de la date :", error);
     res.status(500).json({ message: "Erreur lors de la vérification de la date" });
   }
 });
+
 
 module.exports = router;
