@@ -22,7 +22,7 @@ import { BASE_URL } from '../config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNPickerSelect from "react-native-picker-select";
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
-
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function SignupScreen() {
   const [isConsentChecked, setConsentChecked] = useState(false);
@@ -57,11 +57,14 @@ export default function SignupScreen() {
   const [classementSimpleError, setClassementSimpleError] = useState(false);
   const [classementDoubleError, setClassementDoubleError] = useState(false);
   const [classementMixteError, setClassementMixteError] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState('');
+  const [recaptchaToken, setCaptchaToken] = useState(null);
 
-  const onRecaptcha = (event) => {
-    setRecaptchaToken(event.nativeEvent.data);
+
+  const onCaptchaChange = (captchaValue) => {
+    setCaptchaToken(captchaValue);
+    console.log("Captcha value:", captchaValue);
   };
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -238,23 +241,7 @@ export default function SignupScreen() {
       value: classement,
     }));
   }
-  const captcha = () => {
-    if (Platform.OS === 'web') {
-      // Pour la plateforme web, utiliser une iframe ou un élément similaire pour afficher le HTML
-      return (
-        <iframe srcDoc={htmlContent} style={{ width: '100%', height: '100%' }} />
-      );
-    } else {
-      // Pour React Native,  WebView pour afficher le HTML
-      return (
-        <WebView
-          source={{ html: htmlContent }}
-          style={{ flex: 1 }}
-          onMessage={onRecaptcha} 
-        />
-      );
-    }
-  }
+
 
   // Fonction pour afficher l'indicateur de chargement
   const renderButtonOrLoadingIndicator = () => {
@@ -275,21 +262,6 @@ export default function SignupScreen() {
     }
   };
 
-  const htmlContent = `
-  <html>
-  <head>
-    <title>reCAPTCHA demo: Simple page</title>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  </head>
-  <body>
-    <form action="?" method="POST">
-      <div class="g-recaptcha" data-sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"></div>
-      <br/>
-      <input type="submit" value="Submit">
-    </form>
-  </body>
-</html>
-  `;
 
   return (
 
@@ -434,7 +406,11 @@ export default function SignupScreen() {
             </View>
 
             {renderButtonOrLoadingIndicator()}
-            {captcha()}
+            
+            <ReCAPTCHA
+              sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"
+              onChange={onCaptchaChange}
+            />
             <View style={styles.signupContainer}>
               <Text style={styles.already}>Tu as deja un compte ?</Text>
               <TouchableOpacity onPress={() => navigation.navigate("Login")}>
