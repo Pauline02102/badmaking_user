@@ -1,6 +1,5 @@
 
 require('dotenv').config();
-const axios = require('axios');
 const express = require("express");
 const cors = require("cors");
 const https = require('https');
@@ -22,7 +21,7 @@ console.log('DB User:', process.env.DB_USER);
 console.log('DB User:', process.env.DB_NAME);
 process.env.TZ = 'Europe/Paris';
 console.log('fuseau', process.env.TZ);
-// ... et ainsi de suite pour les autres variables
+
 
 const app = express();
 
