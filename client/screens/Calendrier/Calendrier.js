@@ -161,6 +161,18 @@ function Calendrier({ route }) {
     const zonedDate = utcToZonedTime(date, timeZone);
     return format(zonedDate, 'yyyy-MM-dd HH:mm:ssX', { timeZone });
   };
+  
+  const eventExists = async (date) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/event/checkDate`, {
+        params: { date }
+      });
+      return response.data.exists;
+    } catch (error) {
+      console.error("Erreur lors de la vérification de l'événement", error);
+      return false;
+    }
+  };
 
 
 
@@ -191,6 +203,13 @@ function Calendrier({ route }) {
       const formattedDateTime = format(zonedDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { timeZone });
 
       console.log("formattedDateTime:", formattedDateTime);
+
+      /*const isEventExist = await eventExists(formattedDateTime);
+      if (isEventExist) {
+        console.error("Un événement existe déjà pour cette date");
+        return;
+      }*/
+
 
       await axios.post(`${BASE_URL}/event/postcalendar`, {
         title,
