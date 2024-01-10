@@ -161,7 +161,7 @@ function Calendrier({ route }) {
     const zonedDate = utcToZonedTime(date, timeZone);
     return format(zonedDate, 'yyyy-MM-dd HH:mm:ssX', { timeZone });
   };
-  
+
   const eventExists = async (date) => {
     try {
       const response = await axios.get(`${BASE_URL}/event/checkDate`, {
@@ -204,12 +204,18 @@ function Calendrier({ route }) {
 
       console.log("formattedDateTime:", formattedDateTime);
 
-      /*const isEventExist = await eventExists(formattedDateTime);
+      
+      
+      const isEventExist = await eventExists(formattedDateTime);
       console.log(isEventExist);
       if (isEventExist) {
-        console.error("Un événement existe déjà pour cette date");
+        if (Platform.OS === 'web') {
+          window.alert("Un événement existe déjà pour cette date");
+        } else {
+          Alert.alert("Notification", "Un événement existe déjà pour cette date");
+        }
         return;
-      }*/
+      }
 
 
       await axios.post(`${BASE_URL}/event/postcalendar`, {
