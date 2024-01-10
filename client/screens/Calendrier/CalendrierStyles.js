@@ -391,7 +391,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center', 
     
   },
-
+  warningText: {
+    color: 'red', // Choose a color that indicates a warning or error
+    fontSize: 16, // Set the font size as needed
+    fontWeight: 'bold', // Optional, for emphasis
+    textAlign: 'center', // Center the text
+    marginTop: 20, // Add some space at the top
+    marginBottom: 20, // Add some space at the bottom
+  },
 });
 
 export default styles;
