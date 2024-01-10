@@ -101,7 +101,9 @@ router.get("/checkDate", async (req, res) => {
 
     const checkDateQuery = 'SELECT COUNT(*) FROM event WHERE date = $1';
     const count = await db.one(checkDateQuery, [date]);
-
+    console.log(date);
+    console.log(checkDateQuery);
+    console.log(count);
     res.json({ exists: count > 0 });
   } catch (error) {
     console.error("Erreur lors de la vérification de la date :", error);

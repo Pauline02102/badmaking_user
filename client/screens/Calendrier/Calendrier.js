@@ -205,6 +205,7 @@ function Calendrier({ route }) {
       console.log("formattedDateTime:", formattedDateTime);
 
       /*const isEventExist = await eventExists(formattedDateTime);
+      console.log(isEventExist);
       if (isEventExist) {
         console.error("Un événement existe déjà pour cette date");
         return;
