@@ -32,7 +32,7 @@ const Match = () => {
   
       fetchLoggedInUserInfo();
   
-    }, 2000);
+    }, 20000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
