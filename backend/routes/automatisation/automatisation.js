@@ -33,7 +33,7 @@ const cron = require('node-cron');
 // 24h : 0 0 */1 * * *
 
 if (process.env.NODE_ENV !== 'test') {
-    cron.schedule('*/30 * * * * *', async () => {
+    cron.schedule('0 */10 * * * *', async () => {
         const client = await db.connect();
         console.log("Travail Cron démarré - vérification des événements pour créer des paires");
         try {
@@ -86,7 +86,7 @@ if (process.env.NODE_ENV !== 'test') {
                     await client.query(updateEventQuery, [event.id]);
                 }
             } else {
-                console.log("No upcoming events or invalid format");
+                console.log("Pas d'évenment à venir ou format invalid");
             }
         } catch (error) {
             console.error('Error in scheduled task: ', error);
