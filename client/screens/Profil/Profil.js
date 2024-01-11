@@ -93,6 +93,32 @@ const Profil = () => {
     }
   };
 
+  const handleLogoutDelete = async () => {
+    console.log("testdelete");
+    const logoutDelete = async () => {
+      try {
+        await fetch(`${BASE_URL}/user_tokens/logout`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${await AsyncStorage.getItem('userToken')}`,
+          },
+        });
+        // Utiliser AsyncStorage pour React Native et localStorage pour le web
+        if (Platform.OS === 'web') {
+          localStorage.removeItem('userToken');
+        } else {
+          await AsyncStorage.removeItem('userToken');
+        }
+        setIsSignedIn(false);
+      } catch (error) {
+        console.error("Erreur lors de la déconnexion :", error);
+      }
+    };
+
+    // Supprimer la confirmation de déconnexion pour toutes les plates-formes
+    logoutDelete();
+  };
+  
 
 
   const handleDeleteAccount = async () => {
@@ -113,7 +139,7 @@ const Profil = () => {
           const data = await response.json();
           if (data.success) {
             // Déconnecter l'utilisateur
-            handleLogout();
+            handleLogoutDelete();
           } else {
             console.error('Erreur lors de la suppression du compte:', data.message);
             // Afficher une alerte ou un message d'erreur spécifique à la plateforme Web de Windows si nécessaire
@@ -146,7 +172,7 @@ const Profil = () => {
                 const data = await response.json();
                 if (data.success) {
                   // Déconnecter l'utilisateur
-                  handleLogout();
+                  handleLogoutDelete();
                 } else {
                   console.error('Erreur lors de la suppression du compte:', data.message);
                   Alert.alert("Erreur", "La suppression du compte a échoué.");
