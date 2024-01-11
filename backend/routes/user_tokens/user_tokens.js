@@ -244,4 +244,27 @@ router.put('/update-profile', userAuthMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de la mise à jour du profil' });
   }
 });
+
+router.put('/delete-account', userAuthMiddleware, async (req, res) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "Utilisateur non authentifié" });
+  }
+
+  const userId = req.user.id;
+  try {
+    // Mise à jour du profil de l'utilisateur pour anonymiser les informations
+    const anonymizeQuery = `
+      UPDATE users
+      SET prenom = 'Anonyme', nom = 'Anonyme', email = 'anonyme@anonyme.com'
+      WHERE id = $1
+    `;
+
+    await db.query(anonymizeQuery, [userId]);
+
+    res.json({ success: true, message: 'Compte supprimé avec succès' });
+  } catch (error) {
+    console.error("Erreur lors de la suppression du compte :", error);
+    res.status(500).json({ error: 'Erreur lors de la suppression du compte' });
+  }
+});
 module.exports = router;

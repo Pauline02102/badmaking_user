@@ -46,20 +46,34 @@ db.query('SELECT NOW()', [])
   .catch(err => {
     console.error("Erreur lors de la connexion à la base de données PostgreSQL :", err);
   });
+app.use(express.json());
+
 const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
+key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
+cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
 };
 
 const httpsServer = https.createServer(options, app);
-app.use(express.json());
+
+
+if (process.env.NODE_ENV !== 'test') {
+const port = process.env.PORT || 3030;
+
+httpsServer.listen(port, () => {
+  console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
+});
+}
+
+
+/*
+pour test
 if (process.env.NODE_ENV !== 'test') {
   const port = process.env.PORT || 3030;
 
-  httpsServer.listen(port, () => {
-    console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
+  app.listen(port, () => {
+    console.log(`Serveur en cours d'exécution sur le port ${port}`);
   });
-}
+}*/
 
 
 app.use("/paires", paires);

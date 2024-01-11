@@ -94,6 +94,76 @@ const Profil = () => {
   };
 
 
+
+  const handleDeleteAccount = async () => {
+    if (Platform.OS === 'web') {
+      const isConfirmed = window.confirm("Suppression de compte\n\nÊtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.");
+      if (isConfirmed) {
+        // Continuer avec la suppression du compte
+        try {
+          const token = await AsyncStorage.getItem('userToken');
+          const response = await fetch(`${BASE_URL}/user_tokens/delete-account`, {
+            method: "PUT",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            // Déconnecter l'utilisateur
+            handleLogout();
+          } else {
+            console.error('Erreur lors de la suppression du compte:', data.message);
+            // Afficher une alerte ou un message d'erreur spécifique à la plateforme Web de Windows si nécessaire
+          }
+        } catch (error) {
+          console.error('Erreur lors de la suppression du compte:', error);
+          // Afficher une alerte ou un message d'erreur spécifique à la plateforme Web de Windows si nécessaire
+        }
+      }
+    } else {
+      // Code pour les autres plates-formes mobiles en utilisant Alert.alert
+      Alert.alert(
+        "Suppression de compte",
+        "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+        [
+          { text: "Non", style: "cancel" },
+          {
+            text: "Oui",
+            onPress: async () => {
+              try {
+                const token = await AsyncStorage.getItem('userToken');
+                const response = await fetch(`${BASE_URL}/user_tokens/delete-account`, {
+                  method: "PUT",
+                  headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                  // Déconnecter l'utilisateur
+                  handleLogout();
+                } else {
+                  console.error('Erreur lors de la suppression du compte:', data.message);
+                  Alert.alert("Erreur", "La suppression du compte a échoué.");
+                }
+              } catch (error) {
+                console.error('Erreur lors de la suppression du compte:', error);
+                Alert.alert("Erreur", "La suppression du compte a échoué.");
+              }
+            }
+          }
+        ],
+        { cancelable: false }
+      );
+    }
+  };
+
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -139,6 +209,9 @@ const Profil = () => {
 
           <TouchableOpacity style={styles.button} onPress={handleLogout}>
             <Text style={styles.buttonText}>Déconnexion</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonSupp} onPress={handleDeleteAccount}>
+            <Text style={styles.buttonText}>Supprimer mon compte</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -186,6 +259,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#467c86",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '80%',
+  },
+  buttonSupp: {
+    backgroundColor: "red",
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
