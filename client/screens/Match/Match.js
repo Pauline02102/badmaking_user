@@ -26,17 +26,17 @@ const Match = () => {
 
 
   useEffect(() => {
-   
+
     // Définition de l'intervalle pour exécuter les fetch toutes les 30 secondes
     const intervalId = setInterval(() => {
-  
+
       fetchLoggedInUserInfo();
       fetchPoules();
-    }, 2000);
+    }, 20000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
-  }, []); 
+  }, []);
 
   const refreshMatches = () => {
     fetchMatches();
@@ -437,59 +437,24 @@ const Match = () => {
   };
 
   return (
-
-    <ScrollView style={styles.container}>
-
+    <View style={styles.container}>
       {renderPoulePicker()}
-      <View>
-        <Text style={styles.subtitle}>Matchs</Text>
-
-
-
-        {matches.length > 0 && (
+      <Text style={styles.subtitle}>Matchs</Text>
+      <ScrollView style={styles.scrollViewContainer}>
+        {matches.length > 0 ? (
           <>
-            {matches.map((match, index) => (
-              <View key={match.match_id} >
-
-              </View>
-            ))}
             <Text style={styles.dateCellbas}>
               Date: {formatDayAndMonth(matches[0].event_date)} - Heure: {matches[0].event_time}
             </Text>
+            {renderMatchTable()}
+
           </>
+        ) : (
+          <Text style={styles.noMatchText}>Matchs disponnibles seulement 24h à l'avance du prochain événement.</Text>
         )}
-      </View>
+      </ScrollView>
 
-
-      <View >
-
-        {/*
-
-        <ScrollView style={styles.container}>
-
-          <View style={styles.buttonContainerFresh}>
-            <Button title="Rafraîchir les Matchs" onPress={refreshMatches} color="#467c86" />
-          </View>
-          {matches.length > 0 ? renderMatchTable() : <Text style={styles.noMatchText}>Matchs disponnibles seulement 24h à l'avance du prochain événement.</Text>}
-
-        </ScrollView>*/}
-        <View style={styles.refreshContainer}>
-          {matches.length === 0 ? (
-            <Text style={styles.noMatchText}>Matchs disponnibles seulement 24h à l'avance du prochain événement.</Text>
-          ) : renderMatchTable()}
-          <Button title="Rafraîchir les Matchs" onPress={refreshMatches} color="#467c86" />
-        </View>
-
-
-
-
-      </View>
-      {/*
-        <Button
-          title="Créer matchs"
-          onPress={handleToutCreer}
-          color="purple"
-        />*/}
+      <Button title="Rafraîchir les Matchs" onPress={refreshMatches} color="#467c86" />
       <CustomModal
         isVisible={modalVisible}
         message={modalMessage}
@@ -502,7 +467,6 @@ const Match = () => {
         cancelText="Non"
         onClose={() => setModalVisible(false)}
       />
-
       <CustomModal
         isVisible={resultModalVisible}
         message={resultModalMessage}
@@ -518,9 +482,7 @@ const Match = () => {
         cancelText="Non"
         onClose={() => setResultModalVisible(false)}
       />
-
-
-    </ScrollView>
+    </View>
   );
 };
 
@@ -545,14 +507,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   teamHeader: {
-    flex: 1.5, // Takes up 3 times more space than the VS column
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1.5, // Adjust the flex proportion as needed
     padding: 10,
     color: '#FFFFFF', // White text color for the header
     fontWeight: 'bold',
-    marginLeft: 40
+    textAlign: 'center', // This ensures the text is centered horizontally
   },
+  
   vsHeader: {
     flex: 0.3,
     justifyContent: 'center',
@@ -678,8 +639,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, // Opacité de l'ombre
     shadowRadius: 3, // Rayon de l'ombre
     shadowOffset: { width: 0, height: 2 }, // Décalage de l'ombre
-    paddingBottom:-10,
-    paddingTop:-1
+    paddingBottom: -10,
+    paddingTop: -1
 
   },
   picker: {
@@ -808,6 +769,9 @@ const styles = StyleSheet.create({
     padding: 10,
     color: '#FF9500', // Orange text color for the VS column
     fontWeight: 'bold',
+  },
+  scrollViewContainer: {
+    flex: 1, // Add flex to ScrollView so it fills the available space
   },
 });
 
