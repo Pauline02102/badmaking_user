@@ -55,14 +55,14 @@ const modalContentStyle = {
 
 const closeButtonStyle = {
   position: 'absolute',
-  top: '5px', // Réduit la distance depuis le haut
-  right: '5px', // Réduit la distance depuis la droite
+  top: '10px', // Ajustez la distance depuis le haut
+  right: '10px', // Ajustez la distance depuis la droite
   backgroundColor: '#ff6b6b',
   color: '#fff',
-  padding: '2px 4px', // Ajuste le padding pour réduire la taille du bouton
-  fontSize: '12px', // Réduit la taille de la police
+  padding: '5px 10px', // Ajustez le padding pour la taille du bouton
+  fontSize: '12px', // Ajustez la taille de la police
   border: 'none',
-  borderRadius: '3px', // Réduit le rayon de la bordure
+  borderRadius: '3px',
   cursor: 'pointer',
   fontWeight: 'bold',
   textAlign: 'center',

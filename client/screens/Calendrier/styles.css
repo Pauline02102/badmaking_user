@@ -1,6 +1,17 @@
 .hide-time-list .react-datepicker__time-list {
     display: none;
 }
+.modal-content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%; 
+}
 
 .button {
     background-color: #467c86;
@@ -9,7 +20,6 @@
     padding: 10px 25px;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
     font-size: 16px;
     margin: 10px;
     cursor: pointer;
@@ -19,5 +29,5 @@
 
 .button:hover {
     background-color: #dccde0;
-
 }
+

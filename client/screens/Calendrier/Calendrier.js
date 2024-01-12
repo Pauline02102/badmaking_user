@@ -204,8 +204,8 @@ function Calendrier({ route }) {
 
       console.log("formattedDateTime:", formattedDateTime);
 
-      
-      
+
+
       const isEventExist = await eventExists(formattedDateTime);
       console.log(isEventExist);
       if (isEventExist) {
@@ -637,7 +637,7 @@ function Calendrier({ route }) {
             // Mise à jour de l'état selectedTime avec l'heure de la base de données
             if (participants.length > 0) {
               Alert.alert(
-                `Viens-tu au jeu libre le ${readableDate}?`,
+                `Viens-tu aux jeux libres le ${readableDate}?`,
                 "Voici les joueurs présents:\n" + participants.map((participant) => {
                   // Extracting hours and minutes from the 'heure' property
                   const [hours, minutes] = participant.heure.split(':');
@@ -653,7 +653,7 @@ function Calendrier({ route }) {
             }
 
           } else {
-            Alert.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
+            Alert.alert("Impossible de s'inscrire aux jeux libres pour une date antérieure");
           }
         } else if (color === '#e05642') {
           setShowTimePicker(false);
@@ -669,11 +669,28 @@ function Calendrier({ route }) {
 
           if (!isDatePassed) {
             const readableDate = format(parseISO(selectedDateString), 'dd/MM/yyyy');
-            const modalMessage = `<strong> Viens-tu au jeu libre le ${readableDate}?, <br/> <br/> Voici les joueurs présents: <br/>  <br/> </strong>  ${participants.map((participant) => {
-              // Extracting hours and minutes from the 'heure' property
+
+            /* const modalMessage = `<strong>  <br/> Viens-tu au jeu libre le ${readableDate}? <br/> <br/> Joueurs présents:  <br/> </strong>  ${participants.map((participant) => {
+               // Extracting hours and minutes from the 'heure' property
+               const [hours, minutes] = participant.heure.split(':');
+               return `   - ${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
+ 
+             }).join("<br/>")}`;*/
+
+
+            const modalMessage = `
+              <strong> 
+                  <br/> Viens-tu aux jeux libres le ${readableDate}? <br/> <br/> 
+                  Joueurs présents:  <br/> 
+              </strong>
+              <ul>
+                  ${participants.map((participant) => {
+              // Extraction des heures et des minutes de la propriété 'heure'
               const [hours, minutes] = participant.heure.split(':');
-              return `${participant.prenom} ${participant.nom} à ${hours}:${minutes}`;
-            }).join("<br/>")}`;
+              return `<li> ${participant.prenom} ${participant.nom} à ${hours}:${minutes}</li>`;
+            }).join('')}
+              </ul>
+          `;
             setModalContent(modalMessage);
             setIsModalVisible(true);
             setShowTimePicker(true); // Afficher le sélecteur de temps
@@ -681,7 +698,7 @@ function Calendrier({ route }) {
             setShowButtons(true);
           } else {
             // Affiche une alerte si la date est passée
-            window.alert("Impossible de s'inscrire au jeu libre pour une date antérieure");
+            window.alert("Impossible de s'inscrire aux jeux libres pour une date antérieure");
           }
         } else if (color === '#e05642') {
           setModalContent(" <strong> <br/> La salle est fermée pour cette date </strong>");
@@ -715,8 +732,8 @@ function Calendrier({ route }) {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.legendTitle}>Légende des couleurs:</Text>
-          <Text style={styles.legendText}><Text style={{ color: '#96dfa2' }}>●</Text>  Jeu libre au Verseau</Text>
-          <Text style={styles.legendText}><Text style={{ color: '#9199ff' }}>●</Text> Jeu libre à Rixensart</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#96dfa2' }}>●</Text>  Jeux libres au Verseau</Text>
+          <Text style={styles.legendText}><Text style={{ color: '#9199ff' }}>●</Text> Jeux libres à Rixensart</Text>
           <Text style={styles.legendText}><Text style={{ color: '#eac849' }}>●</Text>  Soirée à thème</Text>
           <Text style={styles.legendText}><Text style={{ color: '#e05642' }}>●</Text>  Fermeture de la salle</Text>
 
@@ -1130,13 +1147,18 @@ function Calendrier({ route }) {
             content={modalContent}
             onClose={() => setIsModalVisible(false)}
           >
-            {showButtons && (
-              <>
-                <button onClick={() => handleModalResponseWeb("Oui")} className="button">Oui</button>
-                <button onClick={() => handleModalResponseWeb("Non")} className="button">Non</button>
-              </>
+            <div className="modal-content">
+           
+              <div className="button-container">
+                {showButtons && (
+                  <>
+                    <button onClick={() => handleModalResponseWeb("Oui")} className="button">Oui</button>
+                    <button onClick={() => handleModalResponseWeb("Non")} className="button">Non</button>
+                  </>
+                )}
+              </div>
+            </div>
 
-            )}
           </CustomModal>
         </View>
 
