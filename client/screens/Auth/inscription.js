@@ -16,7 +16,6 @@ import {
   ActivityIndicator
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { WebView } from 'react-native-webview';
 import { CommonActions } from '@react-navigation/native';
 import { BASE_URL } from '../config';
 import Icon from 'react-native-vector-icons/FontAwesome';
