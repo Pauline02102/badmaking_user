@@ -21,6 +21,7 @@ const ModifierEvent = ({ route, navigation }) => {
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [isTimePickerVisible, setTimePickerVisible] = useState(false);
     const { eventId } = route.params ?? {};
+    const { eventDate } = route.params ?? {};
     const [selectedDateWeb, setSelectedDateWeb] = useState('');
     const [selectedTimeWeb, setSelectedTimeWeb] = useState('');
 
@@ -159,7 +160,7 @@ const ModifierEvent = ({ route, navigation }) => {
             style={{ flex: 1 }}>
             <ScrollView>
                 <View style={styles.container}>
-                    <Text style={styles.header}>Modifier l'événement : {eventId} </Text>
+                    <Text style={styles.header}>Modifier l'événement du : {eventDate} </Text>
 
                     <View style={styles.card}>
                         <Text style={styles.inputTitle}>Titre :</Text>

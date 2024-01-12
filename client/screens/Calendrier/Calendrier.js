@@ -796,9 +796,10 @@ function Calendrier({ route }) {
     );
   };
 
-  const handleEditEvent = (eventId) => {
-    navigation.navigate("Gestion d'évenement", { eventId });
+  const handleEditEvent = (eventId,eventDate) => {
+    navigation.navigate("Gestion d'évenement", { eventId, eventDate });
     console.log(eventId)
+    console.log(eventDate)
   };
 
   const isRegistrationOpen = (eventDateTime) => {
@@ -836,7 +837,7 @@ function Calendrier({ route }) {
             </TouchableOpacity>
 
             {isAdmin && (
-              <TouchableOpacity onPress={() => handleEditEvent(event.id)}>
+              <TouchableOpacity onPress={() => handleEditEvent(event.id,event.date)}>
                 <Icon name="edit" size={30} color="purple" />
               </TouchableOpacity>
             )}
