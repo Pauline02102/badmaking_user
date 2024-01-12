@@ -31,8 +31,8 @@ const Match = () => {
     const intervalId = setInterval(() => {
   
       fetchLoggedInUserInfo();
-  
-    }, 20000);
+      fetchPoules();
+    }, 2000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -341,10 +341,6 @@ const Match = () => {
     const matchesGroupedByPoule = groupMatchesByPoule(matches);
     const poulesToShow = selectedPoule === 'all' ? Object.keys(matchesGroupedByPoule) : [selectedPoule];
     // Fonction pour formater la date au format jour et mois
-
-
-
-
     return poulesToShow.map((pouleId) => (
 
 
@@ -682,12 +678,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, // Opacité de l'ombre
     shadowRadius: 3, // Rayon de l'ombre
     shadowOffset: { width: 0, height: 2 }, // Décalage de l'ombre
+    paddingBottom:-10,
+    paddingTop:-1
 
   },
   picker: {
     color: '#333', // Couleur de la police
     fontSize: 16, // Taille de la police
-    marginTop: -80
+    marginTop: -10
   },
   pouleTableContainer: {
     marginBottom: 20, // Ajoute une marge en bas de chaque tableau de poule
