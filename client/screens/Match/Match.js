@@ -30,9 +30,7 @@ const Match = () => {
     // Définition de l'intervalle pour exécuter les fetch toutes les 30 secondes
     const intervalId = setInterval(() => {
 
-      fetchLoggedInUserInfo();
-      fetchPoules();
-    }, 20000);
+    }, 200000);
 
     // Nettoyage de l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
@@ -40,6 +38,8 @@ const Match = () => {
 
   const refreshMatches = () => {
     fetchMatches();
+    fetchLoggedInUserInfo();
+    fetchPoules();
   };
   const CustomModal = ({ isVisible, message, onConfirm, onCancel, confirmText, cancelText, onClose }) => {
     return (
