@@ -53,7 +53,7 @@ function Calendrier({ route }) {
   const [participantsCounts, setParticipantsCounts] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [isJoueur, setIsJoueur] = useState(false);
-  //pour admin
+
   const [title, setTitle] = useState("");
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
