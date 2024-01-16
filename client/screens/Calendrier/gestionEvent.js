@@ -135,6 +135,16 @@ const ModifierEvent = ({ route, navigation }) => {
             );
         }
     };
+    // Fonction pour définir le badge
+    const setAppBadge = async (badgeCount) => {
+        if ('setAppBadge' in navigator) {
+            try {
+                await navigator.setAppBadge(badgeCount);
+            } catch (error) {
+                console.error('Erreur lors de la définition du badge :', error);
+            }
+        }
+    };
 
     const deleteEvent = async () => {
         try {
@@ -145,6 +155,7 @@ const ModifierEvent = ({ route, navigation }) => {
                 Alert.alert("Succès", "Événement supprimé avec succès.");
             }
             navigation.goBack();
+            setAppBadge(1);
         } catch (error) {
             console.error("Erreur lors de la suppression de l'événement", error);
             if (Platform.OS === 'web') {
@@ -178,7 +189,7 @@ const ModifierEvent = ({ route, navigation }) => {
                                 type="date"
                                 value={selectedDateWeb}
                                 onChange={handleWebDateChange}
-                                style={styles.input} 
+                                style={styles.input}
                             />
                         ) : (
                             <>
