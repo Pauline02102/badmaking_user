@@ -7,7 +7,7 @@ const router = express.Router();
 const cors = require("cors");
 
 
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -25,7 +25,7 @@ router.post("/formerPaires", async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        const participants = req.body; 
+        const participants = req.body;
         const groupedByEvent = participants.reduce((acc, participant) => {
             // Regrouper les participants par event_id
             acc[participant.event_id] = acc[participant.event_id] || [];
@@ -57,7 +57,7 @@ router.post("/formerPaires", async (req, res) => {
         await client.query('ROLLBACK');
         console.error(error);
         res.status(500).json({ message: "Erreur lors de la formation des paires" });
-    } 
+    }
 });
 
 
@@ -68,7 +68,7 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
         await client.query('BEGIN');
         const participants = req.body;
         const waitingList = []; // Liste d'attente pour les joueurs du groupe moyen
-        const formedPairs = []; 
+        const formedPairs = [];
         console.log(participants)
         if (!Array.isArray(participants)) {
             return res.status(400).json({ message: 'Les données des participants ne sont pas au format attendu' });
@@ -145,6 +145,16 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
                     console.log(`Le joueur du groupe moyen ${joueurMoyenRestant.user_id} est ajouté à la liste d'attente car la liste d'attente est vide`);
                 }
             }
+            while (waitingList.length >= 2) {
+                const joueur1 = waitingList.pop();
+                const joueur2 = waitingList.pop();
+
+                // Insérez la paire dans la table "paires"
+                await client.query('INSERT INTO paires (event_id, user1, user2) VALUES ($1, $2, $3)', [eventId, joueur1.user_id, joueur2.user_id]);
+                formedPairs.push({ user1: joueur1, user2: joueur2 });
+
+                console.log(`Paire formée avec les joueurs en attente: ${joueur1.prenom} ${joueur1.nom} et ${joueur2.prenom} ${joueur2.nom}`);
+            }
         }
         // Ajoute les joueurs restants de la liste d'attente à un message
         const joueursRestants = waitingList.map(joueur => `${joueur.prenom} ${joueur.nom}`).join(', ');
@@ -156,7 +166,7 @@ router.post("/formerPaireParClassementDouble", async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Erreur lors de la formation des paires :', error);
         res.status(500).json({ message: "Erreur lors de la formation des paires" });
-    } 
+    }
 });
 
 //recupère les paires aves les nom 
