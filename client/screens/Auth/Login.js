@@ -139,6 +139,7 @@ export default function LoginScreen() {
         }))}>
           <Text style={styles.signupLink}>Inscription</Text>
         </TouchableOpacity>
+        <a href="/reset-password">Mot de passe oublié ?</a>
       </View>
 
     </View>
