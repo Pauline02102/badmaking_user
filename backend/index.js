@@ -16,7 +16,7 @@ const poule = require("./routes/poule/poule.js");
 const resultat = require("./routes/resultat/resultat.js");
 const user_tokens = require("./routes/user_tokens/user_tokens.js");
 const users = require("./routes/users/users.js");
-const nodemailer = require('nodemailer');
+
 console.log('DB Host:', process.env.DB_HOST);
 console.log('DB User:', process.env.DB_USER);
 console.log('DB User:', process.env.DB_NAME);

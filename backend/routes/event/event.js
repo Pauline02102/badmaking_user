@@ -2,7 +2,7 @@
 
 const express = require("express");
 const db = require("../../db");
-const nodemailer = require('nodemailer');
+
 const router = express.Router();
 const cors = require("cors");
 
