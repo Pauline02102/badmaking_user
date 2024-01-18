@@ -7,7 +7,7 @@ const router = express.Router();
 require('dotenv').config();
 
 
-
+const nodemailer = require('nodemailer');
 
 const cors = require("cors");
 
@@ -269,7 +269,7 @@ router.put('/delete-account', userAuthMiddleware, async (req, res) => {
   }
 });
 
-const nodemailer = require('nodemailer');
+
 
 async function sendResetEmail(userEmail, resetUrl) {
   const transporter = nodemailer.createTransport({
