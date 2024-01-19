@@ -443,12 +443,16 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
-      // Vérifier si l'utilisateur est déjà inscrit
-      const checkResponse = await axios.get(`${BASE_URL}/ouiparticipation/${eventId}/${loggedInUser.id}`);
-      if (checkResponse.data && checkResponse.data.length > 0) {
-        window.alert("Vous êtes déjà inscrit à l'événement");
-        return;
+
+      // Vérifier si l'utilisateur est déjà inscrit uniquement si la participation est "Oui"
+      if (participation === "Oui") {
+        const checkResponse = await axios.get(`${BASE_URL}/participation_event/ouiparticipation/${eventId}/${loggedInUser.id}`);
+        if (checkResponse.data.length > 0 && checkResponse.data[0].participation) {
+          window.alert("Vous êtes déjà inscrit à l'événement");
+          return;
+        }
       }
+
 
       await axios.post(
         `${BASE_URL}/participation_event/updateParticipation/${eventId}`,
@@ -459,7 +463,7 @@ function Calendrier({ route }) {
 
         }
       );
-
+      // Message de confirmation pour l'inscription
       if (participation === "Oui") {
         // Vérifie si l'application est en cours d'exécution dans un navigateur web
         if (Platform.OS === 'web') {
@@ -474,6 +478,15 @@ function Calendrier({ route }) {
             },
           ]);
         }
+      }
+      // Message de confirmation pour la désinscription
+      if (participation === "Non") {
+        if (Platform.OS === 'web') {
+          window.alert("Vous vous êtes désinscrit de l'événement");
+        } else {
+          Alert.alert("Vous vous êtes désinscrit de l'événement")
+        }
+
       }
 
       await fetchEvents();
