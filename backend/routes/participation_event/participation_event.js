@@ -5,13 +5,13 @@ const db = require("../../db");
 const router = express.Router();
 
 
-  
+
 
 
 const cors = require("cors");
 
 
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -109,6 +109,29 @@ router.get("/ouiparticipation/:event_id", async (req, res) => {
     }
 });
 
+router.get("/ouiparticipation/:event_id/:user_id", async (req, res) => {
+    try {
+        const { event_id, user_id } = req.params; // Récupérer les ID de l'événement et de l'utilisateur depuis les paramètres de l'URL
+        const query = `
+        SELECT p.event_id, p.user_id, p.participation, u.prenom, u.nom, u.classement_double, u.classement_mixte, 
+        TO_CHAR(e.date,'YYYY-MM-DD') AS "date",
+        e.status as status
+        FROM participation_events AS p
+        JOIN users AS u ON p.user_id = u.id
+        JOIN event AS e ON p.event_id = e.id
+        WHERE p.participation = 'True' AND p.event_id = $1 AND p.user_id = $2;
+        `;
+        const events = await db.query(query, [event_id, user_id]); // Passer les ID de l'événement et de l'utilisateur en tant que paramètres
+        res.json(events);
+    } catch (error) {
+        console.error(error);
+        res
+            .status(500)
+            .json({ message: "Erreur lors de la récupération des événements" });
+    }
+});
+
+
 //compte le nombre de participants a l'evenement 
 router.get("/participantcount/:event_id", async (req, res) => {
     try {
@@ -126,4 +149,4 @@ router.get("/participantcount/:event_id", async (req, res) => {
     }
 });
 
- module.exports = router;
+module.exports = router;

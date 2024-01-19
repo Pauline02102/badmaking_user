@@ -443,6 +443,12 @@ function Calendrier({ route }) {
         console.error("Les informations de l'utilisateur ne sont pas disponibles");
         return;
       }
+      // Vérifier si l'utilisateur est déjà inscrit
+      const checkResponse = await axios.get(`${BASE_URL}/ouiparticipation/${eventId}/${loggedInUser.id}`);
+      if (checkResponse.data && checkResponse.data.length > 0) {
+        window.alert("Vous êtes déjà inscrit à l'événement");
+        return;
+      }
 
       await axios.post(
         `${BASE_URL}/participation_event/updateParticipation/${eventId}`,
@@ -796,7 +802,7 @@ function Calendrier({ route }) {
     );
   };
 
-  const handleEditEvent = (eventId,eventDate) => {
+  const handleEditEvent = (eventId, eventDate) => {
     navigation.navigate("Gestion d'évenement", { eventId, eventDate });
     console.log(eventId)
     console.log(eventDate)
@@ -837,7 +843,7 @@ function Calendrier({ route }) {
             </TouchableOpacity>
 
             {isAdmin && (
-              <TouchableOpacity onPress={() => handleEditEvent(event.id,event.date)}>
+              <TouchableOpacity onPress={() => handleEditEvent(event.id, event.date)}>
                 <Icon name="edit" size={30} color="purple" />
               </TouchableOpacity>
             )}
@@ -1149,7 +1155,7 @@ function Calendrier({ route }) {
             onClose={() => setIsModalVisible(false)}
           >
             <div className="modal-content">
-           
+
               <div className="button-container">
                 {showButtons && (
                   <>
