@@ -390,12 +390,23 @@ function Calendrier({ route }) {
     setShowConfirmButton(false); // Cacher le bouton de confirmation
     sendParticipation("Oui", selectedTime); // Envoyer la participation avec l'heure confirmée
     console.log("Heure confirmée:", selectedTime);
+    if (Platform.OS === 'web') {
+      // For web
+      window.alert(`Vous êtes bien inscrit pour le jeu libre`);
+    } else {
+      // For mobile (iOS and Android)
+      Alert.alert(
+        "Confirmation",
+        `Vous êtes bien inscrit pour le jeu libre`
+      );
+    }
   };
 
   // Appelée quand l'utilisateur confirme la participation
   const confirmParticipationWithTime = () => {
     setShowTimePicker(true); // Afficher le TimePicker
   };
+
   const handleModalResponseWeb = (response) => {
     if (response === "Oui") {
       confirmParticipationWithTime();
