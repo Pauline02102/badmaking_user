@@ -50,19 +50,19 @@ db.query('SELECT NOW()', [])
 app.use(express.json());
 
 const options = {
-key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
-cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
+  key: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/rixbad.ovh/fullchain.pem')
 };
 
 const httpsServer = https.createServer(options, app);
 
 
 if (process.env.NODE_ENV !== 'test') {
-const port = process.env.PORT || 3030;
+  const port = process.env.PORT || 3030;
 
-httpsServer.listen(port, () => {
-  console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
-});
+  httpsServer.listen(port, () => {
+    console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
+  });
 }
 
 

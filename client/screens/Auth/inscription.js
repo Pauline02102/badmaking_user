@@ -63,7 +63,7 @@ export default function SignupScreen() {
     setCaptchaToken(captchaValue);
     console.log("Captcha value:", captchaValue);
   };
-  
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -393,6 +393,10 @@ export default function SignupScreen() {
                 ios_backgroundColor="#3e3e3e"
                 testID="consentCheckbox"
               />
+              <ReCAPTCHA
+                sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"
+                onChange={onCaptchaChange}
+              />
               <Text style={styles.consentText}>
                 J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
                 <Text
@@ -405,15 +409,12 @@ export default function SignupScreen() {
             </View>
 
             {renderButtonOrLoadingIndicator()}
-            
-            <ReCAPTCHA
-              sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"
-              onChange={onCaptchaChange}
-            />
+
+
             <View style={styles.signupContainer}>
-              <Text style={styles.already}>Tu as deja un compte ?</Text>
+              <Text style={styles.already}>Vous avez deja un compte ?</Text>
               <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                <Text style={styles.signupLink}>Connecte-toi</Text>
+                <Text style={styles.signupLink}>Connectez-vous</Text>
               </TouchableOpacity>
             </View>
 

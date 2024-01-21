@@ -133,7 +133,7 @@ export default function LoginScreen() {
       {renderButtonOrLoadingIndicator()}
 
       <View style={styles.signupContainer}>
-        <Text style={styles.already}>Tu n'as pas de compte ?</Text>
+        <Text style={styles.already}>Pas encore de compte ?</Text>
         <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({
           name: 'Inscription',
         }))}>
