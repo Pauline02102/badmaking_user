@@ -383,7 +383,10 @@ export default function SignupScreen() {
                 />
               </View>
             </View>
-
+            <ReCAPTCHA
+              sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"
+              onChange={onCaptchaChange}
+            />
             <View style={styles.switchContainer}>
               <Switch
                 value={isConsentChecked}
@@ -393,10 +396,7 @@ export default function SignupScreen() {
                 ios_backgroundColor="#3e3e3e"
                 testID="consentCheckbox"
               />
-              <ReCAPTCHA
-                sitekey="6Lck5EwpAAAAAIep5GShlEp6jCs9Ugm_7WAsF6QS"
-                onChange={onCaptchaChange}
-              />
+
               <Text style={styles.consentText}>
                 J'accepte les conditions générales d'utilisation et la politique de confidentialité.{" "}
                 <Text
