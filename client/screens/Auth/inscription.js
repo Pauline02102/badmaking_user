@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: "100%",
     position: "relative",
-    marginBottom: 30,
+    marginBottom: 15,
     marginTop: 20
   },
 
