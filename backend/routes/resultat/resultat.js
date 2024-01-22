@@ -119,7 +119,7 @@ router.get('/check-match-result', async (req, res) => {
     res.status(500).json({ message: "Erreur lors de la vérification du résultat du match" });
   }
 });
-
+/*
 //enregistrer les resultats d'un match
 router.post('/report-match-result', async (req, res) => {
   try {
@@ -177,6 +177,71 @@ router.post('/report-match-result', async (req, res) => {
       await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
       return res.status(200).json({ message: "Le résultat du match a été signalé avec succès." });
     }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erreur dans les résultats du match." });
+  }
+});*/
+
+router.post('/report-match-result', async (req, res) => {
+  try {
+    const { match_id, user_id, victoire, defaite, event_id } = req.body;
+
+    // Récupérer les détails du match, y compris les paires
+    const matchQuery = `
+      SELECT paire1, paire2
+      FROM match
+      WHERE id = $1
+    `;
+    const matchDetails = await db.query(matchQuery, [match_id]);
+    const { paire1, paire2 } = matchDetails.rows[0];
+
+    // Déterminer la paire de l'utilisateur et trouver le partenaire
+    const userPaire = [paire1, paire2].find(p => p.includes(user_id));
+    const partnerId = userPaire.find(id => id !== user_id);
+
+    // Récupérer les résultats existants pour le match
+    const existingResultQuery = `
+      SELECT user_id, victoire, defaite
+      FROM resultat
+      WHERE match_id = $1
+    `;
+    const existingResults = await db.query(existingResultQuery, [match_id]);
+
+    // Vérifier la cohérence avec le partenaire
+    const partnerResult = existingResults.rows.find(result => result.user_id === partnerId);
+    if (partnerResult && (partnerResult.victoire !== victoire || partnerResult.defaite !== defaite)) {
+      return res.status(400).json({ message: "Les résultats doivent correspondre à ceux du partenaire." });
+    }
+
+    // Vérifier l'incohérence avec les adversaires
+    const adversaryPaire = userPaire === paire1 ? paire2 : paire1;
+    const adversaryResults = existingResults.rows.filter(result => adversaryPaire.includes(result.user_id));
+    for (let adversaryResult of adversaryResults) {
+      if (adversaryResult.victoire === victoire || adversaryResult.defaite === defaite) {
+        return res.status(400).json({ message: "Les résultats doivent être l'inverse de ceux de l'adversaire." });
+      }
+    }
+
+    // Insérer ou mettre à jour le résultat
+    const myResult = existingResults.rows.find(result => result.user_id === user_id);
+    if (myResult) {
+      const updateQuery = `
+        UPDATE resultat
+        SET victoire = $3, defaite = $4, event_id = $5
+        WHERE match_id = $1 AND user_id = $2
+      `;
+      await db.query(updateQuery, [match_id, user_id, victoire, defaite, event_id]);
+    } else {
+      const insertQuery = `
+        INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
+      await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
+    }
+
+    return res.status(200).json({ message: "Le résultat du match a été traité avec succès." });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Erreur dans les résultats du match." });
