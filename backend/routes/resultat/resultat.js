@@ -194,7 +194,7 @@ router.post('/report-match-result', async (req, res) => {
       WHERE id = $1
     `;
     const matchDetails = await db.query(matchQuery, [match_id]);
-    const { paire1, paire2 } = matchDetails.rows[0];
+    const { paire1, paire2 } = matchDetails[0];
 
     // Déterminer la paire de l'utilisateur et trouver le partenaire
     const userPaire = [paire1, paire2].find(p => p.includes(user_id));
