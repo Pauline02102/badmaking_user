@@ -187,36 +187,44 @@ router.post('/report-match-result', async (req, res) => {
   try {
     const { match_id, user_id, victoire, defaite, event_id } = req.body;
 
-    // Récupérer les détails du match, y compris les paires
+    // Récupérer les détails du match, y compris les identifiants des paires
     const matchQuery = `
       SELECT paire1, paire2
       FROM match
       WHERE id = $1
     `;
-    const matchDetails = await db.query(matchQuery, [match_id]);
-    const { paire1, paire2 } = matchDetails[0];
+    const matchDetails = await db.oneOrNone(matchQuery, [match_id]);
+    if (!matchDetails) {
+      return res.status(404).json({ message: "Match non trouvé." });
+    }
+    const { paire1, paire2 } = matchDetails;
 
-    // Déterminer la paire de l'utilisateur et trouver le partenaire
-    const userPaire = [paire1, paire2].find(p => p.includes(user_id));
+    // Récupérer les détails des paires
+    const paire1Details = await db.one("SELECT user1, user2 FROM paires WHERE id = $1", [paire1]);
+    const paire2Details = await db.one("SELECT user1, user2 FROM paires WHERE id = $1", [paire2]);
+    const usersPaire1 = [paire1Details.user1, paire1Details.user2];
+    const usersPaire2 = [paire2Details.user1, paire2Details.user2];
+
+    // Trouver la paire de l'utilisateur et le partenaire
+    const userPaire = [usersPaire1, usersPaire2].find(p => p.includes(user_id));
     const partnerId = userPaire.find(id => id !== user_id);
 
     // Récupérer les résultats existants pour le match
-    const existingResultQuery = `
+    const existingResults = await db.any(`
       SELECT user_id, victoire, defaite
       FROM resultat
       WHERE match_id = $1
-    `;
-    const existingResults = await db.query(existingResultQuery, [match_id]);
+    `, [match_id]);
 
     // Vérifier la cohérence avec le partenaire
-    const partnerResult = existingResults.rows.find(result => result.user_id === partnerId);
+    const partnerResult = existingResults.find(result => result.user_id === partnerId);
     if (partnerResult && (partnerResult.victoire !== victoire || partnerResult.defaite !== defaite)) {
       return res.status(400).json({ message: "Les résultats doivent correspondre à ceux du partenaire." });
     }
 
     // Vérifier l'incohérence avec les adversaires
-    const adversaryPaire = userPaire === paire1 ? paire2 : paire1;
-    const adversaryResults = existingResults.rows.filter(result => adversaryPaire.includes(result.user_id));
+    const adversaryPaire = userPaire === usersPaire1 ? usersPaire2 : usersPaire1;
+    const adversaryResults = existingResults.filter(result => adversaryPaire.includes(result.user_id));
     for (let adversaryResult of adversaryResults) {
       if (adversaryResult.victoire === victoire || adversaryResult.defaite === defaite) {
         return res.status(400).json({ message: "Les résultats doivent être l'inverse de ceux de l'adversaire." });
@@ -224,20 +232,20 @@ router.post('/report-match-result', async (req, res) => {
     }
 
     // Insérer ou mettre à jour le résultat
-    const myResult = existingResults.rows.find(result => result.user_id === user_id);
+    const myResult = existingResults.find(result => result.user_id === user_id);
     if (myResult) {
       const updateQuery = `
         UPDATE resultat
         SET victoire = $3, defaite = $4, event_id = $5
         WHERE match_id = $1 AND user_id = $2
       `;
-      await db.query(updateQuery, [match_id, user_id, victoire, defaite, event_id]);
+      await db.none(updateQuery, [match_id, user_id, victoire, defaite, event_id]);
     } else {
       const insertQuery = `
         INSERT INTO resultat (match_id, user_id, victoire, defaite, event_id)
         VALUES ($1, $2, $3, $4, $5)
       `;
-      await db.query(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
+      await db.none(insertQuery, [match_id, user_id, victoire, defaite, event_id]);
     }
 
     return res.status(200).json({ message: "Le résultat du match a été traité avec succès." });
@@ -247,6 +255,7 @@ router.post('/report-match-result', async (req, res) => {
     return res.status(500).json({ message: "Erreur dans les résultats du match." });
   }
 });
+
 
 
 
