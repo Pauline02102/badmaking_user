@@ -58,7 +58,7 @@ const httpsServer = https.createServer(options, app);
 
 
 if (process.env.NODE_ENV !== 'test') {
-  const port = process.env.PORT || 3030;
+  const port = process.env.PORT || 443;
 
   httpsServer.listen(port, () => {
     console.log(`Serveur HTTPS en cours d'exécution sur le port ${port}`);
